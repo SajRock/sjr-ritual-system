@@ -1,0 +1,3361 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://telegram.org https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com; img-src 'self' data:;">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<title>SJR Ritual System</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c14;--bg2:#0c1220;--surface:#0f1825;--surface2:#162030;--surface3:#1c2a3d;
+  --border:#1e2d42;--border2:#263650;--text:#e8f0fe;--text2:#b8c8e8;--muted:#5a7090;
+  --accent:#4f9eff;--accent2:#6eb8ff;--green:#22c55e;--green2:#4ade80;
+  --yellow:#f59e0b;--red:#ef4444;--purple:#a78bfa;--orange:#fb923c;--gold:#fbbf24;
+  --cyan:#22d3ee;--pink:#f472b6;
+  --glow-accent:0 0 20px rgba(79,158,255,.25);--glow-green:0 0 20px rgba(34,197,94,.2);--glow-gold:0 0 20px rgba(251,191,36,.25);
+  --glass:rgba(15,24,37,.8);--glass2:rgba(22,32,48,.7);
+}
+body{font-family:'Outfit',sans-serif;-webkit-tap-highlight-color:transparent;background:var(--bg);color:var(--text);overflow-x:hidden}
+/* ── LIGHT THEME ── */
+body.light{
+  --bg:#f0f4f8;--bg2:#e8edf3;--surface:#ffffff;--surface2:#f4f7fb;--surface3:#e8edf5;
+  --border:#dde3ec;--border2:#c8d2e0;--text:#1a2333;--text2:#3a4f6a;--muted:#8a9bb0;
+  --accent:#2d7dd2;--accent2:#1a6abf;--green:#16a34a;--green2:#15803d;
+  --yellow:#d97706;--red:#dc2626;--purple:#7c3aed;--orange:#ea580c;--gold:#d97706;
+  --cyan:#0891b2;--pink:#db2777;
+  --glow-accent:0 0 20px rgba(45,125,210,.15);
+  --glow-green:0 0 20px rgba(22,163,74,.12);
+  --glow-gold:0 0 20px rgba(217,119,6,.12);
+  --glass:rgba(255,255,255,.85);
+  --glass2:rgba(244,247,251,.8);
+}
+body.light::before{background:radial-gradient(ellipse 80% 60% at 10% 0%,rgba(45,125,210,.04) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 90% 100%,rgba(124,58,237,.03) 0%,transparent 60%)}
+body.light .sidebar{background:var(--surface);border-right-color:var(--border)}
+body.light .mobile-header{background:rgba(240,244,248,.95)}
+body.light .bottom-nav{background:rgba(240,244,248,.95)}
+body.light .pin-key{background:var(--surface2)}
+body.light .pin-key:active{background:var(--accent);color:white}
+body.light .modal-box{background:var(--surface)}
+body.light .task-modal-box{background:var(--surface)}
+body.light .notif-banner{background:rgba(255,255,255,.95)}
+body.light .pet-bubble{background:rgba(255,255,255,.95)}
+body.light .today-banner{background:linear-gradient(135deg,rgba(22,163,74,.05),rgba(45,125,210,.04))}
+body.light .sidebar-score{background:linear-gradient(135deg,rgba(22,163,74,.07),rgba(45,125,210,.05))}
+body.light .board-col{background:var(--surface2)}
+body.light .task-card{background:var(--surface)}
+body.light .task-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+body.light #pinScreen,body.light #onboardScreen,body.light #loadingScreen{background:var(--bg)}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 10% 0%,rgba(79,158,255,.06) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 90% 100%,rgba(167,139,250,.05) 0%,transparent 60%);pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+/* LOADING */
+#loadingScreen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+.ls-logo{font-size:56px;font-weight:800;letter-spacing:6px;background:linear-gradient(135deg,#4f9eff,#a78bfa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:logoGlow 2s ease infinite alternate}
+@keyframes logoGlow{from{filter:drop-shadow(0 0 8px rgba(79,158,255,.4))}to{filter:drop-shadow(0 0 20px rgba(167,139,250,.5))}}
+.ls-spin{width:40px;height:40px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+.ls-text{font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* PIN */
+#pinScreen{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:0}
+#pinScreen::before{content:'';position:absolute;top:-20%;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(79,158,255,.07) 0%,transparent 70%);pointer-events:none}
+.pin-logo{font-size:42px;font-weight:800;letter-spacing:5px;background:linear-gradient(135deg,#4f9eff,#a78bfa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;position:relative}
+.pin-tagline{font-size:10px;color:var(--muted);letter-spacing:4px;text-transform:uppercase;margin-bottom:40px}
+.pin-title{font-size:18px;font-weight:600;color:var(--text);margin-bottom:6px;text-align:center}
+.pin-sub{font-size:12px;color:var(--muted);margin-bottom:30px;text-align:center}
+.pin-dots{display:flex;gap:18px;margin-bottom:36px}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border2);transition:all .25s cubic-bezier(.34,1.56,.64,1)}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent);transform:scale(1.2);box-shadow:var(--glow-accent)}
+.pin-dot.error{background:var(--red);border-color:var(--red);animation:shake .3s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.pin-error{font-size:12px;color:var(--red);height:18px;margin-bottom:12px;text-align:center}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:250px}
+.pin-key{background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:17px 8px;font-size:20px;font-weight:600;cursor:pointer;text-align:center;color:var(--text);transition:all .15s;user-select:none;font-family:'Outfit',sans-serif}
+.pin-key:hover{background:var(--surface3);border-color:var(--border2)}
+.pin-key:active{background:var(--accent);color:var(--bg);transform:scale(.92);box-shadow:var(--glow-accent)}
+.pin-key.del{color:var(--muted)}
+.pin-key.empty{background:none;border:none;cursor:default}
+.pin-forgot{margin-top:22px;font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+/* ONBOARDING */
+#onboardScreen{position:fixed;inset:0;background:var(--bg);z-index:8000;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:32px 24px;gap:0;overflow-y:auto}
+.ob-emoji{font-size:52px;margin:20px 0 14px;filter:drop-shadow(0 4px 12px rgba(79,158,255,.3))}
+.ob-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px;text-align:center}
+.ob-sub{font-size:13px;color:var(--muted);margin-bottom:22px;text-align:center;line-height:1.7;max-width:300px}
+.ob-input{width:100%;max-width:320px;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);padding:12px 14px;border-radius:12px;font-size:14px;font-family:'Outfit',sans-serif;outline:none;transition:all .2s;margin-bottom:10px}
+.ob-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,158,255,.1)}
+.ob-input::placeholder{color:var(--muted)}
+.ob-examples{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:18px;max-width:320px}
+.ob-chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 13px;font-size:12px;cursor:pointer;transition:all .2s;color:var(--muted)}
+.ob-chip:hover{border-color:var(--accent);color:var(--accent)}
+.ob-chip.sel{border-color:var(--accent);color:var(--accent);background:rgba(79,158,255,.1)}
+.ob-goals-list{width:100%;max-width:320px;margin-bottom:14px}
+.ob-goal-item{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;gap:10px}
+.ob-goal-item span{flex:1;font-size:13px}
+.ob-goal-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0}
+.ob-btn{background:linear-gradient(135deg,var(--accent),var(--purple));color:white;border:none;padding:13px 32px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;width:100%;max-width:320px;margin-top:4px;transition:all .2s;box-shadow:0 4px 20px rgba(79,158,255,.3)}
+.ob-btn:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(79,158,255,.4)}
+.ob-add-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:10px 14px;border-radius:10px;font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif;width:100%;max-width:320px;margin-bottom:8px;transition:all .2s}
+.ob-add-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* MAIN */
+.app{min-height:100vh;background:var(--bg);color:var(--text);display:flex;flex-direction:column;position:relative;z-index:1}
+.desktop-layout{display:flex;min-height:100vh}
+/* SIDEBAR */
+.sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+.sidebar-logo{padding:0 18px 18px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.sidebar-logo .logo{font-size:22px;font-weight:800;letter-spacing:3px;background:linear-gradient(135deg,#4f9eff,#a78bfa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sidebar-logo .tagline{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:1.5px;text-transform:uppercase}
+.sidebar-logo .current-date{font-size:11px;color:var(--muted);margin-top:5px}
+.sidebar-nav{flex:1;padding:0 10px}
+.sidebar-tab{display:flex;align-items:center;gap:9px;width:100%;padding:8px 12px;border-radius:10px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;text-align:left;transition:all .18s;margin-bottom:2px}
+.sidebar-tab:hover{background:var(--surface2);color:var(--text2)}
+.sidebar-tab.active{background:linear-gradient(135deg,rgba(79,158,255,.12),rgba(167,139,250,.08));color:var(--accent2);border-left:2.5px solid var(--accent);padding-left:9.5px}
+.sidebar-tab .tab-icon{font-size:14px;flex-shrink:0;width:18px;text-align:center}
+.sidebar-score{margin:10px 10px 6px;padding:14px;background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(79,158,255,.06));border:1px solid rgba(34,197,94,.25);border-radius:12px;text-align:center;position:relative;overflow:hidden}
+.sidebar-score::before{content:'';position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:80px;height:80px;background:radial-gradient(circle,rgba(34,197,94,.12) 0%,transparent 70%)}
+.sidebar-score .ss-pct{font-size:28px;font-weight:800;color:var(--green);font-family:'JetBrains Mono',monospace;position:relative}
+.sidebar-score .ss-label{font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:1px;text-transform:uppercase}
+.sidebar-meta{margin:0 10px 10px;padding:10px 12px;background:var(--surface2);border-radius:10px;font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.main-content{flex:1;padding:22px 26px;overflow-y:auto;min-width:0;position:relative}
+/* MOBILE */
+.mobile-header{display:none;background:rgba(15,24,37,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 16px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.mobile-header .logo{font-size:19px;font-weight:800;letter-spacing:3px;background:linear-gradient(135deg,#4f9eff,#a78bfa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.mobile-header .mob-meta{font-size:10px;color:var(--muted);margin-top:1px}
+.mobile-header .mob-score{font-size:17px;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace}
+.mobile-pages{display:none;flex:1;overflow-y:auto;padding:12px 14px 82px}
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,20,.95);backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:7px 0 max(7px,env(safe-area-inset-bottom));z-index:200;box-shadow:0 -8px 32px rgba(0,0,0,.4)}
+.bottom-nav-inner{display:flex;justify-content:space-around}
+.bnav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif;min-width:42px;border-radius:10px;transition:all .2s}
+.bnav-btn.active{color:var(--accent)}
+.bnav-btn.active .bnav-icon{background:rgba(79,158,255,.12);border-radius:8px;padding:2px 6px}
+.bnav-icon{font-size:19px;line-height:1.2}
+.bnav-label{font-size:9px;font-weight:500}
+.page{display:none}.page.active{display:block;animation:pageIn .25s ease}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){.desktop-layout{display:none!important}.mobile-header{display:flex!important}.mobile-pages{display:block!important}.bottom-nav{display:block!important}}
+@media(min-width:769px){.desktop-layout{display:flex!important}.mobile-header,.mobile-pages,.bottom-nav{display:none!important}}
+/* COMMON */
+.section-header{background:linear-gradient(135deg,rgba(79,158,255,.08),transparent);border-left:2.5px solid var(--accent);padding:9px 13px;font-size:11px;font-weight:600;color:var(--accent2);margin:14px 0 8px;border-radius:0 8px 8px 0;letter-spacing:.5px;text-transform:uppercase}
+.week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.week-label{font-size:14px;font-weight:600;color:var(--text2)}
+.nav-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:7px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-family:'Outfit',sans-serif;transition:all .15s}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* TODAY */
+.today-banner{background:linear-gradient(135deg,rgba(34,197,94,.07),rgba(79,158,255,.05));border:1px solid rgba(34,197,94,.2);border-radius:14px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
+.today-banner::before{content:'';position:absolute;top:-30px;right:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(34,197,94,.1) 0%,transparent 70%)}
+.today-banner .date{font-size:14px;font-weight:600;color:var(--text2)}
+.today-banner .score{font-size:28px;font-weight:800;font-family:'JetBrains Mono',monospace;position:relative}
+.streak-level-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.sl-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;text-align:center;transition:all .2s}
+.sl-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.sl-val{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.sl-label{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:.5px;text-transform:uppercase}
+.day-timer{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.dt-label{font-size:11px;color:var(--muted);max-width:200px;line-height:1.5}
+.dt-time{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--yellow);flex-shrink:0}
+.dt-time.urgent{color:var(--red);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.goal-card{background:linear-gradient(135deg,rgba(167,139,250,.07),rgba(79,158,255,.04));border:1px solid rgba(167,139,250,.2);border-radius:12px;padding:12px 15px;margin-bottom:12px}
+.goal-card .gc-label{font-size:10px;color:var(--muted);margin-bottom:7px;letter-spacing:.5px;text-transform:uppercase}
+.goal-card .gc-goals{display:flex;flex-wrap:wrap;gap:6px}
+.gc-goal-chip{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--purple)}
+.progress-msg{border-radius:12px;padding:12px 15px;margin-bottom:12px;display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border)}
+.pm-emoji{font-size:22px;flex-shrink:0}
+.pm-text{font-size:13px;font-weight:500;line-height:1.5}
+.daily-quote{border-radius:14px;padding:15px 18px;margin-bottom:12px;position:relative;overflow:hidden}
+.daily-quote::before{content:'';position:absolute;inset:0;opacity:.05;background:radial-gradient(circle at 15% 50%,#fff,transparent 65%)}
+.dq-label{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:8px;opacity:.6}
+.dq-text{font-size:14px;font-weight:600;line-height:1.6}
+.dq-sub{font-size:12px;margin-top:6px;opacity:.7;line-height:1.5}
+/* RITUAL ROW */
+.ritual-row{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;padding:11px 14px;gap:11px;transition:all .18s;cursor:pointer;position:relative;overflow:hidden}
+.ritual-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:0;transition:opacity .2s;border-radius:3px 0 0 3px}
+.ritual-row:hover{background:var(--surface2);border-color:var(--border2)}
+.ritual-row:hover::before{opacity:.5}
+.ritual-row.flash{animation:rowFlash .5s ease}
+@keyframes rowFlash{0%{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4)}100%{background:var(--surface);border-color:var(--border)}}
+.ritual-check{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:12px}
+.ritual-check.done{background:var(--green);border-color:var(--green);box-shadow:0 0 8px rgba(34,197,94,.3)}
+.ritual-name{flex:1;font-size:13px;font-weight:500}
+.ritual-name.done{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--muted)}
+.ritual-tag{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--surface3);color:var(--muted);border:1px solid var(--border);flex-shrink:0}
+/* INLINE EDIT */
+.section-block{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.section-head{display:flex;align-items:center;padding:10px 14px;background:var(--surface2);gap:10px}
+.section-head .sh-name{flex:1;font-size:13px;font-weight:600}
+.section-head .sh-edit,.section-head .sh-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;transition:all .15s}
+.section-head .sh-edit:hover{color:var(--accent)}
+.section-head .sh-del:hover{color:var(--red)}
+.ritual-edit-row{display:flex;align-items:center;padding:9px 12px;gap:8px;border-bottom:1px solid var(--border);transition:all .15s;cursor:default}
+.ritual-edit-row:last-child{border-bottom:none}
+.ritual-edit-row.drag-target{background:rgba(79,158,255,.08);border-top:2px solid var(--accent)}
+.drag-handle{cursor:grab;color:var(--muted);font-size:15px;padding:2px 4px;border-radius:4px;user-select:none;flex-shrink:0;line-height:1;transition:color .15s}
+.drag-handle:hover{color:var(--accent)}
+.drag-handle:active{cursor:grabbing}
+.rer-move{background:none;border:none;cursor:pointer;font-size:12px;padding:2px 3px;color:var(--muted);border-radius:4px;line-height:1;transition:all .15s;flex-shrink:0}
+.rer-move:hover{color:var(--accent);background:rgba(79,158,255,.1)}
+.rer-name{flex:1;font-size:13px}
+.rer-cat{font-size:11px;color:var(--muted);padding:0 6px}
+.rer-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:2px 5px;color:var(--muted);border-radius:4px;transition:all .15s}
+.rer-btn:hover{color:var(--accent)}
+.rer-btn.del:hover{color:var(--red)}
+.inline-add-ritual{display:flex;gap:6px;padding:8px 12px;border-top:1px solid var(--border);flex-wrap:wrap}
+.inline-input{flex:1;min-width:100px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 11px;border-radius:8px;font-size:12px;font-family:'Outfit',sans-serif;outline:none;transition:all .15s}
+.inline-input:focus{border-color:var(--accent)}
+.inline-input::placeholder{color:var(--muted)}
+.inline-save{background:var(--accent);color:var(--bg);border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s}
+.inline-save:hover{background:var(--accent2)}
+.add-section-btn{width:100%;padding:11px;background:var(--surface);border:1px dashed var(--border);border-radius:12px;color:var(--muted);cursor:pointer;font-size:12px;font-family:'Outfit',sans-serif;transition:all .2s;margin-bottom:10px}
+.add-section-btn:hover{border-color:var(--accent);color:var(--accent)}
+.affirm-edit-row{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:5px;gap:8px;transition:all .15s}
+.aer-text{flex:1;font-size:13px}
+.aer-btn{background:none;border:none;cursor:pointer;font-size:13px;padding:2px 5px;color:var(--muted);border-radius:4px}
+.aer-btn:hover{color:var(--accent)}
+.aer-btn.del:hover{color:var(--red)}
+.aer-input{flex:1;background:var(--surface2);border:1.5px solid var(--accent);color:var(--text);padding:7px 11px;border-radius:8px;font-size:13px;font-family:'Outfit',sans-serif;outline:none}
+.affirm-card{background:linear-gradient(135deg,rgba(34,197,94,.07),rgba(79,158,255,.05));border:1px solid rgba(34,197,94,.2);border-radius:14px;padding:20px;text-align:center;margin-bottom:14px}
+.affirm-text{font-size:18px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:10px;min-height:56px;display:flex;align-items:center;justify-content:center}
+.affirm-btn{background:var(--green);color:var(--bg);border:none;padding:9px 22px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s}
+.affirm-btn:hover{background:var(--green2);transform:translateY(-1px)}
+.affirm-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;font-size:13px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:10px;margin-bottom:5px}
+.affirm-item:hover{border-color:var(--green)}
+.affirm-item.active-affirm{border-color:var(--green);background:rgba(34,197,94,.06);color:var(--green);font-weight:600}
+.motiv-flash{background:linear-gradient(135deg,var(--surface2),var(--surface));border-left:2.5px solid var(--accent);border-radius:0 10px 10px 0;padding:10px 14px;margin-bottom:10px;font-size:13px;font-style:italic;color:var(--text2);animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+/* REWARDS */
+.reward-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 15px;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:all .2s}
+.reward-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.reward-card.unlocked{border-color:rgba(251,191,36,.3);background:linear-gradient(135deg,rgba(251,191,36,.06),rgba(34,197,94,.04));box-shadow:0 0 20px rgba(251,191,36,.07)}
+.reward-card.unlocked .rc-name{color:var(--gold)}
+.rc-icon{font-size:24px;flex-shrink:0}
+.rc-info{flex:1;min-width:0}
+.rc-name{font-size:14px;font-weight:600;margin-bottom:3px}
+.rc-threshold{font-size:11px;color:var(--muted)}
+.rc-bar-wrap{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:7px}
+.rc-bar{height:100%;border-radius:2px;transition:width .7s cubic-bezier(.34,.1,.25,1);background:linear-gradient(90deg,var(--accent),var(--cyan))}
+.rc-bar.done{background:linear-gradient(90deg,var(--yellow),var(--gold))}
+.rc-status{font-size:11px;font-weight:600;flex-shrink:0}
+.rc-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;padding:0 3px;opacity:0;transition:opacity .15s}
+.reward-card:hover .rc-del{opacity:1}
+.rc-del:hover{color:var(--red)}
+.reward-add-form{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px;margin-bottom:13px}
+.reward-add-form .raf-title{font-size:12px;font-weight:600;margin-bottom:10px;color:var(--accent2);letter-spacing:.3px;text-transform:uppercase}
+.raf-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.raf-input{flex:1;min-width:140px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:9px;font-size:13px;font-family:'Outfit',sans-serif;outline:none;transition:all .15s}
+.raf-input:focus{border-color:var(--accent)}
+.raf-input::placeholder{color:var(--muted)}
+.raf-pct{width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:9px;font-size:13px;font-family:'JetBrains Mono',monospace;outline:none;text-align:center}
+.raf-pct:focus{border-color:var(--gold)}
+.raf-save{background:linear-gradient(135deg,var(--accent),var(--purple));color:white;border:none;padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s}
+.raf-save:hover{transform:translateY(-1px)}
+/* STATS */
+.week-summary{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:14px}
+.ws-day{text-align:center;padding:7px 4px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);transition:all .15s}
+.ws-day.today{border-color:var(--accent);background:rgba(79,158,255,.06)}
+.ws-day.rest{border-color:rgba(167,139,250,.2);background:rgba(167,139,250,.04)}
+.ws-day .dn{font-size:9px;color:var(--muted);letter-spacing:.3px;text-transform:uppercase}
+.ws-day .dp{font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace;margin-top:2px}
+.day-cols{display:grid;grid-template-columns:145px repeat(7,1fr);gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px}
+.day-header{background:var(--surface2);padding:7px 4px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.3px}
+.day-header.today{background:rgba(79,158,255,.15);color:var(--accent2)}
+.day-header.rest-day{background:rgba(167,139,250,.1);color:var(--purple)}
+.ritual-label{background:var(--surface);padding:7px 9px;font-size:10px;display:flex;align-items:center;gap:5px;color:var(--text2)}
+.day-cell{background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .1s;min-height:33px}
+.day-cell:hover{background:var(--surface2)}
+.day-cell.checked{background:rgba(34,197,94,.08)}
+.day-cell.rest-col{background:rgba(167,139,250,.04);cursor:default}
+.check-icon{width:14px;height:14px;border:1.5px solid var(--border2);border-radius:3px}
+.check-icon.done{background:var(--green);border-color:var(--green);display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:9px;font-weight:700}
+.check-icon.rest{background:rgba(167,139,250,.2);border-color:rgba(167,139,250,.3);display:flex;align-items:center;justify-content:center;color:var(--purple);font-size:9px}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:14px}
+.month-day{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:7px;min-height:54px;cursor:pointer;transition:all .15s}
+.month-day:hover{border-color:var(--border2);transform:translateY(-1px)}
+.month-day.rest{border-color:rgba(167,139,250,.15);background:rgba(167,139,250,.03)}
+.month-day.today{border-color:rgba(79,158,255,.35);background:rgba(79,158,255,.05)}
+.month-day .day-num{font-size:11px;font-weight:600;margin-bottom:3px;font-family:'JetBrains Mono',monospace}
+.month-day .day-pct{font-size:10px;color:var(--muted)}
+.month-day .day-bar{height:3px;border-radius:2px;background:var(--border);margin-top:4px;overflow:hidden}
+.month-day .day-fill{height:100%;border-radius:2px}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;transition:all .18s}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.stat-card .label{font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:.3px;text-transform:uppercase}
+.stat-card .value{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.stat-card .value.good{color:var(--green)}
+.stat-card .value.warn{color:var(--yellow)}
+.stat-card .value.bad{color:var(--red)}
+.ritual-stats{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.rs-row{display:grid;grid-template-columns:1fr 70px 48px 62px;padding:10px 13px;border-bottom:1px solid var(--border);align-items:center}
+.rs-row:last-child{border-bottom:none}
+.rs-header{background:var(--surface2);font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.3px;text-transform:uppercase}
+.rs-bar-wrap{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.rs-bar{height:100%;border-radius:2px}
+.rs-pct{font-size:11px;text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600}
+.badge.great{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.badge.good{background:rgba(245,158,11,.1);color:var(--yellow);border:1px solid rgba(245,158,11,.2)}
+.badge.bad{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.month-selector{display:flex;gap:5px;margin-bottom:13px;flex-wrap:wrap}
+.month-btn{padding:4px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-size:11px;font-family:'Outfit',sans-serif;transition:all .15s}
+.month-btn:hover{border-color:var(--border2);color:var(--text2)}
+.month-btn.active{background:rgba(79,158,255,.12);color:var(--accent2);border-color:rgba(79,158,255,.3)}
+.chart-wrap{position:relative;height:175px;margin-bottom:14px}
+/* SETTINGS */
+.settings-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:5px;transition:all .15s}
+.settings-row:hover{border-color:var(--border2)}
+.settings-label{font-size:13px;font-weight:500}
+.settings-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.toggle{width:42px;height:22px;background:var(--border);border-radius:12px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:var(--green)}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;background:white;border-radius:50%;top:3px;left:3px;transition:transform .2s cubic-bezier(.34,1.56,.64,1);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.toggle.on::after{transform:translateX(20px)}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:5000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
+.modal-overlay.hidden{display:none}
+.modal-box{background:var(--surface);border:1px solid rgba(251,191,36,.2);border-radius:18px;padding:26px 24px;text-align:center;max-width:330px;width:100%;animation:popIn .4s cubic-bezier(.175,.885,.32,1.275);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+@keyframes popIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-emoji{font-size:52px;margin-bottom:14px;animation:bounce 1s infinite;filter:drop-shadow(0 4px 12px rgba(251,191,36,.3))}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.modal-title{font-size:19px;font-weight:800;color:var(--gold);margin-bottom:7px}
+.modal-subtitle{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+.modal-reward{background:linear-gradient(135deg,rgba(251,191,36,.07),rgba(34,197,94,.05));border:1px solid rgba(251,191,36,.2);border-radius:12px;padding:13px;margin-bottom:16px}
+.modal-reward-label{font-size:9px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:2px}
+.modal-reward-text{font-size:19px;font-weight:700;color:var(--gold)}
+.modal-close{background:linear-gradient(135deg,var(--gold),var(--yellow));color:var(--bg);border:none;padding:11px 28px;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s}
+.modal-close:hover{transform:translateY(-1px)}
+/* NOTIF */
+.notif-banner{position:fixed;top:12px;right:12px;left:12px;max-width:360px;margin:0 auto;background:rgba(15,24,37,.95);backdrop-filter:blur(12px);border:1px solid rgba(79,158,255,.3);border-radius:12px;padding:11px 14px;z-index:4000;display:flex;align-items:center;gap:10px;animation:slideIn .3s ease;box-shadow:0 8px 28px rgba(0,0,0,.4)}
+.notif-banner.hidden{display:none}
+.notif-banner.warn{border-color:rgba(245,158,11,.4)}
+.notif-banner.danger{border-color:rgba(239,68,68,.4)}
+@keyframes slideIn{from{transform:translateY(-16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.notif-text{flex:1;font-size:12px;line-height:1.5}
+.notif-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0}
+/* TASKS/KANBAN */
+.folder-chip{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;font-weight:500}
+.folder-chip:hover{border-color:var(--border2);transform:translateY(-1px)}
+.folder-chip .fc-del{color:var(--muted);font-size:13px;opacity:0;transition:.15s}
+.board-wrap{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px;min-height:420px;align-items:flex-start}
+/* Board background theming */
+.board-area{border-radius:14px;padding:16px;margin-top:4px;transition:background .4s ease}
+body.light .board-area{background:var(--bg2)}
+body:not(.light) .board-area{background:transparent}
+.board-col{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:12px;min-width:270px;max-width:360px;flex:1;flex-shrink:0;display:flex;flex-direction:column}
+.board-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.board-col-title{font-size:12px;font-weight:700;letter-spacing:.3px}
+.board-col-count{background:var(--surface3);border-radius:8px;padding:2px 8px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.board-col-body{flex:1;display:flex;flex-direction:column;gap:7px;min-height:60px}
+.task-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;cursor:grab;transition:all .2s;position:relative}
+.task-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.task-card:active{cursor:grabbing;opacity:.85}
+.task-card.done-card{opacity:.5}
+.task-card .tc-title{font-size:13px;font-weight:600;margin-bottom:5px;word-break:break-word;line-height:1.4}
+.task-card .tc-desc{font-size:11px;color:var(--muted);margin-bottom:7px;line-height:1.5}
+.task-card .tc-meta{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.task-card .tc-label{padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600}
+.task-card .tc-deadline{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.task-card .tc-deadline.overdue{color:var(--red);font-weight:700}
+.task-card .tc-deadline.today-due{color:var(--yellow);font-weight:700}
+.task-card .tc-link{font-size:10px;color:var(--accent);text-decoration:none;display:block;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.task-card .tc-actions{position:absolute;top:7px;right:7px;display:flex;gap:3px;opacity:0;transition:opacity .15s}
+.task-card:hover .tc-actions{opacity:1}
+.tc-btn{background:none;border:none;cursor:pointer;font-size:13px;padding:3px;border-radius:5px;color:var(--muted);transition:all .15s}
+.tc-btn:hover{background:var(--surface2);color:var(--text)}
+.col-add-btn{background:none;border:1px dashed var(--border);border-radius:9px;padding:9px;font-size:12px;color:var(--muted);cursor:pointer;text-align:center;margin-top:7px;font-family:'Outfit',sans-serif;transition:all .2s}
+.col-add-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* TASK MODAL */
+.task-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:4500;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)}
+.task-modal.hidden{display:none}
+.task-modal-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.tm-title{font-size:15px;font-weight:700;margin-bottom:16px}
+.tm-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 13px;border-radius:9px;font-size:13px;font-family:'Outfit',sans-serif;outline:none;margin-bottom:8px;transition:all .15s}
+.tm-input:focus{border-color:var(--accent)}
+.tm-input::placeholder{color:var(--muted)}
+.tm-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 13px;border-radius:9px;font-size:12px;font-family:'Outfit',sans-serif;outline:none;margin-bottom:8px;resize:vertical;min-height:70px;line-height:1.6;transition:all .15s}
+.tm-textarea:focus{border-color:var(--accent)}
+.tm-label-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.tm-label-chip{padding:5px 11px;border-radius:10px;font-size:11px;cursor:pointer;border:1px solid transparent;transition:all .15s;font-family:'Outfit',sans-serif;font-weight:500}
+.tm-label-chip.sel{font-weight:700;box-shadow:0 0 0 2px rgba(255,255,255,.15)}
+.tm-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.tm-btn{padding:9px 20px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;border:none;transition:all .15s}
+.tm-btn.primary{background:linear-gradient(135deg,var(--accent),var(--purple));color:white}
+.tm-btn.primary:hover{transform:translateY(-1px)}
+.tm-btn.secondary{background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+.tm-btn:active{opacity:.85}
+/* NOTES */
+.note-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 15px;margin-bottom:8px;transition:all .2s}
+.note-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.note-card.private{border-color:rgba(167,139,250,.2)}
+.note-card .nc-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.note-card .nc-date{font-size:10px;color:var(--muted);flex:1}
+.nc-badge{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600}
+.nc-badge.private{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2)}
+.note-card .note-body .ni-text{font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin-bottom:6px}
+.note-card .note-body .ni-link{color:var(--accent);font-size:12px;text-decoration:none;display:block;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.note-card .nc-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.nc-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:4px 11px;border-radius:7px;cursor:pointer;font-size:11px;font-family:'Outfit',sans-serif;transition:all .15s}
+.nc-btn:hover{color:var(--text2);border-color:var(--border2)}
+.nc-btn.danger:hover{color:var(--red);border-color:rgba(239,68,68,.3)}
+.notes-tab-bar{display:flex;gap:0;margin-bottom:14px;background:var(--surface2);border-radius:11px;padding:3px}
+.notes-tab{flex:1;padding:8px;border:none;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;background:transparent;color:var(--muted);transition:all .2s}
+.notes-tab.active{background:var(--surface3);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.notes-tab.secret.active{color:var(--purple)}
+.secret-lock-screen{display:flex;flex-direction:column;align-items:center;padding:40px 20px;text-align:center}
+.sl-icon{font-size:52px;margin-bottom:16px}
+.sl-title{font-size:17px;font-weight:700;margin-bottom:8px}
+.sl-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px}
+/* TRASH */
+.trash-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 15px;margin-bottom:8px;opacity:.75;transition:all .2s}
+.trash-item:hover{opacity:1;border-color:var(--border2)}
+.trash-item .ti-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.trash-item .ti-type{font-size:10px;padding:2px 8px;border-radius:8px;background:var(--surface2);color:var(--muted);font-weight:600}
+.trash-item .ti-date{font-size:10px;color:var(--red);margin-left:auto;font-family:'JetBrains Mono',monospace}
+.trash-item .ti-text{font-size:13px;color:var(--muted);margin-bottom:9px;line-height:1.5}
+.trash-item .ti-actions{display:flex;gap:7px}
+.ti-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;cursor:pointer;font-size:11px;font-family:'Outfit',sans-serif;transition:all .15s;font-weight:500}
+.ti-btn.restore:hover{color:var(--green);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.05)}
+.ti-btn.perm:hover{color:var(--red);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05)}
+/* PET */
+.pet-wrap{position:fixed;bottom:86px;right:16px;z-index:2000;display:flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none}
+.pet-bubble{background:rgba(15,24,37,.95);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:14px;padding:8px 12px;font-size:11px;max-width:160px;text-align:center;margin-bottom:7px;opacity:0;transform:translateY(6px);transition:all .3s;pointer-events:none;line-height:1.5;color:var(--text2);box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.pet-bubble.show{opacity:1;transform:translateY(0)}
+.pet-emoji{font-size:38px;transition:transform .2s;display:block;text-align:center;filter:drop-shadow(0 3px 6px rgba(0,0,0,.3))}
+.pet-emoji:hover{transform:scale(1.15) rotate(-5deg)}
+.pet-emoji.celebrate{animation:petBounce .5s ease 3}
+.pet-emoji.shake{animation:petShake .4s ease}
+@keyframes petBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.3) translateY(-8px)}}
+@keyframes petShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media(max-width:768px){.pet-wrap{bottom:76px;right:12px}}
+#confettiCanvas{position:fixed;inset:0;pointer-events:none;z-index:3000}
+</style>
+</head>
+<body>
+<!-- LOADING -->
+<div id="loadingScreen"><div class="ls-logo">SJR</div><div style="font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:-8px;margin-bottom:4px">Ritual System</div><div class="ls-spin"></div><div class="ls-text">Yuklanmoqda...</div></div>
+<!-- PIN -->
+<div id="pinScreen" style="display:none">
+  <div class="pin-logo">SJR</div>
+  <div style="font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;margin-top:-4px">Ritual System</div>
+  <div class="pin-tagline">Tizim · Jarayon · Natija</div>
+  <div class="pin-title" id="pinTitle">PIN kodni kiriting</div>
+  <div class="pin-sub" id="pinSub">Maxfiyligingiz uchun</div>
+  <div class="pin-dots" id="pinDots">
+    <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-error" id="pinError"></div>
+  <div class="pin-keypad">
+    <button class="pin-key" onclick="pinPress('1')">1</button><button class="pin-key" onclick="pinPress('2')">2</button><button class="pin-key" onclick="pinPress('3')">3</button>
+    <button class="pin-key" onclick="pinPress('4')">4</button><button class="pin-key" onclick="pinPress('5')">5</button><button class="pin-key" onclick="pinPress('6')">6</button>
+    <button class="pin-key" onclick="pinPress('7')">7</button><button class="pin-key" onclick="pinPress('8')">8</button><button class="pin-key" onclick="pinPress('9')">9</button>
+    <button class="pin-key empty"></button><button class="pin-key" onclick="pinPress('0')">0</button><button class="pin-key del" onclick="pinDel()">⌫</button>
+  </div>
+  <div class="pin-forgot" id="pinForgot" onclick="pinForgotFlow()" style="display:none">PIN ni unutdim</div>
+</div>
+<!-- ONBOARDING — multiple goals -->
+<div id="onboardScreen" style="display:none">
+  <div class="ob-emoji">🎯</div>
+  <div class="ob-title">Maqsadlaringiz nima?</div>
+  <div class="ob-sub">Bir yoki bir nechta maqsad qo'shing. Tizim har kuni siz bilan shu yo'lda bo'ladi.</div>
+  <div class="ob-goals-list" id="obGoalsList"></div>
+  <div class="ob-examples" id="obChips">
+    <div class="ob-chip" onclick="addGoalChip('Vazn yo`qotish')">🏃 Vazn yo'qotish</div>
+    <div class="ob-chip" onclick="addGoalChip('Daromad oshirish')">💰 Daromad oshirish</div>
+    <div class="ob-chip" onclick="addGoalChip('Sport tanasi')">💪 Sport tanasi</div>
+    <div class="ob-chip" onclick="addGoalChip('Intizomli bo`lish')">⚔️ Intizom</div>
+    <div class="ob-chip" onclick="addGoalChip('Ingliz tilini o`rganish')">🌍 Ingliz tili</div>
+    <div class="ob-chip" onclick="addGoalChip('O`z biznesim')">🚀 Biznes</div>
+    <div class="ob-chip" onclick="addGoalChip('Mashina sotib olish')">🚗 Mashina</div>
+    <div class="ob-chip" onclick="addGoalChip('Uy sotib olish')">🏠 Uy</div>
+  </div>
+  <input class="ob-input" id="goalInput" placeholder="O'z maqsadingizni yozing..." maxlength="60" onkeydown="if(event.key==='Enter')addGoalFromInput()">
+  <button class="ob-add-btn" onclick="addGoalFromInput()">+ Qo'shish</button>
+  <button class="ob-btn" onclick="submitGoals()">Boshlash →</button>
+</div>
+<!-- CELEBRATION MODAL -->
+<div class="modal-overlay hidden" id="celebModal">
+  <div class="modal-box">
+    <div class="modal-emoji">🏆</div>
+    <div class="modal-title" id="celebTitle">BARAKALLO!</div>
+    <div class="modal-subtitle" id="celebSubtitle">Barcha rituallar bajarildi!</div>
+    <div class="modal-reward"><div class="modal-reward-label">🎁 Bugungi mukofot</div><div class="modal-reward-text" id="celebReward">—</div></div>
+    <button class="modal-close" onclick="closeModal()">🎉 Rahmat!</button>
+  </div>
+</div>
+<!-- NOTIF -->
+<div class="notif-banner hidden" id="notifBanner">
+  <span id="notifIcon">⏰</span><div class="notif-text" id="notifText"></div>
+  <button class="notif-close" onclick="closeNotif()">×</button>
+</div>
+<canvas id="confettiCanvas"></canvas>
+<!-- MAIN APP -->
+<div class="app" id="mainApp" style="display:none">
+<!-- DESKTOP -->
+<div class="desktop-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="logo">SJR</div>
+          <div style="font-size:9px;color:var(--accent2);letter-spacing:2px;text-transform:uppercase;margin-top:1px;font-weight:600">Ritual System</div>
+          <div style="font-size:7.5px;color:var(--muted);margin-top:2px;letter-spacing:.5px">System · Journey · Result</div>
+          <div style="font-size:7.5px;color:var(--muted);letter-spacing:.5px">Tizim · Jarayon · Natija</div>
+        </div>
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Kunduzgi/Tungi rejim" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 9px;cursor:pointer;font-size:15px;line-height:1;color:var(--text);transition:all .2s">🌙</button>
+      </div>
+      <div class="current-date" id="desktopDate" style="margin-top:8px"></div>
+      <div id="sidebarUser" style="font-size:10px;color:var(--muted);margin-top:2px"></div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-tab active" onclick="showPage('today')" id="dtab-today"><span class="tab-icon">☀️</span> Bugun</button>
+      <button class="sidebar-tab" onclick="showPage('tasks')" id="dtab-tasks"><span class="tab-icon">✅</span> Vazifalar</button>
+      <button class="sidebar-tab" onclick="showPage('notes')" id="dtab-notes"><span class="tab-icon">📝</span> Eslatmalar</button>
+      <button class="sidebar-tab" onclick="showPage('rewards')" id="dtab-rewards"><span class="tab-icon">🏆</span> Mukofot</button>
+      <button class="sidebar-tab" onclick="showPage('affirm')" id="dtab-affirm"><span class="tab-icon">⚡</span> Energiya</button>
+      <button class="sidebar-tab" onclick="showPage('stats')" id="dtab-stats"><span class="tab-icon">📊</span> Statistika</button>
+      <button class="sidebar-tab" onclick="showPage('settings')" id="dtab-settings"><span class="tab-icon">⚙️</span> Sozlamalar</button>
+      <div style="height:1px;background:var(--border);margin:8px 0"></div>
+      <button class="sidebar-tab" onclick="showPage('rituals')" id="dtab-rituals"><span class="tab-icon">🔧</span> Ritual sozlamalari</button>
+      <button class="sidebar-tab" onclick="showPage('trash')" id="dtab-trash" style="margin-top:auto"><span class="tab-icon">🗑</span> Karzinka</button>
+    </nav>
+    <div class="sidebar-score"><div class="ss-pct" id="sidebarScore">0%</div><div class="ss-label">Bugungi natija</div></div>
+    <div class="sidebar-meta"><div id="smStreak">🔥 Seria: —</div><div id="smLevel">⭐ Daraja: —</div><div id="smTimer">⏱ Qoldi: —</div></div>
+  </div>
+  <div class="main-content">
+    <div id="dpage-today" class="page active"></div><div id="dpage-rituals" class="page"></div>
+    <div id="dpage-affirm" class="page"></div><div id="dpage-tasks" class="page"></div>
+    <div id="dpage-rewards" class="page"></div><div id="dpage-notes" class="page"></div>
+    <div id="dpage-trash" class="page"></div>
+    <div id="dpage-week" class="page"></div><div id="dpage-month" class="page"></div>
+    <div id="dpage-stats" class="page"></div><div id="dpage-settings" class="page"></div>
+</div>
+<!-- MOBILE -->
+<div class="mobile-header">
+  <div><div class="logo">SJR</div><div class="mob-meta" id="mobileDate"></div></div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <button id="themeToggleBtn" onclick="toggleTheme()" style="background:none;border:none;cursor:pointer;font-size:17px;padding:2px;line-height:1">🌙</button>
+    <div class="mob-score" id="mobileScore">0%</div>
+  </div>
+</div>
+<div class="mobile-pages">
+  <div id="mpage-today" class="page active"></div><div id="mpage-rituals" class="page"></div>
+  <div id="mpage-affirm" class="page"></div><div id="mpage-tasks" class="page"></div>
+  <div id="mpage-rewards" class="page"></div><div id="mpage-notes" class="page"></div>
+  <div id="mpage-trash" class="page"></div>
+  <div id="mpage-week" class="page"></div><div id="mpage-month" class="page"></div>
+  <div id="mpage-stats" class="page"></div><div id="mpage-settings" class="page"></div>
+</div>
+<div class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bnav-btn active" onclick="showPage('today')" id="mtab-today"><div class="bnav-icon">☀️</div><div class="bnav-label">Bugun</div></button>
+    <button class="bnav-btn" onclick="showPage('tasks')" id="mtab-tasks"><div class="bnav-icon">✅</div><div class="bnav-label">Vazifa</div></button>
+    <button class="bnav-btn" onclick="showPage('notes')" id="mtab-notes"><div class="bnav-icon">📝</div><div class="bnav-label">Eslatma</div></button>
+    <button class="bnav-btn" onclick="showPage('rewards')" id="mtab-rewards"><div class="bnav-icon">🏆</div><div class="bnav-label">Mukofot</div></button>
+    <button class="bnav-btn" onclick="showPage('stats')" id="mtab-stats"><div class="bnav-icon">📊</div><div class="bnav-label">Stat</div></button>
+    <button class="bnav-btn" onclick="showPage('settings')" id="mtab-settings"><div class="bnav-icon">⚙️</div><div class="bnav-label">Menu</div></button>
+  </div>
+</div>
+<!-- PET MASCOT -->
+<div class="pet-wrap" id="petWrap" onclick="petTap()" style="display:none">
+  <div class="pet-bubble" id="petBubble"></div>
+  <span class="pet-emoji" id="petEmoji">🐧</span>
+</div>
+</div>
+<!-- TASK MODAL -->
+<div class="task-modal hidden" id="taskModal">
+  <div class="task-modal-box">
+    <div class="tm-title" id="tmTitle">Yangi vazifa</div>
+    <input class="tm-input" id="tmName" placeholder="Vazifa nomi *">
+    <textarea class="tm-textarea" id="tmDesc" placeholder="Tavsif (ixtiyoriy)..."></textarea>
+    <input class="tm-input" id="tmUrl" placeholder="Havola (https://..., ixtiyoriy)">
+    <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+      <input class="tm-input" id="tmDeadline" type="date" style="flex:1;min-width:130px;margin-bottom:0">
+      <select class="tm-input" id="tmPriority" style="flex:0 0 auto;width:110px;margin-bottom:0">
+        <option value="high">🔴 Muhim</option><option value="mid" selected>🟡 O'rta</option><option value="low">🟢 Past</option>
+      </select>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Teglar:</div>
+    <div class="tm-label-row" id="tmLabels">
+      <button class="tm-label-chip" data-label="Shoshilinch" data-color="#f85149" style="background:#2d0f0f;color:#f85149" onclick="toggleLabel(this)">Shoshilinch</button>
+      <button class="tm-label-chip" data-label="Ish" data-color="#3fb950" style="background:#0d2818;color:#3fb950" onclick="toggleLabel(this)">Ish</button>
+      <button class="tm-label-chip" data-label="Shaxsiy" data-color="#58a6ff" style="background:#0d1a2e;color:#58a6ff" onclick="toggleLabel(this)">Shaxsiy</button>
+      <button class="tm-label-chip" data-label="Startup" data-color="#bc8cff" style="background:#1a0d2e;color:#bc8cff" onclick="toggleLabel(this)">Startup</button>
+      <button class="tm-label-chip" data-label="Maqsad" data-color="#ffd700" style="background:#1a1200;color:#ffd700" onclick="toggleLabel(this)">Maqsad</button>
+    </div>
+    <input id="tmColTarget" type="hidden" value="todo">
+    <input id="tmFolderTarget" type="hidden" value="">
+    <input id="tmEditId" type="hidden" value="">
+    <div class="tm-row" style="margin-top:6px">
+      <button class="tm-btn primary" onclick="saveTaskModal()">Saqlash</button>
+      <button class="tm-btn secondary" onclick="closeTaskModal()">Bekor</button>
+    </div>
+  </div>
+</div>
+<script>
+// =========================================================
+//  FIREBASE CONFIG — sjr-ritual-system
+// =========================================================
+const firebaseConfig = {
+  apiKey:            "AIzaSyBvzGQ3RU9MKOwAPEZw1Iz8O2jaH8my8lo",
+  authDomain:        "sjr-ritual-system.firebaseapp.com",
+  projectId:         "sjr-ritual-system",
+  storageBucket:     "sjr-ritual-system.firebasestorage.app",
+  messagingSenderId: "938779544771",
+  appId:             "1:938779544771:web:2917461308ff9b9050e676"
+};
+
+// ===== FIX: Safe Firebase initialization =====
+// "firebase is not defined" xatosini oldini oladi
+let db = null;
+(function initFirebaseSafe() {
+  if (typeof firebase === 'undefined') {
+    console.warn('Firebase SDK yuklanmadi — localStorage rejimida ishlaydi');
+    return;
+  }
+  try {
+    // Agar allaqachon init qilingan bo'lsa, qayta init qilma
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    db = firebase.firestore();
+    // Offline persistence (tarmoqsiz ishlash)
+    db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+  } catch(e) {
+    console.warn('Firebase init xatosi:', e.message);
+    db = null;
+  }
+})();
+
+// ===== TELEGRAM =====
+const tgWebApp = window.Telegram?.WebApp;
+if(tgWebApp){tgWebApp.ready();tgWebApp.expand();}
+const tgUser   = tgWebApp?.initDataUnsafe?.user;
+const USER_ID  = tgUser?.id?.toString() || 'dev_'+Math.random().toString(36).slice(2,8);
+const USER_NAME = tgUser?.first_name || '';
+
+// ===== SECURITY UTILS =====
+
+// XSS protection — barcha foydalanuvchi kiritgan matnni sanitize qilish
+function escapeHtml(str) {
+  return String(str||'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;')
+    .replace(/\//g,'&#x2F;');
+}
+// Barcha render funksiyalarida foydalanuvchi matni uchun ishlatiladi
+
+// PIN hashing — SHA-256 + USER_ID salt
+async function hashPin(pin) {
+  if (!crypto?.subtle) return pin; // fallback: eski brauzerlar
+  try {
+    const enc = new TextEncoder();
+    const data = enc.encode(pin + ':' + USER_ID);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hash))
+      .map(b => b.toString(16).padStart(2,'0')).join('');
+  } catch(e) {
+    return pin; // hash qilish imkoni bo'lmasa, plain PIN
+  }
+}
+
+// PIN brute-force himoya
+const MAX_ATTEMPTS  = 5;
+const LOCKOUT_MS    = 2 * 60 * 1000; // 2 daqiqa
+const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 daqiqa
+
+function getPinAttempts()  { return parseInt(sessionStorage.getItem('sjr_pa')||'0'); }
+function setPinAttempts(n) { sessionStorage.setItem('sjr_pa', String(n)); }
+function getLockUntil()    { return parseInt(sessionStorage.getItem('sjr_lu')||'0'); }
+function setLockUntil(t)   { sessionStorage.setItem('sjr_lu', String(t)); }
+
+function checkLockout() {
+  const lu = getLockUntil();
+  if (!lu) return null;
+  const remaining = Math.ceil((lu - Date.now()) / 1000);
+  if (remaining > 0) return remaining;
+  // Vaqt o'tdi — reset
+  sessionStorage.removeItem('sjr_lu');
+  sessionStorage.removeItem('sjr_pa');
+  return null;
+}
+function recordFailedAttempt() {
+  const n = getPinAttempts() + 1;
+  setPinAttempts(n);
+  if (n >= MAX_ATTEMPTS) {
+    setLockUntil(Date.now() + LOCKOUT_MS);
+    setPinAttempts(0);
+  }
+  return MAX_ATTEMPTS - n;
+}
+
+// Session auto-lock
+let lastActivity = Date.now();
+let appUnlocked  = false;
+function updateActivity() { lastActivity = Date.now(); }
+function lockApp() {
+  appUnlocked = false;
+  document.getElementById('mainApp').style.display = 'none';
+  pinBuffer = ''; pinMode = 'check';
+  document.getElementById('pinTitle').textContent = 'PIN kodni kiriting';
+  document.getElementById('pinSub').textContent = 'Sessiya tugadi. Qayta kiring';
+  document.getElementById('pinForgot').style.display = 'block';
+  document.getElementById('pinScreen').style.display = 'flex';
+}
+setInterval(() => {
+  if (appUnlocked && Date.now() - lastActivity > SESSION_TIMEOUT_MS) lockApp();
+}, 30000); // har 30 soniyada tekshir
+document.addEventListener('click', updateActivity);
+document.addEventListener('keydown', updateActivity);
+
+// ===== STORE (Firebase + localStorage hybrid, xavfsiz) =====
+const STORE = (() => {
+  let _c={}, _ref=null, _t=null;
+  function _push() {
+    if(!_ref) return;
+    clearTimeout(_t);
+    _t = setTimeout(() => {
+      // Faqat joriy foydalanuvchi ma'lumotlarini yoz
+      _ref.set(_c, {merge:true}).catch(() => {});
+    }, 800);
+  }
+  return {
+    async load(database, uid) {
+      if (!database) {
+        // Firebase yo'q — localStorage fallback
+        for(let i=0;i<localStorage.length;i++){
+          const k=localStorage.key(i);
+          if(k) _c[k]=localStorage.getItem(k);
+        }
+        return;
+      }
+      // Firestore path: users/{uid} — foydalanuvchi izolyatsiyasi
+      _ref = database.collection('users').doc(uid);
+      try {
+        const snap = await _ref.get();
+        if(snap.exists) _c = snap.data() || {};
+      } catch(e) {
+        console.warn('Firebase o\'qish xatosi, localStorage ishlatiladi:', e.message);
+        for(let i=0;i<localStorage.length;i++){
+          const k=localStorage.key(i);
+          if(k) _c[k]=localStorage.getItem(k);
+        }
+      }
+    },
+    getItem(k)  { const v=_c[k]; return (v===undefined||v===null)?null:String(v); },
+    setItem(k,v){ _c[k]=v; try{localStorage.setItem(k,v);}catch(e){} _push(); },
+    removeItem(k){
+      delete _c[k];
+      try{localStorage.removeItem(k);}catch(e){}
+      if(_ref) _ref.update({[k]: (typeof firebase!=='undefined'?firebase.firestore.FieldValue.delete():'__delete__')}).catch(()=>{});
+    }
+  };
+})();
+
+// ===== PIN (Oddiy, ishonchli versiya) =====
+// SHA-256 + USER_ID salt olib tashlandi — USER_ID reload da o'zgarishi mumkin
+// PIN localStorage da to'g'ridan saqlnadi (4 raqam, Firebase da ham)
+let pinBuffer='', pinMode='check', pinFirst='';
+
+function pinPress(d) {
+  const remaining = checkLockout();
+  if (remaining) { pinError(remaining + ' soniya kuting'); return; }
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += d;
+  updatePinDots();
+  if (pinBuffer.length === 4) setTimeout(processPinInput, 200);
+}
+function pinDel() { if(pinBuffer.length>0){pinBuffer=pinBuffer.slice(0,-1);updatePinDots();} }
+function updatePinDots(state='') {
+  for(let i=0;i<4;i++){
+    const d=document.getElementById('pd'+i);
+    if(d) d.className='pin-dot'+(i<pinBuffer.length?' filled':'')+(state==='error'?' error':'');
+  }
+}
+function pinError(msg) {
+  updatePinDots('error');
+  const el=document.getElementById('pinError');
+  if(el) el.textContent=msg;
+  setTimeout(()=>{pinBuffer='';updatePinDots();if(el)el.textContent='';}, 900);
+}
+function processPinInput() {
+  // STORE yuklanmagan bo'lsa localStorage dan o'qi
+  const stored = STORE.getItem('sjr_pin') || localStorage.getItem('sjr_pin');
+
+  if (pinMode === 'check') {
+    const remaining = checkLockout();
+    if (remaining) { pinError(remaining + ' soniya kuting'); pinBuffer=''; return; }
+
+    if (pinBuffer === stored) {
+      sessionStorage.removeItem('sjr_pa');
+      sessionStorage.removeItem('sjr_lu');
+      enterApp();
+    } else {
+      const left = recordFailedAttempt();
+      const lu = getLockUntil();
+      if (lu) {
+        pinError("5 ta xato. 2 daqiqa kuting");
+      } else {
+        pinError(left > 0 ? "Noto'g'ri PIN. " + left + " urinish qoldi" : "Noto'g'ri PIN");
+      }
+    }
+  } else if (pinMode === 'set') {
+    pinFirst = pinBuffer; pinBuffer = '';
+    document.getElementById('pinTitle').textContent = 'Qayta kiriting';
+    document.getElementById('pinSub').textContent   = 'Tasdiqlash uchun';
+    pinMode = 'confirm'; updatePinDots();
+  } else if (pinMode === 'confirm') {
+    if (pinBuffer === pinFirst) {
+      // Saqla: STORE ham, localStorage ham
+      STORE.setItem('sjr_pin', pinFirst);
+      localStorage.setItem('sjr_pin', pinFirst);
+      enterApp();
+    } else {
+      pinFirst = ''; pinMode = 'set';
+      document.getElementById('pinTitle').textContent = "Yangi PIN o'rnating";
+      pinError("PIN mos kelmadi. Qaytadan boshlang");
+    }
+  }
+}
+function pinForgotFlow() {
+  if (confirm("PIN ni tiklash uchun barcha ma'lumotlar o'chiriladi. Davom etasizmi?")) {
+    ['sjr_pin','sjr_goals','sjr_onboarded'].forEach(k => STORE.removeItem(k));
+    sessionStorage.clear();
+    location.reload();
+  }
+}
+
+// ===== ONBOARDING — multiple goals =====
+let obGoals=[];
+function addGoalChip(val){
+  if(!val.trim()||obGoals.includes(val.trim()))return;
+  obGoals.push(val.trim());renderObGoals();
+}
+function addGoalFromInput(){
+  const inp=document.getElementById('goalInput');
+  const val=inp.value.trim();
+  if(!val)return;
+  addGoalChip(val);inp.value='';
+}
+function removeObGoal(i){obGoals.splice(i,1);renderObGoals();}
+function renderObGoals(){
+  const el=document.getElementById('obGoalsList');
+  if(!el)return;
+  el.innerHTML=obGoals.map((g,i)=>
+    `<div class="ob-goal-item"><span>🎯 ${escapeHtml(g)}</span><button class="ob-goal-del" onclick="removeObGoal(${i})">×</button></div>`
+  ).join('');
+}
+function submitGoals(){
+  if(obGoals.length===0){
+    const inp=document.getElementById('goalInput');
+    const val=inp.value.trim();
+    if(val){obGoals.push(val);inp.value='';}
+    else{inp.style.borderColor='var(--red)';return;}
+  }
+  STORE.setItem('sjr_goals',JSON.stringify(obGoals));
+  STORE.setItem('sjr_onboarded','1');
+  document.getElementById('onboardScreen').style.display='none';
+  showMainApp();
+}
+
+// ===== GOALS HELPERS =====
+function getGoals(){try{return JSON.parse(STORE.getItem('sjr_goals')||'[]');}catch{return[];}}
+function saveGoals(g){STORE.setItem('sjr_goals',JSON.stringify(g));}
+function addGoal(text){if(!text.trim())return;const g=getGoals();if(!g.includes(text.trim())){g.push(text.trim());saveGoals(g);}}
+function removeGoal(i){const g=getGoals();g.splice(i,1);saveGoals(g);}
+function getRandomGoal(){const g=getGoals();return g.length?g[Math.floor(Math.random()*g.length)]:'';}
+function getDailyGoal(){const g=getGoals();if(!g.length)return'';const d=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/(1000*60*60*24));return g[d%g.length];}
+
+// ===== SECTIONS SYSTEM =====
+const DEFAULT_SECTIONS=[
+  {id:'morning',name:'🌅 Ertalabki rituallar',color:'#bc8cff'},
+  {id:'day',    name:'☀️ Kun davomida',      color:'#58a6ff'},
+  {id:'evening',name:'🌙 Kechki rituallar',  color:'#f0883e'},
+];
+function getSections(){
+  try{const s=STORE.getItem('sjr_sections');return s?JSON.parse(s):DEFAULT_SECTIONS;}catch{return DEFAULT_SECTIONS;}
+}
+function saveSections(s){STORE.setItem('sjr_sections',JSON.stringify(s));}
+function addSection(name){
+  if(!name.trim())return;
+  const colors=['#3fb950','#d29922','#f85149','#58a6ff','#bc8cff','#f0883e'];
+  const s=getSections();
+  s.push({id:'sec_'+Date.now().toString(36),name:name.trim(),color:colors[s.length%colors.length]});
+  saveSections(s);
+}
+function deleteSection(id){
+  // Bo'lim o'chirilsa, undagi rituallarni ham o'chir
+  const rituals=getRituals().filter(r=>r.sectionId!==id);
+  saveRituals(rituals);
+  saveSections(getSections().filter(s=>s.id!==id));
+}
+function renameSection(id,name){
+  const s=getSections();const item=s.find(x=>x.id===id);
+  if(item&&name.trim())item.name=name.trim();
+  saveSections(s);
+}
+
+// ===== AFFIRMATIONS (user-managed) =====
+// ===== ENERGIYA BO'LIMI — 3 yo'nalish =====
+
+// --- Gratitude ---
+function getGratitude(){try{return JSON.parse(STORE.getItem('sjr_gratitude')||'[]');}catch{return[];}}
+function saveGratitude(g){STORE.setItem('sjr_gratitude',JSON.stringify(g));}
+function addGratitude(text){if(!text.trim())return;const g=getGratitude();g.push(text.trim());saveGratitude(g);}
+function deleteGratitude(i){const g=getGratitude();g.splice(i,1);saveGratitude(g);}
+function updateGratitude(i,text){const g=getGratitude();if(g[i]!==undefined)g[i]=text.trim();saveGratitude(g);}
+
+// --- Goals (energy) ---
+// Uses existing getGoals() / saveGoals() / addGoal() / removeGoal()
+
+// --- Affirmations ---
+const DEFAULT_AFFIRMATIONS=[
+  "Men to'siqlarni yengib o'taman",
+  "Men har kuni kuchayib boraman",
+  "Men maqsadimga erishaman",
+  "Men intizomli va kuchli odamman",
+  "Boshlagan ishimni oxiriga yetkazaman",
+  "Men hayotimni o'zim boshqaraman",
+];
+function getAffirmations(){
+  try{const a=STORE.getItem('sjr_affirms_v2');return a?JSON.parse(a):DEFAULT_AFFIRMATIONS;}
+  catch{return DEFAULT_AFFIRMATIONS;}
+}
+function saveAffirmations(a){STORE.setItem('sjr_affirms_v2',JSON.stringify(a));}
+function addAffirmation(text){if(!text.trim())return;const a=getAffirmations();a.push(text.trim());saveAffirmations(a);}
+function deleteAffirmation(i){const a=getAffirmations();a.splice(i,1);saveAffirmations(a);}
+function updateAffirmation(i,text){const a=getAffirmations();if(a[i]!==undefined)a[i]=text.trim();saveAffirmations(a);}
+
+// ===== ENERGY READER STATE =====
+// Modes: 'menu' | 'read' | 'edit'
+let _energyMode   = 'menu';   // current view
+let _energySource = null;     // 'gratitude' | 'goals' | 'affirm'
+let _energyIdx    = 0;        // current item index
+let _energyReadCount = 0;     // how many items read this session
+let _energyEditSection = null; // which section we're editing
+
+function getEnergyItems(source){
+  if(source==='gratitude') return getGratitude();
+  if(source==='goals')     return getGoals();
+  if(source==='affirm')    return getAffirmations();
+  return [];
+}
+function saveEnergyItem(source, items){
+  if(source==='gratitude') saveGratitude(items);
+  if(source==='goals')     saveGoals(items);
+  if(source==='affirm')    saveAffirmations(items);
+}
+
+function startEnergyRead(source){
+  const items=getEnergyItems(source);
+  if(!items.length){
+    _energyMode='edit';_energySource=source;renderAffirm();return;
+  }
+  _energyMode='read';_energySource=source;_energyIdx=0;
+  renderAffirm();
+}
+
+function energyNext(){
+  const items=getEnergyItems(_energySource);
+  _energyReadCount++;
+  playSuccessSound();
+  // Animate
+  const card=document.getElementById('energyCard');
+  if(card){card.style.transform='scale(1.04)';card.style.opacity='0.7';
+    setTimeout(()=>{card.style.transform='';card.style.opacity='1';},300);}
+  if(_energyIdx<items.length-1){
+    _energyIdx++;
+    setTimeout(()=>renderAffirm(),320);
+  } else {
+    // Finished this section
+    setTimeout(()=>{
+      _energyMode='done';renderAffirm();
+    },320);
+  }
+}
+
+function renderAffirm(){
+  let html='';
+
+  if(_energyMode==='menu'){
+    const gr=getGratitude(),gl=getGoals(),af=getAffirmations();
+    html+=`<div style="font-size:16px;font-weight:700;margin-bottom:4px">⚡ Energiya</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Har kuni o'qing — ichki kuchni oshiring</div>`;
+
+    // 3 cards
+    const sections=[
+      {key:'gratitude',emoji:'🙏',title:"Minnatdorlik",sub:"Kimga / nimaga minnatdorsiz?",count:gr.length,color:'var(--green)'},
+      {key:'goals',    emoji:'🎯',title:"Maqsadlar",  sub:"Bugun nima uchun harakat qilasiz?",count:gl.length,color:'var(--purple)'},
+      {key:'affirm',   emoji:'💪',title:"Afirmatsiyalar",sub:"O'zingizga aytadigan kuchli gaplar",count:af.length,color:'var(--accent)'},
+    ];
+    sections.forEach(s=>{
+      html+=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px">
+        <div style="font-size:32px;flex-shrink:0">${s.emoji}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600;color:${s.color};margin-bottom:2px">${s.title}</div>
+          <div style="font-size:12px;color:var(--muted)">${s.sub}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">${s.count} ta yozuv</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${s.count>0?`<button onclick="startEnergyRead('${s.key}')" style="background:${s.color};color:#0d1117;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">▶ O'qish</button>`:''}
+          <button onclick="_energyMode='edit';_energySource='${s.key}';renderAffirm()" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit">✏️ Tahrirlash</button>
+        </div>
+      </div>`;
+    });
+
+    // Motivatsiya blok
+    html+=`<div style="margin-top:4px">${renderMotivBlock(1)}</div>`;
+
+  } else if(_energyMode==='read'){
+    const items=getEnergyItems(_energySource);
+    const item=items[_energyIdx];
+    const sourceInfo={
+      gratitude:{emoji:'🙏',title:'Minnatdorlik',color:'var(--green)'},
+      goals:    {emoji:'🎯',title:'Maqsadlar',   color:'var(--purple)'},
+      affirm:   {emoji:'💪',title:'Afirmatsiyalar',color:'var(--accent)'},
+    }[_energySource];
+    const progress=Math.round((_energyIdx/(items.length))*100);
+
+    html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <button onclick="_energyMode='menu';renderAffirm()" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">← Orqaga</button>
+      <div style="font-size:13px;font-weight:600;color:${sourceInfo.color}">${sourceInfo.emoji} ${sourceInfo.title}</div>
+      <div style="margin-left:auto;font-size:12px;color:var(--muted)">${_energyIdx+1} / ${items.length}</div>
+    </div>
+    <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:20px">
+      <div style="height:100%;width:${progress}%;background:${sourceInfo.color};border-radius:2px;transition:width .4s"></div>
+    </div>
+    <div id="energyCard" style="background:linear-gradient(135deg,#0d1a2e,#1a0d2e);border:2px solid ${sourceInfo.color};border-radius:16px;padding:32px 24px;text-align:center;min-height:160px;display:flex;align-items:center;justify-content:center;transition:all .3s;margin-bottom:24px">
+      <div style="font-size:20px;font-weight:700;color:var(--text);line-height:1.5">${escapeHtml(item||'')}</div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:10px">
+      <button onclick="repeatEnergyItem()" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:10px 20px;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit">🔁 Qayta o'qi</button>
+      <button onclick="energyNext()" style="background:${sourceInfo.color};color:#0d1117;border:none;padding:12px 32px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">${_energyIdx<items.length-1?'Keyingisi →':'✓ Tugadi!'}</button>
+    </div>
+    <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--muted)">Ovoz chiqarib o'qing</div>`;
+
+  } else if(_energyMode==='done'){
+    const sourceInfo={
+      gratitude:{emoji:'🙏',title:'Minnatdorlik',color:'var(--green)'},
+      goals:    {emoji:'🎯',title:'Maqsadlar',   color:'var(--purple)'},
+      affirm:   {emoji:'💪',title:'Afirmatsiyalar',color:'var(--accent)'},
+    }[_energySource];
+
+    // Check if all 3 done
+    const allDoneKey='sjr_energy_done_'+todayStr;
+    const doneSet=JSON.parse(STORE.getItem(allDoneKey)||'[]');
+    if(!doneSet.includes(_energySource)){doneSet.push(_energySource);STORE.setItem(allDoneKey,JSON.stringify(doneSet));}
+    const allDone=doneSet.length>=3;
+
+    if(allDone){playBigSound();launchConfetti(80);}
+    else playSuccessSound();
+
+    html+=`<div style="text-align:center;padding:32px 16px">
+      <div style="font-size:56px;margin-bottom:16px;animation:bounce 1s ease 3">${allDone?'🌟':'✅'}</div>
+      <div style="font-size:22px;font-weight:700;color:${allDone?'var(--gold)':sourceInfo.color};margin-bottom:8px">${allDone?'ENERGIYA TUGALLANDI!':sourceInfo.title+' o\'qildi!'}</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.6">${allDone?"Barcha 3 bo'lim tugatildi. Siz kuchlirasiz!":"Zo'r! Davom eting."}</div>
+      <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+        <button onclick="_energyMode='menu';renderAffirm()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit">← Menyu</button>
+        ${!allDone?`<button onclick="startNextEnergySection('${_energySource}')" style="background:${sourceInfo.color};color:#0d1117;border:none;padding:10px 24px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Keyingi bo'lim →</button>`:''}
+      </div>
+      ${allDone?`<div style="margin-top:16px;font-size:13px;color:var(--gold);font-weight:600">⚡ Energy Complete</div>`:''}
+    </div>`;
+
+  } else if(_energyMode==='edit'){
+    const items=getEnergyItems(_energySource);
+    const sourceInfo={
+      gratitude:{emoji:'🙏',title:'Minnatdorlik',placeholder:'Kimga / nimaga minnatdorsiz?',color:'var(--green)'},
+      goals:    {emoji:'🎯',title:'Maqsadlar',   placeholder:'Maqsadingizni yozing...',    color:'var(--purple)'},
+      affirm:   {emoji:'💪',title:'Afirmatsiyalar',placeholder:"O'zingizga aytadigan gap...",color:'var(--accent)'},
+    }[_energySource];
+
+    html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <button onclick="_energyMode='menu';renderAffirm()" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">← Orqaga</button>
+      <div style="font-size:14px;font-weight:600;color:${sourceInfo.color}">${sourceInfo.emoji} ${sourceInfo.title}</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input id="energyNewInp" class="inline-input" placeholder="${sourceInfo.placeholder}" style="flex:1;font-size:13px;padding:9px 12px" onkeydown="if(event.key==='Enter')submitEnergyItem()">
+      <button onclick="submitEnergyItem()" class="inline-save">+ Qo'sh</button>
+    </div>`;
+
+    if(!items.length){
+      html+=`<div style="text-align:center;padding:28px;color:var(--muted)">Hali hech narsa yozilmagan.<br>Birinchi yozuvingizni qo'shing!</div>`;
+    }
+    items.forEach((item,i)=>{
+      html+=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+        <div style="width:6px;height:6px;border-radius:50%;background:${sourceInfo.color};flex-shrink:0"></div>
+        <div style="flex:1;font-size:13px">${escapeHtml(item)}</div>
+        <button onclick="deleteEnergyItem(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0">×</button>
+      </div>`;
+    });
+
+    if(items.length>0){
+      html+=`<div style="margin-top:12px;text-align:center">
+        <button onclick="startEnergyRead('${_energySource}')" style="background:${sourceInfo.color};color:#0d1117;border:none;padding:10px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">▶ O'qishni boshlash</button>
+      </div>`;
+    }
+  }
+
+  setPageContent('affirm',html);
+}
+
+// Energy helpers
+function submitEnergyItem(){
+  const inp=document.getElementById('energyNewInp');
+  if(!inp?.value.trim())return;
+  if(_energySource==='goals'){addGoal(inp.value);}
+  else if(_energySource==='gratitude'){addGratitude(inp.value);}
+  else if(_energySource==='affirm'){addAffirmation(inp.value);}
+  inp.value='';renderAffirm();
+}
+function deleteEnergyItem(i){
+  const items=getEnergyItems(_energySource);
+  items.splice(i,1);saveEnergyItem(_energySource,items);
+  renderAffirm();
+}
+function repeatEnergyItem(){
+  const card=document.getElementById('energyCard');
+  if(!card)return;
+  card.style.background='linear-gradient(135deg,#0d2818,#0d1a2e)';
+  setTimeout(()=>{card.style.background='';},500);
+  playSuccessSound();
+}
+function startNextEnergySection(current){
+  const order=['gratitude','goals','affirm'];
+  const idx=order.indexOf(current);
+  const next=order[(idx+1)%order.length];
+  startEnergyRead(next);
+}
+
+// Legacy aliases (used by old code)
+let currentAffirmIdx=0;
+let editingAffirmIdx=-1;
+function nextAffirm(){energyNext();}
+function selectAffirm(i){currentAffirmIdx=i;}
+function repeatAffirm(){repeatEnergyItem();}
+function startAffirmEdit(i){editingAffirmIdx=i;}
+function cancelAffirmEdit(){editingAffirmIdx=-1;renderAffirm();}
+function saveAffirmEdit(i){editingAffirmIdx=-1;renderAffirm();}
+function confirmDeleteAffirm(i){deleteAffirmation(i);renderAffirm();}
+function submitNewAffirm(){submitEnergyItem();}
+// ===== DEFAULT RITUALS (sectionId based) =====
+const DEFAULT_RITUALS=[
+  {id:'wake',  name:"06:00 da uyg'onish",  cat:'Uyqu',   color:'#bc8cff',sectionId:'morning'},
+  {id:'shower',name:'Sovuq dush',           cat:"Sog'liq",color:'#58a6ff',sectionId:'morning'},
+  {id:'gratitude',name:'Minnatdorlik yozish',cat:'Ruhiyat',color:'#bc8cff',sectionId:'morning'},
+  {id:'goals_review',name:"Maqsadlarni ko'rib chiqish",cat:'Rivojlanish',color:'#f0883e',sectionId:'morning'},
+  {id:'plan_check',name:'Bugungi rejani belgilash',cat:'Produktivlik',color:'#f0883e',sectionId:'morning'},
+  {id:'water', name:'4 litr suv ichish',    cat:"Sog'liq",color:'#58a6ff',sectionId:'day'},
+  {id:'diet',  name:"Shakardan voz kechish",cat:'Ovqat',  color:'#3fb950',sectionId:'day'},
+  {id:'nogas', name:"Gazli ichimlik yo'q",  cat:'Intizom',color:'#f85149',sectionId:'day'},
+  {id:'nophone',name:"Telefonsiz 3 soat",  cat:"Diqqat", color:'#f85149',sectionId:'day'},
+  {id:'sport', name:'Sport / Zal / Yugurish',cat:'Sport', color:'#3fb950',sectionId:'day'},
+  {id:'walk',  name:"30+ daqiqa yurish",   cat:'Sport',  color:'#3fb950',sectionId:'day'},
+  {id:'english',name:"Ingliz tilidan mashq",cat:"Ta'lim",color:'#58a6ff',sectionId:'day'},
+  {id:'book',  name:"Kitob o'qish (10 daqiqa)",cat:'Rivojlanish',color:'#bc8cff',sectionId:'day'},
+  {id:'review',name:"Kunni yakunlash",     cat:'Produktivlik',color:'#f0883e',sectionId:'evening'},
+  {id:'plan_next',name:'Ertangi kun rejasi',cat:'Produktivlik',color:'#f0883e',sectionId:'evening'},
+  {id:'sleep', name:"23:00 da uxlash",     cat:'Uyqu',   color:'#bc8cff',sectionId:'evening'},
+];
+
+// ===== RITUALS CRUD =====
+function getRituals(){
+  const r=STORE.getItem('sjr_rituals');
+  if(r){try{
+    const parsed=JSON.parse(r);
+    // Migrate old section format to sectionId
+    return parsed.map(x=>({...x,sectionId:x.sectionId||(x.section&&x.section.includes('ERTALAB')?'morning':x.section&&x.section.includes('KECHKI')?'evening':'day')}));
+  }catch{}}
+  return DEFAULT_RITUALS;
+}
+function saveRituals(r){STORE.setItem('sjr_rituals',JSON.stringify(r));}
+function addRitual(name,cat,sectionId){
+  if(!name.trim())return;
+  const r=getRituals();
+  const id='r_'+Date.now().toString(36);
+  r.push({id,name:name.trim(),cat:cat||'',color:'#58a6ff',sectionId:sectionId||'day'});
+  saveRituals(r);
+}
+function updateRitual(id,name,cat){
+  const r=getRituals();const item=r.find(x=>x.id===id);
+  if(item&&name.trim()){item.name=name.trim();if(cat)item.cat=cat;}
+  saveRituals(r);
+}
+function deleteRitual(id){
+  saveRituals(getRituals().filter(x=>x.id!==id));
+}
+
+// ===== ROULETTE =====
+const ROULETTE_ACTIONS=[
+  "Hozir bir stakan suv iching",
+  "10 daqiqa yuring",
+  "5 marta push-up qiling",
+  "Bugun shunday bir yaxshi ish qiling",
+  "Kichik maqsadingizni yozing",
+  "5 bet kitob o'qing",
+  "O'zingizga rahmat ayting",
+  "Kecha nima qilganingizni o'ylab ko'ring",
+  "Bugun kimgadir yaxshilik qiling",
+  "10 daqiqa telefonsiz o'tiring",
+  "Qorinbog'ich (planka) 30 soniya",
+  "Bir necha daqiqa chuqur nafas oling",
+  "Ertangi uchun 1 maqsad yozing",
+  "Ko'zlaringizni yoping, bir daqiqa tinchlanib oling",
+  "Uxlash oldidan 1 maqsad takrorlang",
+];
+let rouletteIdx=-1;
+
+// ===== MOTIV TOAST — yengil pastki xabar =====
+let _motivToastTimer = null;
+function showMotivToast(text) {
+  let el = document.getElementById('motivToast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'motivToast';
+    el.style.cssText = [
+      'position:fixed','bottom:90px','left:50%','transform:translateX(-50%) translateY(20px)',
+      'background:var(--surface)','border:1px solid var(--accent)','border-radius:20px',
+      'padding:8px 18px','font-size:13px','font-weight:500','color:var(--text)',
+      'z-index:3500','opacity:0','transition:all .3s ease','max-width:90vw',
+      'text-align:center','pointer-events:none','box-shadow:0 4px 16px rgba(0,0,0,.35)',
+    ].join(';');
+    document.body.appendChild(el);
+  }
+  el.textContent = text;
+  clearTimeout(_motivToastTimer);
+  // Ko'rsatish animatsiyasi
+  requestAnimationFrame(() => {
+    el.style.opacity = '1';
+    el.style.transform = 'translateX(-50%) translateY(0)';
+  });
+  _motivToastTimer = setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(10px)';
+  }, 3000);
+}
+
+// ===== RITUAL DONE/TOGGLE =====
+function rKey(date,rid){return `rt_${date}_${rid}`}
+function isDone(date,rid){return STORE.getItem(rKey(date,rid))==='1'}
+function toggleRitual(date,rid){
+  const k=rKey(date,rid);
+  const wasDone = STORE.getItem(k)==='1';
+  wasDone ? STORE.removeItem(k) : STORE.setItem(k,'1');
+  playSuccessSound();
+  document.querySelectorAll(`[data-rid="${rid}"]`).forEach(el=>{el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),600);});
+  if (!wasDone) {
+    // Bajarilganda trigger matn ko'rsat
+    const score = getDayScore(date);
+    if (score.pct === 100) {
+      showMotivToast(get100Text());
+    } else {
+      showMotivToast(getTriggerText());
+    }
+  }
+  checkCelebration();checkRewardUnlocks();checkGlobalRewardUnlocks();render();
+}
+function getDayScore(ds){
+  if(isSunday(ds))return{done:0,total:0,pct:100,rest:true};
+  const r=getRituals();let done=0,total=0;
+  r.forEach(x=>{total++;if(isDone(ds,x.id))done++;});
+  return{done,total,pct:total?Math.round(done/total*100):0,rest:false};
+}
+
+// ===== REWARDS — threshold-based =====
+function getRewards(){try{return JSON.parse(STORE.getItem('sjr_rewards_v2')||'[]');}catch{return[];}}
+function saveRewards(r){STORE.setItem('sjr_rewards_v2',JSON.stringify(r));}
+function addReward(name,threshold){
+  if(!name.trim())return;
+  const r=getRewards();
+  r.push({id:Date.now().toString(36),name:name.trim(),threshold:Math.min(100,Math.max(1,parseInt(threshold)||50))});
+  saveRewards(r);
+}
+function deleteReward(id){saveRewards(getRewards().filter(r=>r.id!==id));}
+function checkRewardUnlocks(){
+  const score=getDayScore(todayStr);
+  const pct=score.pct;
+  const rewards=getRewards();
+  const prev=STORE.getItem('sjr_unlocked_today')||'';
+  rewards.forEach(r=>{
+    if(pct>=r.threshold&&!prev.includes(r.id)){
+      STORE.setItem('sjr_unlocked_today',(prev?prev+',':'')+r.id);
+      showNotif(`🎁 Mukofot ochildi: <b>${r.name}</b>!`,'info');
+    }
+  });
+}
+
+// ===== TASKS =====
+function getTasks(){try{return JSON.parse(STORE.getItem('sjr_tasks')||'[]');}catch{return[];}}
+function saveTasks(t){STORE.setItem('sjr_tasks',JSON.stringify(t));}
+function addTask(text,priority,deadline){
+  if(!text.trim())return;
+  const t=getTasks();
+  t.unshift({id:Date.now().toString(),text:text.trim(),priority:priority||'mid',deadline:deadline||'',done:false,createdAt:todayStr});
+  saveTasks(t);
+}
+function toggleTask(id){const t=getTasks(),item=t.find(x=>x.id===id);if(item)item.done=!item.done;saveTasks(t);checkCelebration();renderTasks();}
+function deleteTask(id){saveTasks(getTasks().filter(t=>t.id!==id));renderTasks();}
+let taskFilter='all';
+
+// ===== NOTES =====
+function getNotes(){try{return JSON.parse(STORE.getItem('sjr_notes')||'[]');}catch{return[];}}
+function saveNotes(n){STORE.setItem('sjr_notes',JSON.stringify(n));}
+function addNote(text){
+  if(!text.trim())return;
+  const n=getNotes();
+  n.unshift({id:Date.now().toString(),text:text.trim(),date:todayStr,updated:new Date().toLocaleString('uz')});
+  saveNotes(n);
+}
+function deleteNote(id){saveNotes(getNotes().filter(n=>n.id!==id));renderNotes();}
+function updateNote(id,text){
+  const n=getNotes();const item=n.find(x=>x.id===id);
+  if(item){item.text=text.trim();item.updated=new Date().toLocaleString('uz');}
+  saveNotes(n);
+}
+
+// ===== STREAK + LEVEL =====
+const LEVELS=[
+  {min:0,max:6,name:'Yangi boshlagan',icon:'🌱',color:'var(--muted)'},
+  {min:7,max:20,name:'Nazorat',icon:'💪',color:'var(--accent)'},
+  {min:21,max:59,name:'Intizom',icon:'⚔️',color:'var(--yellow)'},
+  {min:60,max:Infinity,name:"O'sish",icon:'🚀',color:'var(--gold)'},
+];
+function calcStreak(){
+  let streak=0;const d=new Date(today);d.setDate(d.getDate()-1);
+  for(let i=0;i<365;i++){
+    const ds=dsOf(d);const s=getDayScore(ds);
+    if(s.rest){d.setDate(d.getDate()-1);continue;}
+    if(s.pct>=70){streak++;d.setDate(d.getDate()-1);}else break;
+  }
+  return streak;
+}
+function calcLevel(streak){return LEVELS.find(l=>streak>=l.min&&streak<=l.max)||LEVELS[0];}
+function calcGoalProgress(){
+  let total=0,count=0;
+  for(let i=0;i<30;i++){const d=new Date(today);d.setDate(d.getDate()-i);const s=getDayScore(dsOf(d));if(!s.rest){total+=s.pct;count++;}}
+  return count?Math.round(total/count):0;
+}
+
+// ===== SOUND =====
+let soundEnabled=true;
+function playSuccessSound(){
+  if(!soundEnabled)return;
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880,ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200,ctx.currentTime+0.1);
+    gain.gain.setValueAtTime(0.3,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+    osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.3);
+  }catch(e){}
+}
+function playBigSound(){
+  if(!soundEnabled)return;
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [523,659,784,1047].forEach((f,i)=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.frequency.value=f;const t=ctx.currentTime+i*0.12;
+      gain.gain.setValueAtTime(0.3,t);gain.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+      osc.start(t);osc.stop(t+0.35);
+    });
+  }catch(e){}
+}
+
+// ===== CONFETTI =====
+let confettiP=[],confettiAnim=null;
+const CCOLORS=['#58a6ff','#3fb950','#ffd700','#bc8cff','#f0883e','#f85149','#ffffff'];
+function launchConfetti(n=80){
+  const cv=document.getElementById('confettiCanvas');cv.width=window.innerWidth;cv.height=window.innerHeight;confettiP=[];
+  for(let i=0;i<n;i++)confettiP.push({x:Math.random()*cv.width,y:-10,w:Math.random()*10+5,h:Math.random()*5+3,color:CCOLORS[Math.floor(Math.random()*CCOLORS.length)],vx:(Math.random()-.5)*4,vy:Math.random()*4+2,rot:Math.random()*360,vrot:(Math.random()-.5)*8,opacity:1});
+  if(confettiAnim)cancelAnimationFrame(confettiAnim);
+  animConfetti();setTimeout(stopConfetti,3000);
+}
+function animConfetti(){
+  const cv=document.getElementById('confettiCanvas');const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
+  confettiP=confettiP.filter(p=>p.opacity>0.01);
+  confettiP.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.rot+=p.vrot;if(p.y>cv.height*.7)p.opacity-=0.025;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.globalAlpha=p.opacity;ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});
+  if(confettiP.length>0)confettiAnim=requestAnimationFrame(animConfetti);else stopConfetti();
+}
+function stopConfetti(){cancelAnimationFrame(confettiAnim);const cv=document.getElementById('confettiCanvas');cv.getContext('2d').clearRect(0,0,cv.width,cv.height);}
+
+// ===== CELEBRATION =====
+let lastCelebrated=STORE.getItem('sjr_last_celeb')||'';
+function checkCelebration(){
+  if(lastCelebrated===todayStr)return;
+  const score=getDayScore(todayStr);
+  if(score.pct===100){
+    STORE.setItem('sjr_last_celeb',todayStr);lastCelebrated=todayStr;
+    setTimeout(showCelebration,400);
+  }
+}
+function showCelebration(){
+  const rewards=getRewards().filter(r=>getDayScore(todayStr).pct>=r.threshold);
+  const reward=rewards.length?rewards[rewards.length-1].name:"Zo'r ish qildingiz! 🎉";
+  document.getElementById('celebReward').textContent=reward;
+  document.getElementById('celebTitle').textContent='🏆 BARAKALLO!';
+  const sc=getDayScore(todayStr);
+  document.getElementById('celebSubtitle').textContent=`Barcha ${sc.total} ta ritual bajarildi!`;
+  document.getElementById('celebModal').classList.remove('hidden');
+  launchConfetti(120);playBigSound();
+}
+function closeModal(){document.getElementById('celebModal').classList.add('hidden');stopConfetti();}
+
+// ===== NOTIFICATIONS =====
+function showNotif(text,type='info'){
+  const b=document.getElementById('notifBanner');
+  b.className='notif-banner'+(type==='warn'?' warn':type==='danger'?' danger':'');
+  document.getElementById('notifIcon').textContent=type==='danger'?'🚨':type==='warn'?'⚠️':'🎁';
+  document.getElementById('notifText').innerHTML=text;
+  b.classList.remove('hidden');setTimeout(closeNotif,5000);
+}
+function closeNotif(){document.getElementById('notifBanner').classList.add('hidden');}
+function checkDeadlineAlerts(){
+  const alerts=[];
+  getTasks().filter(t=>!t.done&&t.deadline).forEach(t=>{
+    const diff=Math.ceil((new Date(t.deadline)-new Date(todayStr))/(1000*60*60*24));
+    if(diff<0)alerts.push({text:`<b>${t.text}</b> — muddati o'tib ketdi!`,type:'danger'});
+    else if(diff===0)alerts.push({text:`<b>${t.text}</b> — bugun oxirgi kun!`,type:'warn'});
+    else if(diff===1)alerts.push({text:`<b>${t.text}</b> — ertaga muddati tugaydi!`,type:'warn'});
+  });
+  return alerts;
+}
+
+// ===== TIMER =====
+let timerInterval=null;
+function getRemainingTime(){
+  const now=new Date(),midnight=new Date(now);midnight.setHours(23,59,59,999);const diff=midnight-now;
+  return{h:Math.floor(diff/3600000),m:Math.floor((diff%3600000)/60000),s:Math.floor((diff%60000)/1000)};
+}
+function formatTimer(){const t=getRemainingTime();return`${String(t.h).padStart(2,'0')}:${String(t.m).padStart(2,'0')}:${String(t.s).padStart(2,'0')}`;}
+
+// ===== DYNAMIC MOTIVATION SYSTEM (to'liq versiya) =====
+const MOTIV = {
+  soft:[
+    "Bugun sen o'zing sezmagan holda oldinga siljiy boshlaysan.",
+    "Ehtimol aynan bugun sen o'zingni yengib o'tasen.",
+    "Sen asta-sekin nazoratni qo'lga olayapsan.",
+    "Harakat qilayotganingning o'zi seni boshqalardan ajratadi.",
+    "Sen allaqachon boshlading — bu eng qiyini edi.",
+    "Kichik qadam ham oldinga qadam.",
+    "Bugun sen kecha senindan bir qadam oldindasan.",
+    "Ehtimol bugun sen kutmagan natijani ko'rasan.",
+    "Asta-sekin, lekin aniq — to'g'ri yo'ldasan.",
+    "Sen o'zgarayotganingni hali his qilmayapsan, lekin u ketmoqda.",
+  ],
+  action:[
+    "Hozir qilganing ertangi natijani belgilaydi.",
+    "Yana bitta qadam — va sen boshqa darajaga chiqasan.",
+    "To'xtamasang — natija majburiy bo'ladi.",
+    "Sen qilayotgan har bir amal bejiz emas.",
+    "Oddiy qadamlar katta o'zgarishga olib keladi.",
+    "Bugun qilmagan narsa ertaga ikki baravar og'ir.",
+    "Hozir boshlasang — ertaga rahmat aytasan.",
+    "Bitta ritual — bitta g'alaba. Hozir qil.",
+    "Harakat qilish odat bo'lguncha — har kuni qil.",
+    "Motivatsiya o'tadi, odatlar qoladi. Odatni qur.",
+  ],
+  pressure:[
+    "Bugun ham qoldirasanmi yoki oxirigacha borasanmi?",
+    "Ko'pchilik shu joyda to'xtaydi… sen-chi?",
+    "Sen allaqachon boshlaganingdan keyin ortga yo'l yo'q.",
+    "Agar hozir qilmasang — yana qachon?",
+    "Bu aynan o'sha moment.",
+    "Hozir to'xtash — boshlamaslikdan ham yomon.",
+    "Har o'tgan kun — ortga qaytmaydigan imkoniyat.",
+    "Bugun ham o'tkazib yuborsang — ertaga yanada og'ir.",
+  ],
+  control:[
+    "Sen vaziyatni boshqara boshlading.",
+    "Har kuni sen kuchliroq bo'lyapsan.",
+    "Sen o'zingni majburlamayapsan — sen tanlayapsan.",
+    "Bu endi odatga aylanmoqda.",
+    "Sen o'z ustingda ishlayotgan odamsan.",
+    "Nazorat senda — bu his kuchayib bormoqda.",
+    "Sen tizim qurayotgan odamsan. Bu farq qiladi.",
+    "O'zini boshqara oladigan odam hamma narsani boshqara oladi.",
+  ],
+  goal:[
+    "Bu seni maqsadingga yaqinlashtiradi.",
+    "Sen o'zing xohlagan hayotga yaqinlashyapsan.",
+    "Bu yo'l seni (goal)ga olib boradi.",
+    "Sen asta-sekin o'zing xohlagan natijaga kiryapsan.",
+    "Bu harakat bevosita natijaga ishlayapti.",
+    "Har bir ritual (goal) uchun sarmoya.",
+    "Bu seni (goal) sari bir qadam oldinga olib bordi.",
+    "Sen (goal) uchun kurashayotgan odamsan — davom et.",
+  ],
+  today:[
+    "Bugun hal qiluvchi kun bo'lishi mumkin.",
+    "Bugun sen boshqacha harakat qilasan.",
+    "Bugun o'zingni ko'rsatadigan kun.",
+    "Bugun nazorat sen tomonda.",
+    "Bugun sen o'zingni hurmat qiladigan ish qilasan.",
+    "Bugun 24 soat — ularni qanday o'tkazasen?",
+    "Bugun yutgan odam ertaga ham yutadi.",
+    "Bugun sen o'z tarixi yozayotirsan.",
+  ],
+};
+
+// Ritual bajarilganda qisqa trigger gaplar
+const MOTIV_TRIGGER = [
+  "Davom et.", "To'xtama.", "Hozir qil.", "Yana bitta.",
+  "Nazorat senda.", "Zo'r!", "Oldinga!", "Sen qila olasan.",
+  "Qadamlar qo'shilmoqda.", "Bu ishlayapti.", "Kuchayib boryapsan.",
+  "Bittasi ko'p.", "Davom etish — g'alaba.", "Hoziroq.",
+];
+
+// 100% uchun kuchli matnlar
+const MOTIV_100 = [
+  "MUKAMMAL. Bugun tizim ishladi — sen ham.",
+  "100%. Bugungi sen kechagi senindan kuchli.",
+  "Barcha rituallar bajarildi. Bu bejiz emas.",
+  "Sen bugun g'alaba qozonding — faqat o'zing ustida.",
+  "Bu endi odatga aylanmoqda. Sezayapsanmi?",
+  "100% — bu raqam emas, bu xarakter.",
+  "Bugun tamom. Sen bajarding.",
+  "Butun kun nazorat ostida. Kuchli.",
+];
+
+// Ilovaga kirish momentida ko'rsatiladigan xush kelibsiz matnlar
+const MOTIV_ENTRY = [
+  "Bugun sening kuning. Boshla.",
+  "Yana bir kun — yana bir imkoniyat.",
+  "Sen bu yerga kelding — demak, tayyor.",
+  "Kecha nima bo'lsa ham — bugun yangi sahifa.",
+  "Har kun boshlash — g'olib odamning odati.",
+  "Bugun ham davom etasan. Bilaman.",
+  "Tizimga keldingmi? Demak, ishlayapsan.",
+  "Hozir kichik, keyinchalik katta. Davom et.",
+  "Sen bu yerda — bu allaqachon boshqa odamlardan farqing.",
+  "Bugun ham bir qadam. Kichik bo'lsa ham.",
+];
+
+// Takrorlanmaslik uchun state
+let _lastMotivCat = '', _lastMotivIdx = -1;
+let _lastEntryIdx = -1;
+
+function getDynamicMotiv(count = 1) {
+  const goal = getDailyGoal();
+  const cats  = Object.keys(MOTIV);
+  const results = [];
+  for (let n = 0; n < count; n++) {
+    // Oldingi kategoriyadan boshqasini tanla
+    const available = cats.filter(c => c !== _lastMotivCat);
+    const cat = available[Math.floor(Math.random() * available.length)];
+    _lastMotivCat = cat;
+
+    // Oldingi indeksdan boshqasini tanla
+    const pool = MOTIV[cat].filter((_, i) => i !== _lastMotivIdx);
+    const idx  = Math.floor(Math.random() * pool.length);
+    let text   = pool[idx];
+    _lastMotivIdx = MOTIV[cat].indexOf(text);
+
+    // Maqsadni matnga joylashtir
+    if (text.includes('(goal)') && goal) {
+      text = text.replace(/\(goal\)/g, goal);
+    } else if (text.includes('(goal)')) {
+      text = text.replace(/\s*\(goal\)/g, '').replace(/\(goal\)\s*/g, '');
+    }
+    results.push({ text, cat });
+  }
+  return results;
+}
+
+// Kirish paytida bitta xush kelibsiz matn (takrorlanmaydi)
+function getEntryMotiv() {
+  const available = MOTIV_ENTRY.filter((_, i) => i !== _lastEntryIdx);
+  const idx = Math.floor(Math.random() * available.length);
+  const text = available[idx];
+  _lastEntryIdx = MOTIV_ENTRY.indexOf(text);
+  return text;
+}
+
+// Ritual bajarilganda qisqa trigger
+function getTriggerText() {
+  return MOTIV_TRIGGER[Math.floor(Math.random() * MOTIV_TRIGGER.length)];
+}
+
+// 100% uchun kuchli matn
+function get100Text() {
+  return MOTIV_100[Math.floor(Math.random() * MOTIV_100.length)];
+}
+
+// UI uchun motivatsiya blok (1-2 ta matn)
+function renderMotivBlock(count = 2) {
+  const items = getDynamicMotiv(count);
+  const colorMap = {
+    soft:'var(--purple)', action:'var(--green)', pressure:'var(--orange)',
+    control:'var(--accent)', goal:'var(--gold)', today:'var(--yellow)'
+  };
+  return items.map(m => {
+    const bc = colorMap[m.cat] || 'var(--accent)';
+    return `<div class="motiv-flash" style="border-left-color:${bc}">${escapeHtml(m.text)}</div>`;
+  }).join('');
+}
+
+// getDailyQuote — renderToday ichida ishlatiladi (har safar yangi)
+function getDailyQuote() {
+  const items = getDynamicMotiv(1);
+  const colorMap = {
+    soft:'var(--purple)', action:'var(--green)', pressure:'var(--orange)',
+    control:'var(--accent)', goal:'var(--gold)', today:'var(--yellow)'
+  };
+  const bc = colorMap[items[0].cat] || 'var(--accent)';
+  return { text: items[0].text, border: bc, emoji: '✨', sub: '', color: 'var(--surface2)' };
+}
+
+// Progress uchun (% ga qarab)
+function getProgressMsg(pct) {
+  if (pct === 100) return { e:'🏆', t: get100Text(),                   c:'var(--gold)'   };
+  if (pct >= 80)   return { e:'💪', t: getDynamicMotiv(1)[0].text,     c:'var(--green)'  };
+  if (pct >= 60)   return { e:'🚀', t: getDynamicMotiv(1)[0].text,     c:'var(--accent)' };
+  if (pct >= 40)   return { e:'⚡', t: getDynamicMotiv(1)[0].text,     c:'var(--yellow)' };
+  if (pct >= 1)    return { e:'🌱', t:"Boshladingiz — eng qiyin qadam ortda.", c:'var(--muted)' };
+  return               { e:'☀️', t:"Yangi kun! Birinchi ritualdan boshlang.", c:'var(--muted)' };
+}
+
+// Shaxsiy motivatsiya (maqsad bilan bog'langan)
+function getPersonalMotiv() {
+  const goal = getDailyGoal();
+  if (!goal) return getDynamicMotiv(1)[0].text;
+  // Maqsad bilan bog'langan "goal" kategoriyasidan ustuvorlik bilan ol
+  const goalTexts = MOTIV.goal.map(t => t.replace(/\(goal\)/g, goal));
+  const extra = [
+    `Sen ${escapeHtml(goal)} tomon har kuni bir qadam yaqinlashyapsan.`,
+    `Bugun bajargan har bir ritual ${escapeHtml(goal)} uchun sarmoya.`,
+    `${escapeHtml(goal)} — orzudan haqiqatga. Bugun ham bir qadam oldinga.`,
+  ];
+  const pool = [...goalTexts, ...extra];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// ===== HELPERS =====
+const today=new Date();
+// Local date (UTC muammoini oldini olish)
+function localDateStr(d){
+  const dt=d||new Date();
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+}
+const todayStr=localDateStr();
+function isSunday(ds){return new Date(ds).getDay()===0}
+function dsOf(d){return localDateStr(d)}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r}
+function formatDate(d){
+  const D=['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'];
+  const M=['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
+  const dt=new Date(d);return`${D[dt.getDay()]}, ${dt.getDate()} ${M[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+function shortDay(d){return['Yak','Dush','Ses','Chor','Pay','Juma','Shan'][new Date(d).getDay()]}
+
+// ===== RENDER TODAY =====
+let currentWeekStart=new Date(today);
+currentWeekStart.setDate(today.getDate()-((today.getDay()+6)%7));
+
+function renderToday(){
+  const ds=todayStr,sun=isSunday(ds),score=getDayScore(ds);
+  const streak=calcStreak(),level=calcLevel(streak);
+  const goals=getGoals();
+  let html='';
+
+  // ── MINIMAL HEADER ──
+  const pct = sun ? 100 : score.pct;
+  const pctColor = pct===100?'var(--gold)':pct>=70?'var(--green)':pct>=40?'var(--yellow)':'var(--red)';
+  const t = getRemainingTime();
+  const timerColor = t.h<2?'var(--red)':'var(--muted)';
+
+  html+=`<div style="margin-bottom:18px">
+    <!-- Sana + % + Timer bir qatorda -->
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">
+      <div style="font-size:13px;color:var(--muted)">${formatDate(ds)}</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="font-size:12px;color:${timerColor};font-family:'JetBrains Mono',monospace" id="dayTimerDisplay">${formatTimer()}</div>
+        <div style="font-size:32px;font-weight:800;font-family:'JetBrains Mono',monospace;color:${pctColor};line-height:1">${sun?'💜':pct+'%'}</div>
+      </div>
+    </div>
+    <!-- Progress bar -->
+    <div style="height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;margin-bottom:10px">
+      <div style="height:100%;width:${pct}%;background:${pctColor};border-radius:2px;transition:width .8s cubic-bezier(.34,.1,.25,1)"></div>
+    </div>
+    <!-- Streak + Level + Goal chips inline -->
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div style="font-size:12px;color:var(--muted)">${streak>0?`<span style="color:var(--orange);font-weight:600">${streak}🔥</span>`:''} <span style="color:${level.color}">${level.icon} ${level.name}</span></div>
+      ${goals.length?`<div style="flex:1;display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end">${goals.slice(0,2).map(g=>`<span style="font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:2px 9px">${escapeHtml(g)}</span>`).join('')}${goals.length>2?`<span style="font-size:11px;color:var(--muted)">+${goals.length-2}</span>`:''}</div>`:''}
+    </div>
+  </div>`;
+
+  // Deadline alerts (faqat muddati o'tganlar — ixcham)
+  const alerts=checkDeadlineAlerts().slice(0,2);
+  if(alerts.length){
+    alerts.forEach(a=>html+=`<div style="display:flex;align-items:center;gap:8px;background:${a.type==='danger'?'rgba(239,68,68,.06)':'rgba(245,158,11,.06)'};border:1px solid ${a.type==='danger'?'rgba(239,68,68,.2)':'rgba(245,158,11,.2)'};border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:12px"><span>${a.type==='danger'?'🚨':'⚠️'}</span><div style="color:var(--text2)">${a.text}</div></div>`);
+  }
+
+  if(sun){
+    html+=`<div style="text-align:center;padding:36px 20px;color:var(--muted)">
+      <div style="font-size:48px;margin-bottom:12px">💜</div>
+      <div style="font-size:16px;color:var(--text2);font-weight:600">Dam olish kuni</div>
+      <div style="font-size:12px;margin-top:6px">Hordiq oling — ertaga yangi kuch bilan boshlaysiz</div>
+    </div>`;
+    const q=getDailyQuote();
+    html+=`<div class="daily-quote" style="background:${q.color};border:1px solid ${q.border}"><div class="dq-label" style="color:${q.border}">${q.emoji} Bugungi so'z</div><div class="dq-text">${q.text}</div></div>`;
+    setPageContent('today',html);return;
+  }
+
+  // Progress xabari — bitta qator
+  const pm=getProgressMsg(score.pct);
+  html+=`<div style="font-size:13px;font-weight:500;color:${pm.c};margin-bottom:14px;padding:0 2px">${pm.e} ${pm.t}</div>`;
+
+  // Rituals
+  const rituals=getRituals();let lastSection='';
+  rituals.forEach(r=>{
+    if(r.section&&r.section!==lastSection){
+      html+=`<div class="section-header" style="border-color:${r.color||'var(--accent)'};color:${r.color||'var(--accent)'}">${r.section}</div>`;
+      lastSection=r.section;
+    }
+    const done=isDone(ds,r.id);
+    html+=`<div class="ritual-row" data-rid="${r.id}" onclick="toggleRitual('${ds}','${r.id}')">
+      <div class="ritual-check ${done?'done':''}">${done?'✓':''}</div>
+      <div class="ritual-name ${done?'done':''}">${r.name}</div>
+      <div class="ritual-tag" style="color:${r.color||'var(--accent)'}">${r.cat}</div>
+    </div>`;
+  });
+
+  // Daily quote
+  const q=getDailyQuote();
+  html+=`<div class="daily-quote" style="background:${q.color};border:1px solid ${q.border};margin-top:14px">
+    <div class="dq-label" style="color:${q.border}">${q.emoji} Bugungi so'z</div>
+    <div class="dq-text">${q.text}</div>
+  </div>`;
+
+  if(score.pct===100)html+=`<div style="text-align:center;margin:12px 0">
+    <button style="background:var(--green);color:var(--bg);border:none;padding:10px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif" onclick="showCelebration()">🎁 Mukofot olish</button>
+  </div>`;
+
+  setPageContent('today',html);
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{const el=document.getElementById('dayTimerDisplay');if(el)el.textContent=formatTimer();},1000);
+}
+
+// ===== RENDER RITUALS (manage page) =====
+// ===== RENDER RITUALS (inline CRUD + sections) =====
+let editingRitualId=null;
+
+function renderRituals(){
+  const sections=getSections();
+  const rituals=getRituals();
+  let html=`<div style="font-size:15px;font-weight:600;margin-bottom:4px">🔧 Ritual sozlamalari</div>`;
+  html+=`<div style="font-size:12px;color:var(--muted);margin-bottom:14px">Bo'limlar va rituallarni to'g'ridan-to'g'ri tahrirlang</div>`;
+
+  // Roulette button at top
+  html+=`<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <button onclick="spinRoulette()" style="background:rgba(188,140,255,.1);border:1px solid var(--purple);color:var(--purple);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-family:inherit">🎰 Roulette</button>
+  </div>
+  <div id="rouletteResult" style="margin-bottom:10px"></div>`;
+
+  // Sections with inline management
+  sections.forEach(sec=>{
+    const secRituals=rituals.filter(r=>r.sectionId===sec.id);
+    html+=`<div class="section-block">
+      <div class="section-head" style="border-left:3px solid ${sec.color}">
+        <div class="sh-name">${escapeHtml(sec.name)}</div>
+        <button class="sh-edit" onclick="startRenameSection('${sec.id}')" title="Nomini o'zgartirish">✏️</button>
+        <button class="sh-del" onclick="confirmDeleteSection('${sec.id}','${escapeHtml(sec.name)}')" title="Bo'limni o'chirish">🗑</button>
+      </div>`;
+
+    secRituals.forEach((r, idx)=>{
+      const isFirst = idx === 0;
+      const isLast  = idx === secRituals.length - 1;
+      if(editingRitualId===r.id){
+        html+=`<div class="ritual-edit-row" id="rrow_${r.id}">
+          <span class="drag-handle" title="Sudrab ko'chiring">⠿</span>
+          <input class="inline-input" id="redit_name_${r.id}" value="${escapeHtml(r.name)}" style="flex:2" onkeydown="if(event.key==='Enter')saveRitualEdit('${r.id}')">
+          <input class="inline-input" id="redit_cat_${r.id}" value="${escapeHtml(r.cat)}" style="flex:1;max-width:72px" placeholder="Kat" onkeydown="if(event.key==='Enter')saveRitualEdit('${r.id}')">
+          <button class="rer-btn" onclick="saveRitualEdit('${r.id}')" title="Saqlash">✅</button>
+          <button class="rer-btn del" onclick="cancelRitualEdit()" title="Bekor">✕</button>
+        </div>`;
+      } else {
+        html+=`<div class="ritual-edit-row" id="rrow_${r.id}"
+          draggable="true"
+          ondragstart="onRitualDragStart(event,'${r.id}')"
+          ondragover="onRitualDragOver(event,'${r.id}')"
+          ondrop="onRitualDrop(event,'${r.id}')"
+          ondragend="onRitualDragEnd()">
+          <span class="drag-handle" title="Sudrab ko'chiring">⠿</span>
+          <div class="rer-name">${escapeHtml(r.name)}</div>
+          <div class="rer-cat" style="font-size:10px">${escapeHtml(r.cat)}</div>
+          <div style="display:flex;flex-direction:column;gap:1px;flex-shrink:0">
+            <button class="rer-move" onclick="moveRitualUp('${r.id}')" ${isFirst?'style="opacity:.25;pointer-events:none"':''} title="Yuqoriga">▲</button>
+            <button class="rer-move" onclick="moveRitualDown('${r.id}')" ${isLast?'style="opacity:.25;pointer-events:none"':''} title="Pastga">▼</button>
+          </div>
+          <button class="rer-btn" onclick="startRitualEdit('${r.id}')" title="Tahrirlash">✏️</button>
+          <button class="rer-btn del" onclick="confirmDeleteRitual('${r.id}')" title="O'chirish">🗑</button>
+        </div>`;
+      }
+    });
+
+    // Inline add ritual form for this section
+    html+=`<div class="inline-add-ritual" id="addForm_${sec.id}" style="display:none">
+      <input class="inline-input" id="newName_${sec.id}" placeholder="Ritual nomi..." style="flex:2" onkeydown="if(event.key==='Enter')submitInlineRitual('${sec.id}')">
+      <input class="inline-input" id="newCat_${sec.id}" placeholder="Kat." style="flex:1;max-width:80px" onkeydown="if(event.key==='Enter')submitInlineRitual('${sec.id}')">
+      <button class="inline-save" onclick="submitInlineRitual('${sec.id}')">+</button>
+      <button onclick="document.getElementById('addForm_${sec.id}').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px">✕</button>
+    </div>
+    <button onclick="showInlineAdd('${sec.id}')" style="width:100%;padding:8px;background:none;border:none;border-top:1px dashed var(--border);color:var(--muted);cursor:pointer;font-size:12px;font-family:inherit">+ Ritual qo'shish</button>
+    </div>`;
+  });
+
+  // Add new section
+  html+=`<button class="add-section-btn" onclick="promptAddSection()">+ Yangi bo'lim qo'shish (masalan: Ish, Sport, Fokus)</button>`;
+  html+=`<div style="font-size:11px;color:var(--muted);padding:8px 12px;background:var(--surface2);border-radius:8px">O'chirilgan rituallar faqat ro'yxatdan olib tashlanadi. Avvalgi kun ma'lumotlari saqlanib qoladi.</div>`;
+
+  setPageContent('rituals',html);
+}
+
+function showInlineAdd(secId){
+  document.getElementById('addForm_'+secId).style.display='flex';
+  document.getElementById('newName_'+secId)?.focus();
+}
+function submitInlineRitual(secId){
+  const name=document.getElementById('newName_'+secId)?.value;
+  const cat=document.getElementById('newCat_'+secId)?.value;
+  if(!name?.trim())return;
+  addRitual(name,cat||'',secId);
+  document.getElementById('addForm_'+secId).style.display='none';
+  renderRituals();renderToday();
+}
+// ===== RITUAL REORDER =====
+let _dragRitualId = null;
+let _dragOverRitualId = null;
+
+function moveRitualUp(id) {
+  const rituals = getRituals();
+  const idx = rituals.findIndex(r => r.id === id);
+  if (idx <= 0) return;
+  [rituals[idx - 1], rituals[idx]] = [rituals[idx], rituals[idx - 1]];
+  saveRituals(rituals);
+  renderRituals(); renderToday();
+}
+function moveRitualDown(id) {
+  const rituals = getRituals();
+  const idx = rituals.findIndex(r => r.id === id);
+  if (idx < 0 || idx >= rituals.length - 1) return;
+  [rituals[idx], rituals[idx + 1]] = [rituals[idx + 1], rituals[idx]];
+  saveRituals(rituals);
+  renderRituals(); renderToday();
+}
+function onRitualDragStart(e, id) {
+  _dragRitualId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  // Dim the dragged row
+  setTimeout(() => {
+    const el = document.getElementById('rrow_' + id);
+    if (el) el.style.opacity = '0.35';
+  }, 0);
+}
+function onRitualDragOver(e, id) {
+  e.preventDefault();
+  if (_dragRitualId === id) return;
+  _dragOverRitualId = id;
+  // Visual indicator
+  document.querySelectorAll('.ritual-edit-row').forEach(el => el.classList.remove('drag-target'));
+  const el = document.getElementById('rrow_' + id);
+  if (el) el.classList.add('drag-target');
+}
+function onRitualDrop(e, id) {
+  e.preventDefault();
+  document.querySelectorAll('.ritual-edit-row').forEach(el => {
+    el.classList.remove('drag-target');
+    el.style.opacity = '';
+  });
+  if (!_dragRitualId || _dragRitualId === id) { _dragRitualId = null; return; }
+  const rituals = getRituals();
+  const fromIdx = rituals.findIndex(r => r.id === _dragRitualId);
+  const toIdx   = rituals.findIndex(r => r.id === id);
+  if (fromIdx < 0 || toIdx < 0) { _dragRitualId = null; return; }
+  const [moved] = rituals.splice(fromIdx, 1);
+  rituals.splice(toIdx, 0, moved);
+  saveRituals(rituals);
+  _dragRitualId = null;
+  renderRituals(); renderToday();
+}
+function onRitualDragEnd() {
+  _dragRitualId = null;
+  document.querySelectorAll('.ritual-edit-row').forEach(el => {
+    el.classList.remove('drag-target');
+    el.style.opacity = '';
+  });
+}
+function cancelRitualEdit(){editingRitualId=null;renderRituals();}
+function saveRitualEdit(id){
+  const name=document.getElementById('redit_name_'+id)?.value;
+  const cat=document.getElementById('redit_cat_'+id)?.value;
+  if(name?.trim()){updateRitual(id,name,cat);}
+  editingRitualId=null;renderRituals();renderToday();
+}
+function confirmDeleteRitual(id){
+  const r=getRituals().find(x=>x.id===id);
+  if(r&&confirm(`"${r.name}" ritualini o'chirasizmi?`)){deleteRitual(id);renderRituals();renderToday();}
+}
+function promptAddSection(){
+  const name=prompt("Yangi bo'lim nomi (masalan: 💼 Ish):");
+  if(name?.trim()){addSection(name);renderRituals();}
+}
+function startRenameSection(id){
+  const s=getSections().find(x=>x.id===id);
+  const name=prompt("Bo'lim nomini o'zgartiring:",s?.name||'');
+  if(name?.trim()){renameSection(id,name);renderRituals();}
+}
+function confirmDeleteSection(id,name){
+  if(confirm(`"${name}" bo'limini va undagi barcha rituallarni o'chirasizmi?`)){deleteSection(id);renderRituals();renderToday();}
+}
+function spinRoulette(){
+  const action=ROULETTE_ACTIONS[Math.floor(Math.random()*ROULETTE_ACTIONS.length)];
+  const el=document.getElementById('rouletteResult');
+  if(el)el.innerHTML=`<div style="background:linear-gradient(135deg,#1a0d2e,#0d1a2e);border:1px solid var(--purple);border-radius:10px;padding:14px;text-align:center;animation:popIn .4s cubic-bezier(.175,.885,.32,1.275)">
+    <div style="font-size:10px;color:var(--purple);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">🎰 Roulette natijasi</div>
+    <div style="font-size:17px;font-weight:700;color:var(--text)">${escapeHtml(action)}</div>
+    <button onclick="spinRoulette()" style="margin-top:10px;background:var(--purple);color:white;border:none;padding:7px 18px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit">🔄 Yana</button>
+  </div>`;
+  playSuccessSound();
+}
+
+// ===== RENDER AFFIRM (inline CRUD) =====
+// (renderAffirm is above in Energy system)
+
+// ===== GLOBAL REWARDS — davriy maqsadlar =====
+// Shartlar turi:
+//   {type:'days_100', value:N}   — N kun ketma-ket 100%
+//   {type:'days_pct', value:N, pct:P} — N kun ichida P% o'rtacha
+//   {type:'streak', value:N}     — N kun ketma-ket ≥70%
+//   {type:'total_100', value:N}  — Jami N ta 100% kun
+
+function getGlobalRewards(){try{return JSON.parse(STORE.getItem('sjr_global_rewards')||'[]');}catch{return[];}}
+function saveGlobalRewards(r){STORE.setItem('sjr_global_rewards',JSON.stringify(r));}
+function addGlobalReward(name, condType, condValue, condPct){
+  if(!name.trim())return;
+  const r=getGlobalRewards();
+  r.push({
+    id:'gr_'+Date.now().toString(36),
+    name: name.trim(),
+    condType,
+    condValue: parseInt(condValue)||1,
+    condPct:   parseInt(condPct)||70,
+    claimedAt: null,
+  });
+  saveGlobalRewards(r);
+}
+function deleteGlobalReward(id){saveGlobalRewards(getGlobalRewards().filter(r=>r.id!==id));}
+function claimGlobalReward(id){
+  const r=getGlobalRewards();const item=r.find(x=>x.id===id);
+  if(item)item.claimedAt=todayStr;
+  saveGlobalRewards(r);renderRewards();
+}
+
+// Global shartni hisoblash
+function calcGlobalCondition(cond){
+  const {condType, condValue, condPct} = cond;
+
+  if(condType === 'days_100'){
+    // Oxirgi condValue kun ketma-ket 100%
+    let count=0;
+    for(let i=0;i<condValue;i++){
+      const d=new Date(today);d.setDate(d.getDate()-i);
+      const ds=dsOf(d);const s=getDayScore(ds);
+      if(s.rest)continue; // yakshanba hisoblanmaydi
+      if(s.pct===100)count++;else break;
+    }
+    return {current:count, target:condValue, met:count>=condValue};
+  }
+
+  if(condType === 'days_pct'){
+    // So'nggi condValue kun ichida o'rtacha condPct% yoki yuqori
+    let total=0,counted=0;
+    for(let i=0;i<condValue;i++){
+      const d=new Date(today);d.setDate(d.getDate()-i);
+      const ds=dsOf(d);const s=getDayScore(ds);
+      if(s.rest)continue;
+      total+=s.pct;counted++;
+    }
+    const avg = counted ? Math.round(total/counted) : 0;
+    return {current:avg, target:condPct, suffix:'% o\'rtacha', met:avg>=condPct, label:`${avg}% / ${condPct}%`};
+  }
+
+  if(condType === 'streak'){
+    // calcStreak() > condValue
+    const streak=calcStreak();
+    return {current:streak, target:condValue, suffix:' kun seria', met:streak>=condValue};
+  }
+
+  if(condType === 'total_100'){
+    // Jami 100% kunlar soni
+    let count=0;
+    for(let i=0;i<365;i++){
+      const d=new Date(today);d.setDate(d.getDate()-i);
+      const ds=dsOf(d);const s=getDayScore(ds);
+      if(!s.rest&&s.pct===100)count++;
+    }
+    return {current:count, target:condValue, suffix:' ta 100% kun', met:count>=condValue};
+  }
+
+  return {current:0, target:1, met:false};
+}
+
+function condTypeLabel(type, value, pct){
+  if(type==='days_100')   return `${value} kun ketma-ket 100%`;
+  if(type==='days_pct')   return `${value} kun ichida ${pct}%+ o'rtacha`;
+  if(type==='streak')     return `${value} kunlik seria (≥70%)`;
+  if(type==='total_100')  return `Jami ${value} ta 100% kun`;
+  return '—';
+}
+
+// Avtomatik global unlock tekshiruvi (har ritualdan keyin chaqiriladi)
+function checkGlobalRewardUnlocks(){
+  const rewards=getGlobalRewards();
+  rewards.forEach(r=>{
+    if(r.claimedAt) return; // allaqachon olingan
+    const res=calcGlobalCondition(r);
+    if(res.met){
+      // Faqat bir marta xabar ber
+      const key=`sjr_gnotif_${r.id}`;
+      if(!STORE.getItem(key)){
+        STORE.setItem(key,'1');
+        showNotif(`🌟 Global sovg'a ochildi: <b>${escapeHtml(r.name)}</b>!`,'info');
+        playBigSound();
+      }
+    }
+  });
+}
+
+// ===== RENDER REWARDS =====
+function renderRewards(){
+  const score=getDayScore(todayStr);
+  const pct=score.pct;
+  const rewards=getRewards();
+  const globalRewards=getGlobalRewards();
+
+  let html=`<div style="font-size:15px;font-weight:600;margin-bottom:12px">🏆 Mukofotlar tizimi</div>`;
+
+  // Bugungi progress
+  html+=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:12px;color:var(--muted)">Bugungi natija</div>
+      <div style="font-size:22px;font-weight:700;color:${pct===100?'var(--gold)':pct>=70?'var(--green)':pct>=40?'var(--yellow)':'var(--red)'}">${pct}%</div>
+    </div>
+    <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${pct===100?'var(--gold)':pct>=70?'var(--green)':pct>=40?'var(--yellow)':'var(--red)'};border-radius:4px;transition:width .6s"></div>
+    </div>
+  </div>`;
+
+  // ── TAB SWITCHER ──
+  const activeTab = (window._rewardsTab||'daily');
+  html+=`<div style="display:flex;gap:0;margin-bottom:14px;background:var(--surface2);border-radius:10px;padding:4px">
+    <button onclick="switchRewardsTab('daily')" style="flex:1;padding:8px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;background:${activeTab==='daily'?'var(--accent)':'transparent'};color:${activeTab==='daily'?'#0d1117':'var(--muted)'}">📅 Kunlik</button>
+    <button onclick="switchRewardsTab('global')" style="flex:1;padding:8px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;background:${activeTab==='global'?'var(--gold)':'transparent'};color:${activeTab==='global'?'#0d1117':'var(--muted)'}">🌟 Global</button>
+  </div>`;
+
+  if(activeTab === 'daily'){
+    // ── KUNLIK MUKOFOTLAR ──
+    html+=`<div class="reward-add-form">
+      <div class="raf-title">+ Kunlik mukofot qo'shish</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Bugun shu % ga yetganingizda mukofot ochiladi</div>
+      <div class="raf-row">
+        <input class="raf-input" id="rafName" placeholder="Mukofot nomi (masalan: Kino ko'rish)">
+        <input class="raf-pct" id="rafPct" type="number" min="1" max="100" value="70" placeholder="%">
+      </div>
+      <button class="raf-save" onclick="submitReward()">Saqlash</button>
+    </div>`;
+
+    if(!rewards.length){
+      html+=`<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Hali kunlik mukofot yo'q.<br>Birinchisini qo'shing!</div>`;
+    } else {
+      rewards.forEach(r=>{
+        const isUnlocked=pct>=r.threshold;
+        const progress=Math.min(100,Math.round(pct/r.threshold*100));
+        html+=`<div class="reward-card ${isUnlocked?'unlocked':''}">
+          <div class="rc-icon">${isUnlocked?'🎁':'🔒'}</div>
+          <div class="rc-info">
+            <div class="rc-name">${escapeHtml(r.name)}</div>
+            <div class="rc-threshold">Bugun ${r.threshold}% bajarilganda</div>
+            <div class="rc-bar-wrap"><div class="rc-bar ${isUnlocked?'done':''}" style="width:${progress}%"></div></div>
+          </div>
+          <div class="rc-status" style="color:${isUnlocked?'var(--gold)':'var(--muted)'}">${isUnlocked?'✅':''+pct+'%'}</div>
+          <button class="rc-del" onclick="deleteReward('${escapeHtml(r.id)}')">×</button>
+        </div>`;
+      });
+    }
+
+  } else {
+    // ── GLOBAL MUKOFOTLAR ──
+    html+=`<div class="reward-add-form">
+      <div class="raf-title">🌟 Global sovg'a qo'shish</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Uzoq muddatli maqsad — kunlar yig'ilib ochiladi</div>
+      <input class="raf-input" id="grName" placeholder="Sovg'a nomi (masalan: Yangi telefon)" style="width:100%;margin-bottom:8px">
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <select id="grType" class="task-select" style="flex:1;min-width:160px" onchange="updateGrForm()">
+          <option value="days_100">Ketma-ket 100% kunlar</option>
+          <option value="days_pct">N kun ichida o'rtacha %</option>
+          <option value="streak">Seria (≥70%)</option>
+          <option value="total_100">Jami 100% kunlar</option>
+        </select>
+        <input class="raf-pct" id="grValue" type="number" min="1" max="365" value="7" placeholder="Kun" title="Kun soni">
+        <input class="raf-pct" id="grPct" type="number" min="1" max="100" value="90" placeholder="%" title="Foiz" style="display:none">
+      </div>
+      <div id="grCondPreview" style="font-size:11px;color:var(--accent);margin-bottom:8px">7 kun ketma-ket 100%</div>
+      <button class="raf-save" style="background:var(--gold);color:#0d1117" onclick="submitGlobalReward()">Saqlash</button>
+    </div>`;
+
+    if(!globalRewards.length){
+      html+=`<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Hali global sovg'a yo'q.<br>Birinchi uzoq muddatli maqsadingizni qo'shing!</div>`;
+    } else {
+      globalRewards.forEach(r=>{
+        const res=calcGlobalCondition(r);
+        const progress=Math.min(100, Math.round((res.current/res.target)*100));
+        const isMet=res.met;
+        const isClaimed=!!r.claimedAt;
+        const condLabel=condTypeLabel(r.condType, r.condValue, r.condPct);
+        const progressLabel=res.label || `${res.current} / ${res.target}${res.suffix||''}`;
+
+        html+=`<div class="reward-card ${isMet&&!isClaimed?'unlocked':isClaimed?'unlocked':''}">
+          <div class="rc-icon">${isClaimed?'✅':isMet?'🎁':'🌟'}</div>
+          <div class="rc-info">
+            <div class="rc-name" style="color:${isClaimed?'var(--muted)':isMet?'var(--gold)':'var(--text)'}">${escapeHtml(r.name)}</div>
+            <div class="rc-threshold">${condLabel}</div>
+            <div class="rc-bar-wrap"><div class="rc-bar ${isMet?'done':''}" style="width:${progress}%;background:${isMet?'var(--gold)':'var(--accent)'}"></div></div>
+            <div style="font-size:10px;color:${isMet?'var(--gold)':'var(--muted)'};margin-top:4px">${isClaimed?'Olindi ✓':progressLabel}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+            ${isMet&&!isClaimed?`<button onclick="claimGlobalReward('${escapeHtml(r.id)}')" style="background:var(--gold);color:#0d1117;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Olish 🎁</button>`:''}
+            <button class="rc-del" style="opacity:.4" onclick="deleteGlobalReward('${escapeHtml(r.id)}')">×</button>
+          </div>
+        </div>`;
+      });
+    }
+
+    // Tayyor shablonlar
+    html+=`<div style="font-size:12px;font-weight:600;color:var(--muted);margin:14px 0 8px">⚡ Tezkor qo'shish (shablon)</div>`;
+    const templates=[
+      {name:"1 kun 100%",          type:'days_100', val:1,  pct:100},
+      {name:"7 kun ketma-ket 100%", type:'days_100', val:7,  pct:100},
+      {name:"30 kun 90% o'rtacha",  type:'days_pct', val:30, pct:90},
+      {name:"1 oy 80% o'rtacha",    type:'days_pct', val:30, pct:80},
+      {name:"21 kunlik seria",       type:'streak',   val:21, pct:70},
+      {name:"60 kunlik seria",       type:'streak',   val:60, pct:70},
+      {name:"10 ta 100% kun",        type:'total_100',val:10, pct:100},
+      {name:"30 ta 100% kun",        type:'total_100',val:30, pct:100},
+    ];
+    html+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px">`;
+    templates.forEach(t=>{
+      html+=`<button onclick="addGlobalRewardTemplate('${t.name}','${t.type}',${t.val},${t.pct})" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:16px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">${t.name}</button>`;
+    });
+    html+=`</div>`;
+  }
+
+  setPageContent(currentPage, html);
+}
+
+function switchRewardsTab(tab){
+  window._rewardsTab = tab;
+  renderRewards();
+}
+
+function updateGrForm(){
+  const type=document.getElementById('grType')?.value;
+  const val=document.getElementById('grValue')?.value||7;
+  const pct=document.getElementById('grPct')?.value||90;
+  const pctInput=document.getElementById('grPct');
+  const preview=document.getElementById('grCondPreview');
+  if(type==='days_pct'){if(pctInput)pctInput.style.display='block';}
+  else{if(pctInput)pctInput.style.display='none';}
+  if(preview) preview.textContent=condTypeLabel(type, val, pct);
+}
+
+function submitReward(){
+  const name=document.getElementById('rafName')?.value;
+  const pct=document.getElementById('rafPct')?.value;
+  if(!name?.trim())return;
+  addReward(name, pct||70);
+  if(document.getElementById('rafName'))document.getElementById('rafName').value='';
+  if(document.getElementById('rafPct'))document.getElementById('rafPct').value='70';
+  renderRewards();
+}
+
+function submitGlobalReward(){
+  const name=document.getElementById('grName')?.value;
+  const type=document.getElementById('grType')?.value;
+  const val=document.getElementById('grValue')?.value;
+  const pct=document.getElementById('grPct')?.value;
+  if(!name?.trim())return;
+  addGlobalReward(name, type||'days_100', val||7, pct||90);
+  if(document.getElementById('grName'))document.getElementById('grName').value='';
+  renderRewards();
+}
+
+function addGlobalRewardTemplate(name, type, val, pct){
+  const customName=prompt(`"${name}" sovg'asi uchun nom yozing:`, name);
+  if(!customName?.trim())return;
+  addGlobalReward(customName, type, val, pct);
+  window._rewardsTab='global';
+  renderRewards();
+}
+
+// ===== MASCOT SYSTEM =====
+const MASCOT = {
+  faces: {
+    ecstatic: '🤩', happy: '😄', good: '😊', neutral: '😐',
+    sad: '😔', bad: '😟', terrible: '😢'
+  },
+  msgs: {
+    ecstatic: ["WOW! Sen CHAMPION! Barcha rituallar bajarildi!","100%! Men seni bilaman — sen to'xtamaysan!","MUKAMMAL KUN! Davom et, do'stim!"],
+    happy:    ["Juda yaxshi! Ko'p ritual bajardingiz!","Zo'r! Davom eting, siz kuchlirasiz!","Bugungi natija meni xursand qildi!"],
+    good:     ["Yaxshi boshladingiz! Yana davom eting!","Yarmi bajarildi — davom eting!","Men senda kuch ko'ryapman!"],
+    neutral:  ["Hali vaqt bor — boshlaymizmi?","Keling birga qilamiz, men siz bilanimanda!","Bitta ritualdan boshlang — men kutaman!"],
+    sad:      ["Bugun qiyin tuyulyaptimi? Hech bo'lmasa bittasini qiling...","Men seni tashlab ketmayman. Bitta ritual?","Kichik qadam ham qadam — boshlang!"],
+    bad:      ["Bugun og'ir kun. Lekin siz qila olasiz!","Menga ishoning — hech bo'lmasa bittasini bajaring!","Xafa bo'lmang, hali vaqt bor!"],
+    terrible: ["Bugun hech narsa bajarilmadi... 😢 Ertaga yangi kun!","Siz qila olasiz! Ertaga yangi imkoniyat!","Hech narsa yo'qdan yaxshi — bitta harakat?"]
+  }
+};
+
+function getMascotState(pct) {
+  if(pct===100) return 'ecstatic';
+  if(pct>=80)   return 'happy';
+  if(pct>=50)   return 'good';
+  if(pct>=20)   return 'neutral';
+  if(pct>=1)    return 'sad';
+  const h = new Date().getHours();
+  if(h>=20)     return 'terrible';
+  return 'bad';
+}
+
+function getMascotXP() {
+  // XP: jami 100% kunlar × 100 + streak × 10
+  let total100=0;
+  for(let i=0;i<90;i++){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const s=getDayScore(dsOf(d));
+    if(!s.rest&&s.pct===100)total100++;
+  }
+  const streak=calcStreak();
+  return Math.min(total100*100 + streak*10, 9999);
+}
+
+function renderMascotBar(pct) {
+  const state = getMascotState(pct);
+  const face  = MASCOT.faces[state];
+  const msgs  = MASCOT.msgs[state];
+  const msg   = msgs[Math.floor(Math.random()*msgs.length)];
+  const xp    = getMascotXP();
+  const xpPct = Math.min(100, Math.round((xp%1000)/10)); // 0-1000 = 0-100%
+  const level = Math.floor(xp/1000)+1;
+  const moodColors = {
+    ecstatic:'var(--gold)',happy:'var(--green)',good:'var(--accent)',
+    neutral:'var(--muted)',sad:'var(--yellow)',bad:'var(--orange)',terrible:'var(--red)'
+  };
+  const moodLabels = {
+    ecstatic:'BAXT!',happy:'Xursand',good:"Yaxshi",neutral:'Normal',
+    sad:'Xafa','bad':"Qiyin",terrible:"Juda xafa"
+  };
+  return `<div class="mascot-bar">
+    <div class="mascot-face">${face}</div>
+    <div class="mascot-info">
+      <div class="mascot-mood" style="color:${moodColors[state]}">${moodLabels[state]}</div>
+      <div class="mascot-msg">${escapeHtml(msg)}</div>
+      <div class="mascot-xp">
+        <div class="mascot-xp-bar"><div class="mascot-xp-fill" style="width:${xpPct}%"></div></div>
+        <div class="mascot-xp-txt">Lv.${level} · ${xp} XP</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ===== SECRET NOTES =====
+let secretNotesUnlocked = false;
+
+function getSecretNotes(){try{return JSON.parse(STORE.getItem('sjr_snotes')||'[]');}catch{return[];}}
+function saveSecretNotes(n){STORE.setItem('sjr_snotes',JSON.stringify(n));}
+function addSecretNote(text){
+  if(!text.trim())return;
+  const n=getSecretNotes();
+  n.unshift({id:Date.now().toString(),text:text.trim(),date:todayStr,updated:new Date().toLocaleString('uz')});
+  saveSecretNotes(n);
+}
+function deleteSecretNote(id){
+  if(!confirm("Bu maxfiy eslatmani o'chirasizmi?")) return;
+  saveSecretNotes(getSecretNotes().filter(n=>n.id!==id));
+  renderNotes();
+}
+function updateSecretNote(id,text){
+  const n=getSecretNotes();const item=n.find(x=>x.id===id);
+  if(item){item.text=text.trim();item.updated=new Date().toLocaleString('uz');}
+  saveSecretNotes(n);
+}
+
+function unlockSecretNotes(pin){
+  const stored = STORE.getItem('sjr_pin') || localStorage.getItem('sjr_pin');
+  if(pin === stored){
+    secretNotesUnlocked=true;
+    renderNotes();
+  } else {
+    const el=document.getElementById('snPinError');
+    if(el){el.textContent="Noto'g'ri PIN";setTimeout(()=>{if(el)el.textContent='';},2000);}
+  }
+}
+function lockSecretNotes(){secretNotesUnlocked=false;renderNotes();}
+
+// ===== FOLDERS (Task Projects) =====
+function getFolders(){
+  try{const f=STORE.getItem('sjr_folders');return f?JSON.parse(f):[{id:'folder_default',name:'Umumiy',emoji:'📋',color:'#58a6ff'}];}
+  catch{return [{id:'folder_default',name:'Umumiy',emoji:'📋',color:'#58a6ff'}];}
+}
+function saveFolders(f){STORE.setItem('sjr_folders',JSON.stringify(f));}
+function addFolder(name,emoji,color){
+  if(!name.trim())return;
+  const f=getFolders();
+  f.push({id:'f_'+Date.now().toString(36),name:name.trim(),emoji:emoji||'📁',color:color||'#58a6ff'});
+  saveFolders(f);
+}
+function deleteFolder(id){
+  if(!confirm("Papkani o'chirasizmi? Undagi barcha kartalar ham o'chadi."))return;
+  saveKanbanCards(getKanbanCards().filter(c=>c.folderId!==id));
+  saveFolders(getFolders().filter(f=>f.id!==id));
+  if(_activeFolderId===id)_activeFolderId=getFolders()[0]?.id||null;
+  renderTasks();
+}
+let _activeFolderId=null;
+
+// ===== KANBAN (per-folder) =====
+function getColumns(folderId){
+  try{
+    const key='sjr_cols_'+folderId;
+    const c=STORE.getItem(key);
+    return c?JSON.parse(c):getDefaultColumns();
+  }catch{return getDefaultColumns();}
+}
+function saveColumns(folderId,cols){STORE.setItem('sjr_cols_'+folderId,JSON.stringify(cols));}
+function getDefaultColumns(){
+  return[
+    {id:'col_todo',   title:'Rejalashtirilgan',color:'#58a6ff'},
+    {id:'col_doing',  title:'Jarayonda',       color:'#d29922'},
+    {id:'col_done',   title:'Bajarildi',       color:'#3fb950'},
+  ];
+}
+function getKanbanCards(){try{return JSON.parse(STORE.getItem('sjr_kcards')||'[]');}catch{return[];}}
+function saveKanbanCards(c){STORE.setItem('sjr_kcards',JSON.stringify(c));}
+
+function addKanbanCard(data){
+  if(!data.title?.trim())return;
+  const cards=getKanbanCards();
+  cards.push({
+    id:'kc_'+Date.now().toString(36),
+    folderId: data.folderId||_activeFolderId,
+    colId:    data.colId||'col_todo',
+    title:    data.title.trim(),
+    desc:     data.desc||'',
+    url:      data.url||'',
+    priority: data.priority||'mid',
+    deadline: data.deadline||'',
+    labels:   data.labels||[],
+    done:     false,
+    createdAt:todayStr,
+  });
+  saveKanbanCards(cards);
+}
+function updateKanbanCard(id,data){
+  const cards=getKanbanCards();const item=cards.find(c=>c.id===id);
+  if(item)Object.assign(item,data);
+  saveKanbanCards(cards);
+}
+function moveKanbanCard(id,newColId){
+  const cards=getKanbanCards();const item=cards.find(c=>c.id===id);
+  if(item)item.colId=newColId;
+  saveKanbanCards(cards);renderTasks();
+}
+function toggleKanbanDone(id){
+  const cards=getKanbanCards();const item=cards.find(c=>c.id===id);
+  if(!item)return;
+  item.done=!item.done;
+  if(item.done){
+    const cols=getColumns(_activeFolderId);
+    const doneCol=cols.find(c=>c.title==='Bajarildi')||cols[cols.length-1];
+    item.colId=doneCol.id;
+    showMotivToast(getTriggerText());
+  }
+  saveKanbanCards(cards);renderTasks();
+}
+function addKanbanColumn(folderId,title){
+  if(!title?.trim())return;
+  const cols=getColumns(folderId);
+  const colors=['#58a6ff','#bc8cff','#f0883e','#3fb950','#d29922','#f85149'];
+  cols.push({id:'col_'+Date.now().toString(36),title:title.trim(),color:colors[cols.length%colors.length]});
+  saveColumns(folderId,cols);renderTasks();
+}
+function deleteKanbanColumn(folderId,colId){
+  if(!confirm("Bu kolonnani o'chirasizmi?"))return;
+  const cols=getColumns(folderId).filter(c=>c.id!==colId);
+  saveKanbanCards(getKanbanCards().filter(c=>!(c.folderId===folderId&&c.colId===colId)));
+  saveColumns(folderId,cols);renderTasks();
+}
+
+// Drag state
+let _dragCardId=null;
+function onDragStart(id){_dragCardId=id;}
+function onDropCol(folderId,colId){
+  if(!_dragCardId)return;
+  moveKanbanCard(_dragCardId,colId);
+  _dragCardId=null;
+}
+
+let _addingCardColId=null;
+
+function renderTasks(){
+  const folders=getFolders();
+  if(!_activeFolderId||!folders.find(f=>f.id===_activeFolderId)){
+    _activeFolderId=folders[0]?.id||null;
+  }
+  const folder=folders.find(f=>f.id===_activeFolderId);
+
+  // All cards stats
+  const allCards=getKanbanCards();
+  const totalOverdue=allCards.filter(c=>!c.done&&c.deadline&&new Date(c.deadline)<new Date()).length;
+
+  let html=`<div style="font-size:15px;font-weight:600;margin-bottom:4px">📋 Vazifalar</div>`;
+  if(totalOverdue)html+=`<div style="font-size:11px;color:var(--red);margin-bottom:10px">⚠️ ${totalOverdue} ta karta muddati o'tdi</div>`;
+
+  // ── FOLDERS BAR ──
+  html+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">`;
+  folders.forEach(f=>{
+    const cnt=allCards.filter(c=>c.folderId===f.id&&!c.done).length;
+    html+=`<div class="folder-chip ${f.id===_activeFolderId?'active':''}" onclick="_activeFolderId='${f.id}';renderTasks()" style="${f.id===_activeFolderId?`border-color:${f.color};background:${f.color}18;color:${f.color}`:''}" onmouseover="this.querySelector('.fc-del').style.opacity='1'" onmouseout="this.querySelector('.fc-del').style.opacity='0'">
+      <span>${f.emoji} ${escapeHtml(f.name)}</span>
+      ${cnt?`<span style="background:var(--surface2);border-radius:10px;padding:0 5px;font-size:10px">${cnt}</span>`:''}
+      ${f.id!=='folder_default'?`<span class="fc-del" style="opacity:0;transition:.15s" onclick="event.stopPropagation();deleteFolder('${f.id}')">×</span>`:''}
+    </div>`;
+  });
+  html+=`<button onclick="promptAddFolder()" style="background:none;border:1px dashed var(--border);color:var(--muted);padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit">+ Papka</button>`;
+  html+=`</div>`;
+
+  if(!folder){html+=`<div style="text-align:center;padding:36px;color:var(--muted)">Papka topilmadi</div>`;setPageContent(currentPage,html);return;}
+
+  // ── FOLDER HEADER ──
+  const currentBgId=getBoardBg();
+  const presets=[...(isDarkMode?BOARD_BG_DARK:BOARD_BG_PRESETS),...getCustomBgs()];
+  html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:14px;font-weight:600;color:${folder.color}">${folder.emoji} ${escapeHtml(folder.name)}</div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button onclick="openTaskModal(null,'${_activeFolderId}','col_todo')" style="background:var(--accent);color:#0d1117;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif">+ Karta</button>
+    </div>
+  </div>
+  <!-- Background picker -->
+  <div style="margin-bottom:12px">
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">🎨 Orqa fon</div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
+      ${presets.map(p=>`<button onclick="setBoardBg('${p.id}')" title="${p.name}" style="width:28px;height:28px;border-radius:8px;border:2px solid ${p.id===currentBgId?'var(--accent)':'var(--border)'};cursor:pointer;background:${p.thumb};transition:all .15s;transform:${p.id===currentBgId?'scale(1.2)':'scale(1)'}"></button>`).join('')}
+      <div style="display:flex;gap:5px;align-items:center;margin-left:4px">
+        <input id="customBgInput" placeholder="linear-gradient(…) yoki #renk" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:8px;font-size:11px;font-family:'Outfit',sans-serif;outline:none;width:180px" onkeydown="if(event.key==='Enter')addCustomBg()">
+        <button onclick="addCustomBg()" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:8px;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif">+ Qo'sh</button>
+      </div>
+    </div>
+  </div>`;
+
+  // ── KANBAN BOARD in background area ──
+  const cols=getColumns(_activeFolderId);
+  const folderCards=allCards.filter(c=>c.folderId===_activeFolderId);
+  const boardBgPreset=presets.find(p=>p.id===currentBgId)||presets[0];
+
+  html+=`<div class="board-area" id="boardArea" style="background:${boardBgPreset.value||''}">
+  <div class="board-wrap" id="kanbanBoard">`;
+  cols.forEach(col=>{
+    const colCards=folderCards.filter(c=>c.colId===col.id);
+    html+=`<div class="board-col" ondragover="event.preventDefault()" ondrop="onDropCol('${_activeFolderId}','${col.id}')">
+      <div class="board-col-header">
+        <div class="board-col-title" style="color:${col.color}">● ${escapeHtml(col.title)}</div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <span class="board-col-count">${colCards.length}</span>
+          <button onclick="deleteKanbanColumn('${_activeFolderId}','${col.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px">×</button>
+        </div>
+      </div>
+      <div class="board-col-body">`;
+
+    colCards.forEach(c=>{
+      const pd=c.deadline?Math.ceil((new Date(c.deadline)-new Date())/(1000*60*60*24)):null;
+      const dClass=pd===null?'':pd<0?'overdue':pd===0?'today-due':'';
+      const dText=pd===null?'':`📅 ${pd<0?'Kechikdi '+Math.abs(pd)+' kun':pd===0?'Bugun!':pd+' kun'}`;
+      const labelsHtml=(c.labels||[]).map(l=>`<span class="tc-label" style="background:${l.color}20;color:${l.color}">${escapeHtml(l.name)}</span>`).join('');
+      html+=`<div class="task-card ${c.done?'done-card':''}" draggable="true" ondragstart="onDragStart('${c.id}')">
+        <div class="tc-actions">
+          <button class="tc-btn" onclick="openTaskModal('${c.id}')" title="Tahrirlash">✏️</button>
+          <button class="tc-btn" onclick="deleteKanbanCard('${c.id}')" title="O'chirish">🗑</button>
+        </div>
+        <div class="tc-title" style="${c.done?'text-decoration:line-through;opacity:.5':''}">${escapeHtml(c.title)}</div>
+        ${c.desc?`<div class="tc-desc">${escapeHtml(c.desc)}</div>`:''}
+        <div class="tc-meta">
+          <div style="width:7px;height:7px;border-radius:50%;background:${c.priority==='high'?'var(--red)':c.priority==='mid'?'var(--yellow)':'var(--green)'}"></div>
+          ${labelsHtml}
+          ${c.deadline?`<span class="tc-deadline ${dClass}">${dText}</span>`:''}
+        </div>
+        ${c.url?`<a href="${escapeHtml(c.url)}" target="_blank" rel="noopener noreferrer" class="tc-link" onclick="event.stopPropagation()">🔗 ${escapeHtml(c.url)}</a>`:''}
+        <div style="margin-top:6px">
+          <button onclick="toggleKanbanDone('${c.id}')" style="background:${c.done?'var(--surface2)':'rgba(63,185,80,.1)'};border:1px solid ${c.done?'var(--border)':'var(--green)'};color:${c.done?'var(--muted)':'var(--green)'};padding:3px 10px;border-radius:5px;font-size:10px;cursor:pointer;font-family:inherit">${c.done?'↩ Qaytarish':'✓ Bajarildi'}</button>
+          <select onchange="moveKanbanCard('${c.id}',this.value)" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:3px 6px;border-radius:5px;font-size:10px;cursor:pointer;max-width:85px;margin-left:4px">
+            <option value="">→ Ko'chir</option>
+            ${cols.filter(x=>x.id!==col.id).map(x=>`<option value="${x.id}">${escapeHtml(x.title)}</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+    });
+
+    html+=`</div>`;
+    html+=`<button class="col-add-btn" onclick="openTaskModal(null,'${_activeFolderId}','${col.id}')">+ Karta qo'shish</button>`;
+    html+=`</div>`;
+  });
+
+  html+=`<div class="board-col" style="opacity:.6">
+    <div style="text-align:center;padding:20px;color:var(--muted)">
+      <div style="font-size:28px;margin-bottom:8px">+</div>
+      <button onclick="promptAddColumn('${_activeFolderId}')" style="background:none;border:1px dashed var(--border);color:var(--muted);padding:7px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-family:inherit">Yangi kolonna</button>
+    </div>
+  </div>`;
+  html+=`</div>`; // board-wrap
+  html+=`</div>`; // board-area
+
+  setPageContent(currentPage,html);
+  // Apply background after render
+  setTimeout(applyBoardBg, 50);
+}
+
+function promptAddFolder(){
+  const name=prompt("Papka nomi (masalan: Ish):");
+  if(!name?.trim())return;
+  const emojis=['📁','💼','🚀','🏠','🎯','📚','🎨','⚙️'];
+  const colors=['#58a6ff','#bc8cff','#f0883e','#3fb950','#d29922','#f85149'];
+  const emoji=emojis[getFolders().length%emojis.length];
+  const color=colors[getFolders().length%colors.length];
+  addFolder(name,emoji,color);
+  _activeFolderId=getFolders()[getFolders().length-1].id;
+  renderTasks();
+}
+function promptAddColumn(folderId){
+  const name=prompt("Kolonna nomi:");
+  if(name?.trim())addKanbanColumn(folderId,name);
+}
+
+// ===== TASK MODAL (create/edit) =====
+let _taskModalData={folderId:null,colId:null,editId:null,labels:[]};
+function openTaskModal(editId,folderId,colId){
+  _taskModalData={folderId:folderId||_activeFolderId,colId:colId||'col_todo',editId:editId||null,labels:[]};
+  const modal=document.getElementById('taskModal');
+  if(!modal)return;
+  const cards=getKanbanCards();
+  const existing=editId?cards.find(c=>c.id===editId):null;
+  document.getElementById('tmTitle').textContent=editId?'Kartani tahrirlash':'Yangi karta';
+  document.getElementById('tmName').value=existing?.title||'';
+  document.getElementById('tmDesc').value=existing?.desc||'';
+  document.getElementById('tmUrl').value=existing?.url||'';
+  document.getElementById('tmDeadline').value=existing?.deadline||'';
+  document.getElementById('tmPriority').value=existing?.priority||'mid';
+  document.getElementById('tmColTarget').value=_taskModalData.colId;
+  document.getElementById('tmFolderTarget').value=_taskModalData.folderId;
+  document.getElementById('tmEditId').value=editId||'';
+  // Labels reset
+  _taskModalData.labels=existing?.labels?[...existing.labels]:[];
+  document.querySelectorAll('.tm-label-chip').forEach(chip=>{
+    const isActive=_taskModalData.labels.some(l=>l.name===chip.dataset.label);
+    chip.classList.toggle('sel',isActive);
+  });
+  modal.classList.remove('hidden');
+}
+function closeTaskModal(){document.getElementById('taskModal')?.classList.add('hidden');}
+function toggleLabel(chip){
+  const name=chip.dataset.label,color=chip.dataset.color;
+  const idx=_taskModalData.labels.findIndex(l=>l.name===name);
+  if(idx>=0){_taskModalData.labels.splice(idx,1);chip.classList.remove('sel');}
+  else{_taskModalData.labels.push({name,color});chip.classList.add('sel');}
+}
+function saveTaskModal(){
+  const name=document.getElementById('tmName')?.value;
+  if(!name?.trim())return;
+  const data={
+    title:    name,
+    desc:     document.getElementById('tmDesc')?.value||'',
+    url:      document.getElementById('tmUrl')?.value||'',
+    deadline: document.getElementById('tmDeadline')?.value||'',
+    priority: document.getElementById('tmPriority')?.value||'mid',
+    labels:   _taskModalData.labels,
+    colId:    document.getElementById('tmColTarget')?.value||'col_todo',
+    folderId: document.getElementById('tmFolderTarget')?.value||_activeFolderId,
+  };
+  const editId=document.getElementById('tmEditId')?.value;
+  if(editId){updateKanbanCard(editId,data);}
+  else{addKanbanCard(data);}
+  closeTaskModal();renderTasks();
+}
+function deleteKanbanCard(id){
+  const cards=getKanbanCards();
+  const item=cards.find(c=>c.id===id);
+  if(!item)return;
+  if(!confirm(`"${item.title}" kartani o'chirasizmi?`))return;
+  moveToTrash('task',item);
+  saveKanbanCards(cards.filter(c=>c.id!==id));
+  renderTasks();
+  showNotif('🗑 Karzinkaga yuborildi.','info');
+}
+function setTaskFilter(){renderTasks();}
+// deprecated helpers — alias
+function getTasks(){return getKanbanCards();}
+function addTask(){}
+function toggleTask(){}
+
+// ===== NOTEBOOKS (OneNote-style) =====
+function getNotebooks(){
+  try{
+    const nb=STORE.getItem('sjr_notebooks');
+    return nb?JSON.parse(nb):[
+      {id:'nb_default',name:'Asosiy',emoji:'📓',color:'#58a6ff'},
+    ];
+  }catch{return [{id:'nb_default',name:'Asosiy',emoji:'📓',color:'#58a6ff'}];}
+}
+function saveNotebooks(nb){STORE.setItem('sjr_notebooks',JSON.stringify(nb));}
+function addNotebook(name,emoji,color){
+  if(!name.trim())return;
+  const nb=getNotebooks();
+  nb.push({id:'nb_'+Date.now().toString(36),name:name.trim(),emoji:emoji||'📓',color:color||'#bc8cff'});
+  saveNotebooks(nb);
+}
+function deleteNotebook(id){
+  if(!confirm("Daftarni o'chirasizmi? Undagi barcha eslatmalar ham o'chadi."))return;
+  const notes=getNotes().filter(n=>n.notebookId!==id);
+  saveNotes(notes);
+  saveNotebooks(getNotebooks().filter(nb=>nb.id!==id));
+  if(_activeNotebookId===id)_activeNotebookId=getNotebooks()[0]?.id||null;
+  renderNotes();
+}
+let _activeNotebookId=null;
+let _activeNoteId=null; // Ochiq note (editor pane)
+
+// ===== RENDER NOTES — OneNote layout =====
+let editingNoteId=null, editingSecretId=null;
+let _notesTab='open';
+
+function renderNotes(){
+  const tab=_notesTab;
+  const notebooks=getNotebooks();
+  if(!_activeNotebookId||!notebooks.find(nb=>nb.id===_activeNotebookId)){
+    _activeNotebookId=notebooks[0]?.id||null;
+  }
+  const activeNb=notebooks.find(nb=>nb.id===_activeNotebookId);
+  const allNotes=getNotes();
+  const nbNotes=allNotes.filter(n=>n.notebookId===_activeNotebookId);
+
+  let html=`<div style="font-size:15px;font-weight:600;margin-bottom:4px">📝 Eslatmalar</div>`;
+
+  // Tab bar: Ochiq / Maxfiy
+  html+=`<div class="notes-tab-bar">
+    <button class="notes-tab ${tab==='open'?'active':''}" onclick="_notesTab='open';_activeNoteId=null;renderNotes()">📄 Daftarlar</button>
+    <button class="notes-tab secret ${tab==='secret'?'active':''}" onclick="_notesTab='secret';renderNotes()">🔐 Maxfiy</button>
+  </div>`;
+
+  if(tab==='open'){
+    // ── NOTEBOOK SELECTOR ──
+    html+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">`;
+    notebooks.forEach(nb=>{
+      const cnt=allNotes.filter(n=>n.notebookId===nb.id).length;
+      html+=`<div class="folder-chip ${nb.id===_activeNotebookId?'active':''}" onclick="_activeNotebookId='${nb.id}';_activeNoteId=null;renderNotes()" style="${nb.id===_activeNotebookId?`border-color:${nb.color};background:${nb.color}18;color:${nb.color}`:''}" onmouseover="this.querySelector('.fc-del').style.opacity='1'" onmouseout="this.querySelector('.fc-del').style.opacity='0'">
+        <span>${nb.emoji} ${escapeHtml(nb.name)}</span>
+        <span style="background:var(--surface2);border-radius:10px;padding:0 5px;font-size:10px">${cnt}</span>
+        ${nb.id!=='nb_default'?`<span class="fc-del" style="opacity:0;transition:.15s" onclick="event.stopPropagation();deleteNotebook('${nb.id}')">×</span>`:''}
+      </div>`;
+    });
+    html+=`<button onclick="promptAddNotebook()" style="background:none;border:1px dashed var(--border);color:var(--muted);padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit">+ Daftar</button>`;
+    html+=`</div>`;
+
+    if(_activeNoteId){
+      // ── NOTE EDITOR (open note) ──
+      const note=nbNotes.find(n=>n.id===_activeNoteId);
+      if(note){
+        html+=`<div style="margin-bottom:10px;display:flex;align-items:center;gap:8px">
+          <button onclick="_activeNoteId=null;renderNotes()" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">← Orqaga</button>
+          <div style="font-size:12px;color:var(--muted)">${escapeHtml(note.updated||note.date)}</div>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <button onclick="saveOpenNote('${note.id}')" style="background:var(--accent);color:#0d1117;border:none;padding:5px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">💾 Saqlash</button>
+            <button onclick="confirmDeleteNote('${note.id}')" style="background:none;border:1px solid var(--red);color:var(--red);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">🗑</button>
+          </div>
+        </div>
+        <input id="noteEditorTitle" value="${escapeHtml(note.title||'')}" placeholder="Sarlavha..." style="width:100%;background:none;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:18px;font-weight:600;font-family:inherit;padding:8px 0;outline:none;margin-bottom:10px" oninput="scheduleAutoSave(note.id)">
+
+        <textarea id="noteEditorBody" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:10px;font-size:13px;font-family:inherit;outline:none;resize:none;min-height:260px;line-height:1.7" placeholder="Yozing..." oninput="scheduleAutoSave('"+note.id+"')">${note.text||''}</textarea>
+        ${note.url?`<div style="margin-top:8px"><a href="${escapeHtml(note.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-size:12px">🔗 ${escapeHtml(note.url)}</a></div>`:''}
+        <input id="noteEditorUrl" value="${escapeHtml(note.url||'')}" placeholder="🔗 Havola (ixtiyoriy)..." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:12px;font-family:inherit;outline:none;margin-top:8px" oninput="scheduleAutoSave('"+note.id+"')">`;
+      } else {
+        html+=`<div style="color:var(--muted)">Eslatma topilmadi</div>`;
+      }
+    } else {
+      // ── NOTE LIST ──
+      html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:600;color:${activeNb?.color||'var(--accent)'}">${activeNb?.emoji} ${escapeHtml(activeNb?.name||'')}</div>
+        <button onclick="createNewNote('${_activeNotebookId}')" style="background:var(--accent);color:#0d1117;border:none;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ Yangi eslatma</button>
+      </div>`;
+
+      if(!nbNotes.length){
+        html+=`<div style="text-align:center;padding:40px;color:var(--muted)">
+          <div style="font-size:48px;margin-bottom:10px">${activeNb?.emoji||'📓'}</div>
+          <div>Bu daftarda hali eslatma yo'q.</div>
+          <div style="font-size:12px;margin-top:6px">Yuqoridagi "+ Yangi eslatma" tugmasini bosing</div>
+        </div>`;
+      } else {
+        // Note cards grid
+        html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">`;
+        nbNotes.forEach(n=>{
+          const preview=(n.text||'').substring(0,80)+(n.text?.length>80?'…':'');
+          html+=`<div onclick="_activeNoteId='${n.id}';renderNotes()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:all .2s;min-height:100px;display:flex;flex-direction:column;gap:6px" onmouseover="this.style.borderColor='${activeNb?.color||'var(--accent)'}'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">${escapeHtml(n.title||'(Sarlavsiz)')}</div>
+            <div style="font-size:11px;color:var(--muted);flex:1;line-height:1.4">${escapeHtml(preview||'(Bo\'sh)')}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:auto">${n.updated||n.date}</div>
+          </div>`;
+        });
+        html+=`</div>`;
+      }
+    }
+
+  } else {
+    // ── SECRET NOTES ──
+    if(!secretNotesUnlocked){
+      html+=`<div class="secret-lock-screen">
+        <div class="sl-icon">🔐</div>
+        <div class="sl-title">Maxfiy eslatmalar</div>
+        <div class="sl-sub">Kirish uchun PIN kodingizni kiriting</div>
+        <input type="password" id="snPinInp" maxlength="4" inputmode="numeric"
+          placeholder="PIN" style="background:var(--surface);border:2px solid var(--border);color:var(--text);padding:12px 16px;border-radius:10px;font-size:18px;text-align:center;letter-spacing:8px;width:160px;font-family:inherit;outline:none;margin-bottom:8px"
+          onkeydown="if(event.key==='Enter')unlockSecretNotes(this.value)"
+          oninput="if(this.value.length===4)unlockSecretNotes(this.value)">
+        <div id="snPinError" style="color:var(--red);font-size:12px;height:16px;margin-bottom:8px"></div>
+        <div style="font-size:11px;color:var(--muted)">Maxfiy daftar faqat siz uchun</div>
+      </div>`;
+    } else {
+      const snotes=getSecretNotes();
+      html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:600;color:var(--purple)">🔐 Maxfiy daftar</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="createNewSecretNote()" style="background:var(--purple);color:white;border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ Yangi</button>
+          <button onclick="lockSecretNotes()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">🔒</button>
+        </div>
+      </div>`;
+      if(!snotes.length)html+=`<div style="text-align:center;padding:32px;color:var(--muted)">Hali maxfiy eslatma yo'q.</div>`;
+      html+=`<div style="display:flex;flex-direction:column;gap:8px">`;
+      snotes.forEach(n=>{
+        const isEditing=editingSecretId===n.id;
+        html+=`<div style="background:rgba(188,140,255,.05);border:1px solid rgba(188,140,255,.25);border-radius:10px;padding:12px">
+          ${isEditing?`
+            <input id="sedit_title_${n.id}" value="${escapeHtml(n.title||'')}" placeholder="Sarlavha..." style="width:100%;background:none;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:14px;font-weight:600;font-family:inherit;padding:4px 0;outline:none;margin-bottom:8px">
+            <textarea id="sedit_body_${n.id}" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;resize:vertical;min-height:80px">${escapeHtml(n.text||'')}</textarea>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button onclick="saveSecretEdit('${n.id}')" style="background:var(--purple);color:white;border:none;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">Saqlash</button>
+              <button onclick="editingSecretId=null;renderNotes()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit">Bekor</button>
+            </div>
+          `:`
+            <div style="font-size:13px;font-weight:600;color:var(--purple);margin-bottom:4px">${escapeHtml(n.title||'(Sarlavsiz)')}</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.5">${escapeHtml((n.text||'').substring(0,100))}${n.text?.length>100?'…':''}</div>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button onclick="editingSecretId='${n.id}';renderNotes()" class="nc-btn">✏️</button>
+              <button onclick="deleteSecretNote('${n.id}')" class="nc-btn danger">🗑</button>
+            </div>
+          `}
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+  }
+
+  setPageContent(currentPage,html);
+}
+
+// Notes CRUD helpers
+function createNewNote(notebookId){
+  const note={id:Date.now().toString(),notebookId,title:'',text:'',url:'',date:todayStr,updated:new Date().toLocaleString('uz')};
+  const n=getNotes();n.unshift(note);saveNotes(n);
+  _activeNoteId=note.id;renderNotes();
+  setTimeout(()=>document.getElementById('noteEditorTitle')?.focus(),100);
+}
+function saveOpenNote(id){
+  const title=document.getElementById('noteEditorTitle')?.value||'';
+  const text=document.getElementById('noteEditorBody')?.value||'';
+  const url=document.getElementById('noteEditorUrl')?.value||'';
+  const n=getNotes();const item=n.find(x=>x.id===id);
+  if(item){item.title=title;item.text=text;item.url=url;item.updated=new Date().toLocaleString('uz');}
+  saveNotes(n);
+  showMotivToast("Saqlandi ✓");
+}
+function promptAddNotebook(){
+  const name=prompt("Daftar nomi:");
+  if(!name?.trim())return;
+  const emojis=['📓','📒','📔','📕','📗','📘','📙','🗒'];
+  const colors=['#bc8cff','#3fb950','#f0883e','#f85149','#d29922','#58a6ff'];
+  const nb=getNotebooks();
+  addNotebook(name,emojis[nb.length%emojis.length],colors[nb.length%colors.length]);
+  _activeNotebookId=getNotebooks()[getNotebooks().length-1].id;
+  renderNotes();
+}
+function createNewSecretNote(){
+  const note={id:Date.now().toString(),title:'',text:'',date:todayStr,updated:new Date().toLocaleString('uz')};
+  const n=getSecretNotes();n.unshift(note);saveSecretNotes(n);
+  editingSecretId=note.id;renderNotes();
+}
+function saveSecretEdit(id){
+  const title=document.getElementById('sedit_title_'+id)?.value||'';
+  const text=document.getElementById('sedit_body_'+id)?.value||'';
+  const n=getSecretNotes();const item=n.find(x=>x.id===id);
+  if(item){item.title=title;item.text=text;item.updated=new Date().toLocaleString('uz');}
+  saveSecretNotes(n);editingSecretId=null;renderNotes();
+}
+function confirmDeleteNote(id){
+  if(!confirm("Bu eslatmani o'chirasizmi?"))return;
+  const notes=getNotes();const item=notes.find(n=>n.id===id);
+  if(item)moveToTrash('note',item);
+  saveNotes(notes.filter(n=>n.id!==id));
+  _activeNoteId=null;renderNotes();
+  showNotif('🗑 Karzinkaga yuborildi.','info');
+}
+function submitNote(){}
+function startEditNote(id){_activeNoteId=id;renderNotes();}
+function cancelEditNote(){_activeNoteId=null;renderNotes();}
+function addNoteWithUrl(text,url){
+  const n=getNotes();
+  n.unshift({id:Date.now().toString(),notebookId:_activeNotebookId||'nb_default',title:'',text:text.trim(),url:url||'',date:todayStr,updated:new Date().toLocaleString('uz')});
+  saveNotes(n);
+}
+function updateNote(id,text,url){
+  const n=getNotes();const item=n.find(x=>x.id===id);
+  if(item){item.text=text.trim();if(url!==undefined)item.url=url;item.updated=new Date().toLocaleString('uz');}
+  saveNotes(n);
+}
+
+// Secret note helpers
+function submitSecretNote(){
+  const ta=document.getElementById('snTextarea');
+  if(!ta?.value.trim())return;
+  if(editingSecretId){updateSecretNote(editingSecretId,ta.value);editingSecretId=null;}
+  else addSecretNote(ta.value);renderNotes();
+}
+function startEditSecretNote(id){editingSecretId=id;renderNotes();}
+
+
+// ===== TRASH SYSTEM =====
+const TRASH_DAYS = 31; // Avtomatik o'chirish
+
+function getTrash(){try{return JSON.parse(STORE.getItem('sjr_trash')||'[]');}catch{return[];}}
+function saveTrash(t){STORE.setItem('sjr_trash',JSON.stringify(t));}
+
+function moveToTrash(type, item){
+  const trash = getTrash();
+  trash.unshift({ ...item, _trashType: type, _trashedAt: todayStr });
+  saveTrash(trash);
+}
+
+function restoreFromTrash(id){
+  const trash = getTrash();
+  const item  = trash.find(t => t.id === id);
+  if(!item) return;
+  const { _trashType, _trashedAt, ...clean } = item;
+  if(_trashType === 'note')        { const n=getNotes(); n.unshift(clean); saveNotes(n); }
+  else if(_trashType === 'task')   { const c=getKanbanCards(); c.unshift(clean); saveKanbanCards(c); }
+  saveTrash(trash.filter(t => t.id !== id));
+  renderTrash();
+  showNotif(`✅ Tiklandi: <b>${escapeHtml(clean.text || clean.title || '—')}</b>`,'info');
+}
+
+function deleteForever(id){
+  if(!confirm("Bu elementni butunlay o'chirasizmi? Tiklab bo'lmaydi.")) return;
+  saveTrash(getTrash().filter(t => t.id !== id));
+  renderTrash();
+}
+
+function cleanExpiredTrash(){
+  const now = new Date(todayStr);
+  const fresh = getTrash().filter(t => {
+    if(!t._trashedAt) return false;
+    const diff = Math.ceil((now - new Date(t._trashedAt)) / (1000*60*60*24));
+    return diff <= TRASH_DAYS;
+  });
+  saveTrash(fresh);
+}
+
+function renderTrash(){
+  cleanExpiredTrash();
+  const trash = getTrash();
+  let html = `<div style="font-size:15px;font-weight:600;margin-bottom:4px">🗑 Karzinka</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">O'chirilgan elementlar ${TRASH_DAYS} kun saqlanadi, keyin avtomatik o'chadi.</div>`;
+
+  if(!trash.length){
+    html += `<div style="text-align:center;padding:48px;color:var(--muted)">
+      <div style="font-size:48px;margin-bottom:12px">🗑</div>
+      <div style="font-size:14px">Karzinka bo'sh</div>
+    </div>`;
+  } else {
+    html += `<div style="text-align:right;margin-bottom:10px">
+      <button onclick="emptyTrash()" style="background:rgba(248,81,73,.1);border:1px solid var(--red);color:var(--red);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">🗑 Barchasini o'chirish</button>
+    </div>`;
+    trash.forEach(item => {
+      const label = item.text || item.title || '—';
+      const icon  = item._trashType === 'note' ? '📝' : '✅';
+      const now   = new Date(todayStr);
+      const trashDate = new Date(item._trashedAt || todayStr);
+      const daysLeft  = TRASH_DAYS - Math.ceil((now - trashDate) / (1000*60*60*24));
+      html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:16px">${icon}</span>
+          <div style="flex:1;font-size:13px;line-height:1.4">${escapeHtml(label)}</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:11px;color:${daysLeft<=3?'var(--red)':'var(--muted)'}">⏳ ${daysLeft} kun qoldi</div>
+          <div style="display:flex;gap:6px">
+            <button onclick="restoreFromTrash('${escapeHtml(item.id)}')" style="background:rgba(63,185,80,.1);border:1px solid var(--green);color:var(--green);padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">↩ Tiklash</button>
+            <button onclick="deleteForever('${escapeHtml(item.id)}')" style="background:rgba(248,81,73,.1);border:1px solid var(--red);color:var(--red);padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">✕ O'chirish</button>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+  setPageContent('trash', html);
+}
+
+function emptyTrash(){
+  if(!confirm("Karzinkadagi barcha elementlarni butunlay o'chirasizmi?")) return;
+  saveTrash([]);
+  renderTrash();
+}
+
+// Override deleteNote to use trash
+function confirmDeleteNote(id){
+  if(!confirm("Bu eslatmani o'chirasizmi?")) return;
+  const notes = getNotes();
+  const item  = notes.find(n => n.id === id);
+  if(item) moveToTrash('note', item);
+  saveNotes(notes.filter(n => n.id !== id));
+  renderNotes();
+  showNotif('🗑 Karzinkaga yuborildi. <a onclick="showPage(\'trash\')" style="color:var(--accent);cursor:pointer">Ko\'rish →</a>','info');
+}
+
+// Override deleteKanbanCard to use trash
+function deleteKanbanCard(id){
+  const cards = getKanbanCards();
+  const item  = cards.find(c => c.id === id);
+  if(!item) return;
+  if(!confirm(`"${item.title}" kartani o'chirasizmi?`)) return;
+  moveToTrash('task', item);
+  saveKanbanCards(cards.filter(c => c.id !== id));
+  renderTasks();
+  showNotif('🗑 Karzinkaga yuborildi.','info');
+}
+
+// URL auto-link helper for notes
+function linkifyText(text){
+  const safe = escapeHtml(text);
+  return safe.replace(/(https?:\/\/[^\s&lt;&gt;"']+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:var(--accent);word-break:break-all">$1</a>');
+}
+function getWeekDates(s){return Array.from({length:7},(_,i)=>dsOf(addDays(s,i)));}
+let currentMonth=today.getMonth(),currentYear=today.getFullYear();
+function prevWeek(){currentWeekStart=addDays(currentWeekStart,-7);}
+function nextWeek(){currentWeekStart=addDays(currentWeekStart,7);}
+function prevMonth(){currentMonth===0?(currentMonth=11,currentYear--):currentMonth--;}
+function nextMonth(){currentMonth===11?(currentMonth=0,currentYear++):currentMonth++;}
+
+// ===== AUTO-SAVE NOTES =====
+let _autoSaveTimer=null;
+function scheduleAutoSave(noteId){
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer=setTimeout(()=>{
+    const title=document.getElementById('noteEditorTitle')?.value||'';
+    const text=document.getElementById('noteEditorBody')?.value||'';
+    const url=document.getElementById('noteEditorUrl')?.value||'';
+    const n=getNotes();const item=n.find(x=>x.id===noteId);
+    if(item){item.title=title;item.text=text;item.url=url;item.updated=new Date().toLocaleString('uz');saveNotes(n);}
+    const ind=document.getElementById('autoSaveIndicator');
+    if(ind){ind.textContent='✓ Saqlandi';setTimeout(()=>{ind.textContent='';},1500);}
+  },800);
+}
+
+// ===== MIDNIGHT REFRESH =====
+(function setupMidnightRefresh(){
+  const now=new Date();
+  const msToMidnight=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1)-now+1000;
+  setTimeout(()=>location.reload(),msToMidnight);
+})();
+
+// ===== MERGED STATS (week + month + stats) =====
+let _statsSubTab='stats';
+let statsChart=null;
+function renderWeek(){_statsSubTab='week';showPage('stats');}
+function renderMonth(){_statsSubTab='month';showPage('stats');}
+function goToDay(ds){const d=new Date(ds);currentWeekStart=new Date(d);currentWeekStart.setDate(d.getDate()-((d.getDay()+6)%7));_statsSubTab='week';showPage('stats');}
+
+function renderStats(){
+  const _sub=_statsSubTab;
+  let html=`<div style="display:flex;gap:0;margin-bottom:14px;background:var(--surface2);border-radius:10px;padding:4px">
+    <button onclick="_statsSubTab='stats';renderStats()" style="flex:1;padding:7px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;background:${_sub==='stats'?'var(--accent)':'transparent'};color:${_sub==='stats'?'#0d1117':'var(--muted)'}">Statistika</button>
+    <button onclick="_statsSubTab='week';renderStats()" style="flex:1;padding:7px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;background:${_sub==='week'?'var(--purple)':'transparent'};color:${_sub==='week'?'white':'var(--muted)'}">Hafta</button>
+    <button onclick="_statsSubTab='month';renderStats()" style="flex:1;padding:7px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;background:${_sub==='month'?'var(--yellow)':'transparent'};color:${_sub==='month'?'#0d1117':'var(--muted)'}">Oy</button>
+  </div>`;
+
+  if(_sub==='week'){
+    const dates=getWeekDates(currentWeekStart);
+    const M=['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];
+    const rituals=getRituals();
+    html+=`<div class="week-nav">
+      <button class="nav-btn" onclick="prevWeek();renderStats()">Oldingi</button>
+      <span class="week-label">${new Date(dates[0]).getDate()} - ${new Date(dates[6]).getDate()} ${M[new Date(dates[0]).getMonth()]}</span>
+      <button class="nav-btn" onclick="nextWeek();renderStats()">Keyingi</button>
+    </div><div class="week-summary">`;
+    dates.forEach(d=>{const s=getDayScore(d),isT=d===todayStr;html+=`<div class="ws-day ${isT?'today':''} ${s.rest?'rest':''}"><div class="dn">${shortDay(d)}</div><div class="dp" style="color:${s.rest?'var(--purple)':s.pct===100?'var(--gold)':s.pct>=70?'var(--green)':s.pct>=40?'var(--yellow)':'var(--red)'}">${s.rest?'dam':s.pct+'%'}</div></div>`;});
+    html+=`</div><div class="day-cols"><div class="day-header"></div>`;
+    dates.forEach(d=>{const sun=isSunday(d),isT=d===todayStr;html+=`<div class="day-header ${isT?'today':''} ${sun?'rest-day':''}">${shortDay(d)}<br><span style="font-size:9px;opacity:.7">${new Date(d).getDate()}</span></div>`;});
+    rituals.forEach(r=>{
+      html+=`<div class="ritual-label"><span style="width:5px;height:5px;border-radius:50%;background:${r.color||'var(--accent)'};flex-shrink:0;display:inline-block"></span>${r.name}</div>`;
+      dates.forEach(d=>{
+        if(isSunday(d)){html+=`<div class="day-cell rest-col"><div class="check-icon rest"></div></div>`;return;}
+        const done=isDone(d,r.id);
+        html+=`<div class="day-cell ${done?'checked':''}" onclick="toggleRitual('${d}','${r.id}');renderStats()"><div class="check-icon ${done?'done':''}">${done?'v':''}</div></div>`;
+      });
+    });
+    html+=`</div>`;
+    setPageContent('stats',html);return;
+  }
+
+  if(_sub==='month'){
+    const M=['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
+    const dim=new Date(currentYear,currentMonth+1,0).getDate();
+    const off=(new Date(currentYear,currentMonth,1).getDay()+6)%7;
+    html+=`<div class="week-nav">
+      <button class="nav-btn" onclick="prevMonth();renderStats()">Oldingi</button>
+      <span class="week-label">${M[currentMonth]} ${currentYear}</span>
+      <button class="nav-btn" onclick="nextMonth();renderStats()">Keyingi</button>
+    </div><div class="month-grid">`;
+    ['Du','Se','Ch','Pa','Ju','Sh','Ya'].forEach(d=>html+=`<div style="text-align:center;font-size:10px;color:var(--muted);padding:3px">${d}</div>`);
+    for(let i=0;i<off;i++)html+=`<div></div>`;
+    for(let d=1;d<=dim;d++){
+      const ds=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isT=ds===todayStr,sun=isSunday(ds),s=getDayScore(ds),isFut=new Date(ds)>today;
+      html+=`<div class="month-day ${sun?'rest':''} ${isT?'today':''}" onclick="goToDay('${ds}')">
+        <div class="day-num">${d}${s.pct===100&&!sun&&!isFut?' *':''}</div>
+        ${sun?`<div class="day-pct" style="color:var(--purple)">dam</div>`:isFut?`<div class="day-pct">-</div>`:`<div class="day-pct" style="color:${s.pct>=70?'var(--green)':s.pct>=40?'var(--yellow)':'var(--red)'}">${s.pct}%</div>`}
+        ${!sun&&!isFut?`<div class="day-bar"><div class="day-fill" style="width:${s.pct}%;background:${s.pct>=70?'var(--green)':s.pct>=40?'var(--yellow)':'var(--red)'}"></div></div>`:''}
+      </div>`;
+    }
+    html+=`</div>`;
+    setPageContent('stats',html);return;
+  }
+
+  const M=['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
+  const dim=new Date(currentYear,currentMonth+1,0).getDate();
+  const rituals=getRituals();
+  let tD=0,tP=0,best='',bP=0,worst='',wP=101,bestStr=0,curStr=0,perfect=0;
+  for(let d=1;d<=dim;d++){
+    const ds=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if(new Date(ds)>today)continue;const s=getDayScore(ds);
+    if(s.rest){curStr++;if(curStr>bestStr)bestStr=curStr;}
+    else{tD+=s.done;tP+=s.total;if(s.pct===100)perfect++;if(s.pct>=70){curStr++;if(curStr>bestStr)bestStr=curStr;}else curStr=0;}
+  }
+  const ov=tP?Math.round(tD/tP*100):0;
+  rituals.forEach(r=>{
+    let d=0,t=0;
+    for(let i=1;i<=dim;i++){
+      const ds=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+      if(new Date(ds)>today||isSunday(ds))continue;t++;if(isDone(ds,r.id))d++;
+    }
+    const p=t?Math.round(d/t*100):0;
+    if(p>bP){bP=p;best=r.name;}if(t>0&&p<wP){wP=p;worst=r.name;}
+  });
+  const tasks=getKanbanCards();
+  html+=`<div class="month-selector">`;
+  M.forEach((m,i)=>html+=`<button class="month-btn ${i===currentMonth&&currentYear===today.getFullYear()?'active':''}" onclick="setStatsMonth(${i})">${m}</button>`);
+  html+=`</div><div class="stat-grid">
+    <div class="stat-card"><div class="label">Bajarilish</div><div class="value ${ov>=70?'good':ov>=40?'warn':'bad'}">${ov}%</div></div>
+    <div class="stat-card"><div class="label">Eng uzun seria</div><div class="value good">${bestStr} kun</div></div>
+    <div class="stat-card"><div class="label">100% kunlar</div><div class="value" style="color:var(--gold)">${perfect}</div></div>
+    <div class="stat-card"><div class="label">Eng yaxshi ritual</div><div class="value good" style="font-size:12px;line-height:1.4">${best||'-'}</div></div>
+    <div class="stat-card"><div class="label">Eng zaif ritual</div><div class="value bad" style="font-size:12px;line-height:1.4">${worst||'-'}</div></div>
+    <div class="stat-card"><div class="label">Vazifalar</div><div class="value good" style="font-size:15px">${tasks.filter(t=>t.done).length} / ${tasks.length}</div></div>
+  </div>
+  <div class="chart-wrap"><canvas id="statsChart"></canvas></div>
+  <div class="ritual-stats"><div class="rs-row rs-header"><div>Ritual</div><div></div><div>%</div><div>Holat</div></div>`;
+  rituals.forEach(r=>{
+    let d=0,t=0;
+    for(let i=1;i<=dim;i++){
+      const ds=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+      if(new Date(ds)>today||isSunday(ds))continue;t++;if(isDone(ds,r.id))d++;
+    }
+    const p=t?Math.round(d/t*100):0;const bc=p>=70?'var(--green)':p>=40?'var(--yellow)':'var(--red)';
+    html+=`<div class="rs-row"><div style="font-size:11px">${r.name}</div><div><div class="rs-bar-wrap"><div class="rs-bar" style="width:${p}%;background:${bc}"></div></div></div><div class="rs-pct">${p}%</div><div>${p>=80?'<span class="badge great">Ajoyib</span>':p>=50?'<span class="badge good">Yaxshi</span>':'<span class="badge bad">Kuchaytir</span>'}</div></div>`;
+  });
+  html+=`</div>`;
+  setPageContent('stats',html);
+  setTimeout(()=>{
+    if(statsChart)statsChart.destroy();
+    const lb=[],dt=[],bg=[];
+    for(let d=1;d<=dim;d++){
+      const ds=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      if(new Date(ds)>today)break;lb.push(d);const s=getDayScore(ds);dt.push(s.pct);
+      bg.push(s.pct===100?'#ffd700':s.rest?'#7b2fbe':s.pct>=70?'#3fb950':s.pct>=40?'#d29922':'#f85149');
+    }
+    const ctx=document.getElementById('statsChart');if(!ctx)return;
+    statsChart=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{label:'%',data:dt,backgroundColor:bg,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#7d8590',callback:v=>v+'%'}},x:{grid:{display:false},ticks:{color:'#7d8590',maxRotation:0,autoSkip:true}}}}});
+  },100);
+}
+function setStatsMonth(m){currentMonth=m;renderStats();}
+
+
+// ===== RENDER SETTINGS =====
+function renderSettings(){
+  const goals=getGoals();
+  const streak=calcStreak(),level=calcLevel(streak);
+  let html=`<div style="font-size:15px;font-weight:600;margin-bottom:14px">⚙️ Sozlamalar</div>`;
+  html+=`<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Profil</div>`;
+  html+=`<div class="settings-row"><div><div class="settings-label">👤 Foydalanuvchi</div><div class="settings-sub">${USER_NAME||'Ism kiritilmagan'} · ID: ${USER_ID}</div></div></div>`;
+  // Goals manage
+  html+=`<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px">Maqsadlar</div>`;
+  goals.forEach((g,i)=>html+=`<div class="settings-row"><div><div class="settings-label">🎯 ${escapeHtml(g)}</div></div><button onclick="removeGoalSetting(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:0 4px">×</button></div>`);
+  html+=`<div style="display:flex;gap:8px;margin-top:8px">
+    <input class="task-input" id="settGoalInp" placeholder="Yangi maqsad qo'shish..." onkeydown="if(event.key==='Enter')addGoalSetting()">
+    <button onclick="addGoalSetting()" class="task-add-btn">+</button>
+  </div>`;
+  html+=`<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px">Ilovani boshqarish</div>`;
+  html+=`<div class="settings-row"><div><div class="settings-label">${isDarkMode?'🌙 Tungi rejim':'☀️ Kunduzgi rejim'}</div><div class="settings-sub">${isDarkMode?'Qora fon yoqilgan':'Oq fon yoqilgan'}</div></div>
+    <button class="toggle ${isDarkMode?'on':''}" onclick="toggleTheme()" style="${isDarkMode?'':'background:var(--yellow)'}"></button>
+  </div>`;
+  html+=`<div class="settings-row"><div><div class="settings-label">🔔 Ovozli effektlar</div><div class="settings-sub">Ritual bajarilganda tovush</div></div><button class="toggle ${soundEnabled?'on':''}" onclick="toggleSound()"></button></div>`;
+  html+=`<div class="settings-row"><div><div class="settings-label">🔐 PIN o'zgartirish</div><div class="settings-sub">Yangi PIN o'rnating</div></div><button onclick="changePin()" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit">O'zgartir</button></div>`;
+  html+=`<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px">Joriy holat</div>`;
+  html+=`<div class="stat-grid">
+    <div class="stat-card"><div class="label">🔥 Seria</div><div class="value" style="color:var(--orange)">${streak} kun</div></div>
+    <div class="stat-card"><div class="label">⭐ Daraja</div><div class="value" style="color:${level.color};font-size:14px">${level.icon} ${level.name}</div></div>
+  </div>`;
+  html+=`<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Darajalar</div>`;
+  LEVELS.forEach(l=>{
+    const active=streak>=l.min&&streak<=(l.max===Infinity?99999:l.max);
+    html+=`<div class="settings-row" style="${active?'border-color:'+l.color:''}"><div><div class="settings-label" style="color:${l.color}">${l.icon} ${l.name}</div><div class="settings-sub">${l.max===Infinity?l.min+'+ kun':l.min+' – '+l.max+' kun'} seria</div></div>${active?`<span style="font-size:11px;color:${l.color}">✓ Hozirgi</span>`:''}</div>`;
+  });
+  setPageContent(currentPage,html);
+}
+function removeGoalSetting(i){removeGoal(i);renderSettings();renderToday();}
+function addGoalSetting(){
+  const inp=document.getElementById('settGoalInp');
+  if(!inp?.value.trim())return;
+  addGoal(inp.value);inp.value='';renderSettings();renderToday();
+}
+function toggleSound(){soundEnabled=!soundEnabled;STORE.setItem('sjr_sound',soundEnabled?'1':'0');renderSettings();}
+
+// ===== THEME SYSTEM =====
+let isDarkMode = true; // default: qora
+
+function applyTheme(dark) {
+  isDarkMode = dark;
+  document.body.classList.toggle('light', !dark);
+  STORE.setItem('sjr_theme', dark ? 'dark' : 'light');
+  // Toggle toggle buttons
+  document.querySelectorAll('#themeToggleBtn').forEach(el => {
+    el.innerHTML = dark ? '🌙' : '☀️';
+    el.title = dark ? 'Kunduzgi rejim' : 'Tungi rejim';
+  });
+  renderSettings();
+}
+
+function toggleTheme() {
+  applyTheme(!isDarkMode);
+}
+
+// ===== BOARD BACKGROUND =====
+const BOARD_BG_PRESETS = [
+  {id:'none',    name:'Oddiy',        value:'',                                                          thumb:'#e8edf5'},
+  {id:'sky',     name:'Osmon',        value:'linear-gradient(160deg,#dbeafe,#eff6ff)',                  thumb:'#93c5fd'},
+  {id:'mint',    name:'Yashil',       value:'linear-gradient(160deg,#dcfce7,#f0fdf4)',                  thumb:'#86efac'},
+  {id:'peach',   name:'Shaftoli',     value:'linear-gradient(160deg,#fee2e2,#fff7ed)',                  thumb:'#fca5a5'},
+  {id:'lavender',name:'Lavanda',      value:'linear-gradient(160deg,#ede9fe,#faf5ff)',                  thumb:'#c4b5fd'},
+  {id:'sand',    name:'Qum',          value:'linear-gradient(160deg,#fef9c3,#fffbeb)',                  thumb:'#fde047'},
+  {id:'slate',   name:"Ko'k-kulrang", value:'linear-gradient(160deg,#e2e8f0,#f8fafc)',                  thumb:'#94a3b8'},
+  {id:'rose',    name:'Atirgul',      value:'linear-gradient(160deg,#fce7f3,#fdf2f8)',                  thumb:'#f9a8d4'},
+  {id:'ocean',   name:'Okean',        value:'linear-gradient(160deg,#cffafe,#ecfeff)',                  thumb:'#67e8f9'},
+  {id:'forest',  name:"O'rmon",       value:'linear-gradient(160deg,#d1fae5,#ecfdf5)',                  thumb:'#6ee7b7'},
+  {id:'sunset',  name:'Atirgul-oltin',value:'linear-gradient(160deg,#fed7aa,#fef3c7)',                  thumb:'#fdba74'},
+  {id:'grape',   name:'Uzum',         value:'linear-gradient(160deg,#e9d5ff,#fae8ff)',                  thumb:'#d8b4fe'},
+];
+const BOARD_BG_DARK = [
+  {id:'none',   name:'Oddiy',         value:'',                                                          thumb:'#1c2a3d'},
+  {id:'navy',   name:'Dengiz',        value:'linear-gradient(160deg,#0f1f35,#0a1628)',                   thumb:'#1e3a5f'},
+  {id:'forest', name:"O'rmon",        value:'linear-gradient(160deg,#0a1f10,#071a0d)',                   thumb:'#166534'},
+  {id:'void',   name:'Violeta',       value:'linear-gradient(160deg,#1a0a2e,#0d0720)',                   thumb:'#4c1d95'},
+  {id:'ember',  name:'Olov',          value:'linear-gradient(160deg,#1f0a00,#1a0800)',                   thumb:'#7c2d12'},
+  {id:'steel',  name:"Po'lat",        value:'linear-gradient(160deg,#0f172a,#1e293b)',                   thumb:'#334155'},
+];
+
+function getBoardBg(){return STORE.getItem('sjr_board_bg')||'none';}
+function setBoardBg(id){STORE.setItem('sjr_board_bg',id);applyBoardBg();renderTasks();}
+function applyBoardBg(){
+  const id=getBoardBg();
+  const presets=[...(isDarkMode?BOARD_BG_DARK:BOARD_BG_PRESETS),...getCustomBgs()];
+  const preset=presets.find(p=>p.id===id)||presets[0];
+  const el=document.getElementById('boardArea');
+  if(el)el.style.background=preset.value||'';
+}
+function getCustomBgs(){try{return JSON.parse(STORE.getItem('sjr_custom_bgs')||'[]');}catch{return[];}}
+function addCustomBg(){
+  const input=document.getElementById('customBgInput');
+  const val=input?.value.trim();
+  if(!val)return;
+  const customs=getCustomBgs();
+  const newId='cb_'+Date.now().toString(36);
+  customs.push({id:newId,name:'Maxsus',value:val,thumb:val.startsWith('#')?val:'linear-gradient(135deg,#a78bfa,#6eb8ff)'});
+  STORE.setItem('sjr_custom_bgs',JSON.stringify(customs));
+  STORE.setItem('sjr_board_bg',newId);
+  if(input)input.value='';
+  applyBoardBg();renderTasks();
+}
+function changePin(){
+  pinMode='set';pinBuffer='';
+  document.getElementById('pinTitle').textContent="Yangi PIN o'rnating";
+  document.getElementById('pinSub').textContent='4 ta raqam kiriting';
+  document.getElementById('pinForgot').style.display='none';
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('pinScreen').style.display='flex';
+}
+
+// ===== LAYOUT =====
+let currentPage='today';
+function showPage(name){
+  currentPage=name;
+  ['dtab-','mtab-'].forEach(p=>{document.querySelectorAll(`[id^="${p}"]`).forEach(t=>t.classList.remove('active'));const el=document.getElementById(p+name);if(el)el.classList.add('active');});
+  ['dpage-','mpage-'].forEach(p=>{document.querySelectorAll(`[id^="${p}"]`).forEach(pg=>pg.classList.remove('active'));const el=document.getElementById(p+name);if(el)el.classList.add('active');});
+  renderPage(name);
+}
+function renderPage(name){
+  if(name==='today')renderToday();else if(name==='rituals')renderRituals();
+  else if(name==='affirm')renderAffirm();else if(name==='tasks')renderTasks();
+  else if(name==='rewards')renderRewards();else if(name==='notes')renderNotes();
+  else if(name==='trash')renderTrash();
+  else if(name==='week'){_statsSubTab='week';renderStats();}
+  else if(name==='month'){_statsSubTab='month';renderStats();}
+  else if(name==='stats')renderStats();else if(name==='settings')renderSettings();
+}
+function setPageContent(name,html){
+  const dp=document.getElementById('dpage-'+name),mp=document.getElementById('mpage-'+name);
+  if(dp)dp.innerHTML=html;if(mp)mp.innerHTML=html;
+}
+function render(){renderPage(currentPage);updateScoreDisplays();}
+function updateScoreDisplays(){
+  const score=getDayScore(todayStr);const streak=calcStreak();const level=calcLevel(streak);
+  const pct=isSunday(todayStr)?'💜':score.pct+'%';
+  const color=score.pct===100?'var(--gold)':score.pct>=70?'var(--green)':score.pct>=40?'var(--yellow)':'var(--red)';
+  const ss=document.getElementById('sidebarScore'),ms=document.getElementById('mobileScore');
+  if(ss){ss.textContent=pct;ss.style.color=color;}if(ms){ms.textContent=pct;ms.style.color=color;}
+  const smStreak=document.getElementById('smStreak'),smLevel=document.getElementById('smLevel'),smTimer=document.getElementById('smTimer');
+  if(smStreak)smStreak.textContent=`🔥 Seria: ${streak} kun`;
+  if(smLevel)smLevel.textContent=`${level.icon} ${level.name}`;
+  if(smTimer)smTimer.textContent=`⏱ Qoldi: ${formatTimer()}`;
+}
+
+// Kirish fanfarasi — muvaffaqiyat shovqini
+function playEntryFanfare(){
+  if(!soundEnabled) return;
+  try{
+    const ctx = new(window.AudioContext||window.webkitAudioContext)();
+    // Qisqa yuqoriga ko'tariluvchi akkord: do-mi-sol-do
+    const notes = [
+      {f:523.25, t:0,    dur:0.18},
+      {f:659.25, t:0.1,  dur:0.18},
+      {f:783.99, t:0.2,  dur:0.18},
+      {f:1046.5, t:0.3,  dur:0.35},
+    ];
+    notes.forEach(({f,t,dur})=>{
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      const start = ctx.currentTime + t;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.25, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+      osc.start(start); osc.stop(start + dur + 0.05);
+    });
+  }catch(e){}
+}
+
+function showMainApp(){
+  const goals=getGoals();
+  const userEl=document.getElementById('sidebarUser');
+  if(userEl&&USER_NAME)userEl.textContent='👤 '+USER_NAME;
+  const s=STORE.getItem('sjr_sound');if(s!==null)soundEnabled=s==='1';
+  // Theme load
+  const savedTheme=STORE.getItem('sjr_theme')||localStorage.getItem('sjr_theme')||'dark';
+  applyTheme(savedTheme==='dark');
+  document.getElementById('mainApp').style.display='block';
+  const dateStr=formatDate(todayStr);
+  const d1=document.getElementById('desktopDate'),d2=document.getElementById('mobileDate');
+  if(d1)d1.textContent=dateStr;
+  if(d2)d2.textContent=(USER_NAME?USER_NAME+' · ':'')+dateStr;
+  const alerts=checkDeadlineAlerts();
+  if(alerts.length)setTimeout(()=>showNotif(alerts[0].text,alerts[0].type),600);
+  // Kirish ovozi (fanfara) — darhol
+  setTimeout(playEntryFanfare, 400);
+  // Kirish motivatsiyasi — 1.2s kechikish bilan ko'rsatiladi
+  setTimeout(()=>{
+    const entryText=getEntryMotiv();
+    showMotivToast(entryText);
+  }, 1200);
+  showPage('today');updateScoreDisplays();
+}
+function enterApp(){
+  appUnlocked = true;
+  lastActivity = Date.now();
+  document.getElementById('pinScreen').style.display='none';
+  const onboarded=STORE.getItem('sjr_onboarded');
+  if(!onboarded){document.getElementById('onboardScreen').style.display='flex';}
+  else showMainApp();
+}
+
+// ===== INIT =====
+async function initApp(){
+  // Firebase mavjudligini tekshir, keyin ma'lumotlarni yukla
+  await STORE.load(db, USER_ID);
+
+  document.getElementById('loadingScreen').style.display='none';
+  const storedPin=STORE.getItem('sjr_pin');
+  if(!storedPin){
+    pinMode='set';
+    document.getElementById('pinTitle').textContent="PIN o'rnating";
+    document.getElementById('pinSub').textContent="Ilovani himoya qilish uchun 4 ta raqam";
+  } else {
+    pinMode='check';
+    document.getElementById('pinTitle').textContent='PIN kodni kiriting';
+    document.getElementById('pinSub').textContent='Maxfiyligingiz uchun';
+    document.getElementById('pinForgot').style.display='block';
+  }
+  document.getElementById('pinScreen').style.display='flex';
+}
+
+// Sahifa yuklangandan keyin ishga tushir
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initApp().catch(err => {
+      console.error('Init xatosi:', err);
+      document.getElementById('loadingScreen').style.display='none';
+      document.getElementById('pinScreen').style.display='flex';
+      pinMode='set';
+    });
+  });
+} else {
+  initApp().catch(err => {
+    console.error('Init xatosi:', err);
+    document.getElementById('loadingScreen').style.display='none';
+    document.getElementById('pinScreen').style.display='flex';
+    pinMode='set';
+  });
+}
+</script>
+</body>
+</html>
