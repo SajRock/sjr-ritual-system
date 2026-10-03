@@ -310,9 +310,35 @@ input[type=text]:focus{outline:2px solid var(--accent);outline-offset:1px}
     <div class="logo">KO'R</div>
     <div class="tagline">IQ jang · blef · psixologik urush</div>
     <button class="btn primary" data-start="pvp">2 kishi</button>
+    <button class="btn" data-go="online">Onlayn · 2 telefon</button>
     <button class="btn" data-start="bot">Botga qarshi</button>
     <button class="btn" data-go="rules">Qoidalar</button>
     <button class="btn" data-go="settings">Sozlamalar</button>
+  </div>
+</section>
+
+<!-- ================= ONLAYN: 2 ta telefon ================= -->
+<section id="online" class="screen hidden">
+  <div class="topbar"><button class="icon-btn" data-go="menu" aria-label="Orqaga">←</button></div>
+  <div class="wrap">
+    <h2>Onlayn o'yin</h2>
+    <div class="step">Har kim o'z telefonida</div>
+    <div class="card">
+      <label class="field-label" for="inNameOn" style="margin-top:0">Ismingiz</label>
+      <input type="text" id="inNameOn" maxlength="14" placeholder="Ismingiz" autocomplete="off">
+    </div>
+    <div class="card setting-row">
+      <label>Yangi xona</label>
+      <small class="muted">Siz maydon o'lchami va shartni tanlaysiz, keyin do'stingizga 4 xonali kod berasiz.</small>
+      <button class="btn primary" id="btnCreateRoom" style="margin:0">Xona yaratish</button>
+    </div>
+    <div class="card setting-row">
+      <label for="inCode">Do'stingiz xonasiga qo'shilish</label>
+      <input type="text" id="inCode" maxlength="4" inputmode="numeric" placeholder="Kod: 1234" autocomplete="off">
+      <button class="btn" id="btnJoinRoom" style="margin:0">Qo'shilish</button>
+    </div>
+    <button class="btn ghost hidden" id="btnResume">Oxirgi xonaga qaytish</button>
+    <p class="muted" style="font-size:13px;line-height:1.5;margin-top:6px">Ikkalangiz ham shu sahifani claude.ai havolasi orqali ochgan bo'lishingiz kerak. Telefon ekrani o'chsa, qayta ochib "Oxirgi xonaga qaytish"ni bosing — o'yin davom etadi.</p>
   </div>
 </section>
 
@@ -957,6 +983,7 @@ const ui = {
 const isBot = (p) => ui.mode === 'bot' && p === ui.botPlayer;
 const humanP = () => 1 - ui.botPlayer;
 function nameOf(p) {
+  if (ui.mode === 'online') return (ui.names[p] || '').trim() || (p === 0 ? "1-o'yinchi" : "2-o'yinchi");
   if (ui.mode === 'bot') return p === ui.botPlayer ? 'Bot' : ((ui.names[0] || '').trim() || 'Siz');
   return (ui.names[p] || '').trim() || (p === 0 ? "1-o'yinchi" : "2-o'yinchi");
 }
@@ -991,7 +1018,7 @@ const cellEl = (r, c) => cells[r * ui.state.n + c];
 function render() {
   const s = ui.state; if (!s) return;
   const v = ui.viewer, turnP = s.turn;
-  const myTurnUI = s.winner === null && !ui.locked && !isBot(turnP);
+  const myTurnUI = s.winner === null && !ui.locked && !isBot(turnP) && (ui.mode !== 'online' || turnP === net.seat);
 
   for (let r = 0; r < s.n; r++) for (let c = 0; c < s.n; c++) {
     const el = cellEl(r, c);
@@ -1039,7 +1066,8 @@ function render() {
 
   // Navbat ko'rsatkichi (rang + yozuv)
   $('#turnbar').className = 'turnbar t' + turnP;
-  $('#turnText').textContent = s.winner !== null ? `${nameOf(s.winner)} yutdi!` : isBot(turnP) ? "Bot o'ylamoqda…" : `${nameOf(turnP)} yuradi`;
+  $('#turnText').textContent = s.winner !== null ? `${nameOf(s.winner)} yutdi!` : isBot(turnP) ? "Bot o'ylamoqda…"
+    : ui.mode === 'online' ? (turnP === net.seat ? 'Sizning navbatingiz' : `${nameOf(turnP)} o'ylamoqda…`) : `${nameOf(turnP)} yuradi`;
 
   // Panellar
   [0, 1].forEach(p => {
@@ -1052,7 +1080,7 @@ function render() {
   });
 
   // Emoji tugmasi va paneli
-  const me = ui.mode === 'bot' ? humanP() : turnP;
+  const me = ui.mode === 'bot' ? humanP() : ui.mode === 'online' ? net.seat : turnP;
   $('#emojiNow').textContent = s.emoji[me];
   $('#btnEmoji').disabled = !myTurnUI;
   $('#btnAnalysis').disabled = v === null;
@@ -1064,6 +1092,10 @@ function render() {
   if (myTurnUI) hint = ui.selected
     ? 'Yoritilgan katakka bosing. "?" — raqib toshini tekshirish. Emoji almashtirish bepul.'
     : "Figurangiz — yurish va emoji. Bo'sh katak — tosh qo'yish. O'z toshingiz — belgini o'zgartirish (navbatda 1 marta, bepul).";
+  if (ui.mode === 'online' && s.winner === null) {
+    if (!net.oppOnline) hint = "Raqib ulanmagan. U sahifani qayta ochsa, o'yin shu joydan davom etadi.";
+    else if (turnP !== net.seat) hint = "Raqib navbati. Uning emojisi va harakatlari shu yerda ko'rinadi.";
+  }
   $('#hint').textContent = hint;
 }
 function popEmoji(p) {
@@ -1107,11 +1139,12 @@ function overlay(html, solid) {
 function closeOverlay() { $('#overlayRoot').innerHTML = ''; clearInterval(ui.wagerTimer); }
 
 /* ---------- Navbat taymeri ---------- */
+const turnSec = () => ui.mode === 'online' ? (ui.netTimer || 0) : settings.timer;
 function startTimer() {
   stopTimer();
   const el = $('#timer');
-  if (!settings.timer) { el.textContent = '∞'; el.className = 'timer off'; return; }
-  ui.deadline = Date.now() + settings.timer * 1000; ui.lastTickSec = null;
+  if (!turnSec()) { el.textContent = '∞'; el.className = 'timer off'; return; }
+  ui.deadline = Date.now() + turnSec() * 1000; ui.lastTickSec = null;
   const gid = ui.gameId;
   const upd = () => {
     if (gid !== ui.gameId) return stopTimer();
@@ -1124,7 +1157,7 @@ function startTimer() {
   upd(); ui.timerId = setInterval(upd, 200);
 }
 function stopTimer() { clearInterval(ui.timerId); ui.timerId = null; }
-function showIdleTimer() { const el = $('#timer'); el.className = 'timer' + (settings.timer ? '' : ' off'); el.textContent = settings.timer || '∞'; }
+function showIdleTimer() { const el = $('#timer'); el.className = 'timer' + (turnSec() ? '' : ' off'); el.textContent = turnSec() || '∞'; }
 
 /* =================== O'YIN OLDIDAN: rejim → ismlar → o'lcham → shart =================== */
 const setup = { mode: 'pvp' };
@@ -1195,9 +1228,13 @@ function beginTurn() {
   if (s.winner !== null) return;
   if (ui.mode === 'pvp') ui.viewer = p;
   ui.selected = false; ui.placeTarget = null; ui.emojiOpen = false;
+  if (ui.mode === 'online') {
+    ui.viewer = net.seat;
+    if (p !== net.seat) { stopTimer(); ui.locked = true; render(); showIdleTimer(); return; }   // raqib navbati — kutamiz
+  }
   if (!L.canAct(s, p)) {
     toast(`${nameOf(p)}: harakat imkoni yo'q — navbat o'tdi.`);
-    L.passTurn(s, 'pass'); ui.locked = true; render();
+    L.passTurn(s, 'pass'); netSend({ k: 'pass', p }); ui.locked = true; render();
     setTimeout(() => { if (gid === ui.gameId) afterTurnSwitch(); }, 1200);
     return;
   }
@@ -1239,7 +1276,7 @@ function onTimeout() {
   closeSheet(); closeAnalysisIfOpen();
   ui.locked = true; ui.selected = false; ui.placeTarget = null; ui.emojiOpen = false;
   Sound.bad(); toast("Vaqt tugadi! Navbat raqibga o'tdi.", true);
-  L.passTurn(s, 'timeout'); render();
+  L.passTurn(s, 'timeout'); netSend({ k: 'timeout' }); render();
   const gid = ui.gameId;
   setTimeout(() => { if (gid === ui.gameId) afterTurnSwitch(); }, 900);
 }
@@ -1267,6 +1304,7 @@ async function performMove(r, c) {
   const target = L.stoneAt(s, r, c);
   const res = L.applyMove(s, p, r, c);
   if (!res) { ui.locked = false; render(); return; }
+  netSend({ k: res.type, p, r, c, from: res.from });
   if (res.type === 'move') {
     Sound.step(); render(); await sleep(340);
   } else {
@@ -1321,6 +1359,7 @@ async function performPlace(r, c, real, label) {
   const res = L.applyPlace(s, p, r, c, real, label);
   if (!res.ok) { ui.locked = false; render(); placementError(r, c, res); startTimer(); return; }
   ui.justPlaced = L.stoneAt(s, r, c).id;
+  netSend({ k: 'place', p, id: ui.justPlaced });
   Sound.place(); render();
   await sleep(450);
   if (gid !== ui.gameId) return;
@@ -1414,7 +1453,7 @@ function openRelabelSheet(st) {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.label) {
       const res = L.relabel(ui.state, ui.state.turn, st.r, st.c, b.dataset.label);
-      if (res.ok) { Sound.relabel(); toast(`Yangi belgi: ${LABEL_INFO[b.dataset.label].e} ${LABEL_INFO[b.dataset.label].t}`); }
+      if (res.ok) { Sound.relabel(); netSend({ k: 'relabel' }); toast(`Yangi belgi: ${LABEL_INFO[b.dataset.label].e} ${LABEL_INFO[b.dataset.label].t}`); }
     }
     closeSheet(); render();
   });
@@ -1429,7 +1468,7 @@ function buildEmojiStrip() {
 function chooseEmoji(e) {
   const s = ui.state;
   if (!s || ui.locked || isBot(s.turn)) return;
-  if (L.setEmoji(s, s.turn, e)) { Sound.emoji(); render(); }
+  if (L.setEmoji(s, s.turn, e)) { Sound.emoji(); netSend({ k: 'emoji' }); render(); }
 }
 
 /* Tahlil paneli — faqat ochiq ma'lumot (L.analyze yopiq toshlar turini o'qimaydi) */
@@ -1487,8 +1526,11 @@ async function showWin(p) {
   Sound.win(); vibrate([120, 60, 120, 60, 300]); sparks(pieceEls[p], 40);
   await sleep(900); if (gid !== ui.gameId) return;
   if (ui.mode === 'pvp') { ui.viewer = null; render(); }   // o'yin oxirida ham yopiq toshlar sirligicha qoladi
+  if (ui.mode === 'online' && net.winShown === net.g) return;
+  if (ui.mode === 'online') net.winShown = net.g;
   const s = ui.state, loser = 1 - p, w = ui.wager;
-  const title = ui.mode === 'bot' ? (isBot(p) ? 'Bot yutdi!' : `${nameOf(p)}, siz yutdingiz!`) : `${nameOf(p)} yutdi!`;
+  const title = ui.mode === 'bot' ? (isBot(p) ? 'Bot yutdi!' : `${nameOf(p)}, siz yutdingiz!`)
+    : ui.mode === 'online' ? (p === net.seat ? 'Siz yutdingiz!' : `${nameOf(p)} yutdi!`) : `${nameOf(p)} yutdi!`;
   let wHtml = '';
   if (w) {
     let tool = '';
@@ -1508,7 +1550,8 @@ async function showWin(p) {
       <button class="btn primary" id="btnAgain">Revansh</button>
       <button class="btn ghost" id="btnMenu">Bosh menyu</button></div>`);
   if (w) bindWagerTools(ov, w);
-  ov.querySelector('#btnAgain').onclick = () => startGame({ firstTurn: loser, keepWager: true });   // revanshda yutqazgan birinchi yuradi
+  ov.querySelector('#btnAgain').onclick = () => ui.mode === 'online' ? netRematch(loser)
+    : startGame({ firstTurn: loser, keepWager: true });   // revanshda yutqazgan birinchi yuradi
   ov.querySelector('#btnMenu').onclick = quitToMenu;
 }
 const fmtTime = (sec) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
@@ -1543,7 +1586,7 @@ function bindWagerTools(ov, w) {
     Sound.exposed(); sparks(ov.querySelector('.wager-box'), 34);
   };
 }
-function quitToMenu() { ui.gameId++; stopTimer(); closeSheet(); closeOverlay(); ui.state = null; show('menu'); }
+function quitToMenu() { ui.gameId++; stopTimer(); closeSheet(); closeOverlay(); netLeave(); ui.state = null; show('menu'); }
 
 /* ---------- Sozlamalar ekrani ---------- */
 function syncSettingsUI() {
@@ -1580,7 +1623,8 @@ function bindEvents() {
   $('#inCustom').addEventListener('input', e => { settings.custom = e.target.value; saveSettings(); });
   $('#btnStart').onclick = () => {
     if (settings.wager === 'custom' && !(settings.custom || '').trim()) { toast('Shart matnini yozing.', true); $('#inCustom').focus(); return; }
-    Sound.ensure(); startGame();
+    Sound.ensure();
+    if (setup.mode === 'online') createRoom(); else startGame();
   };
   $('#setSize').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; settings.size = b.dataset.v; saveSettings(); renderSizeCards(); });
   $('#setTimer').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; settings.timer = +b.dataset.v; saveSettings(); syncSettingsUI(); });
@@ -1595,7 +1639,206 @@ function bindEvents() {
   $('#btnEmoji').onclick = () => { if (ui.locked) return; ui.emojiOpen = !ui.emojiOpen; render(); };
   $('#emojiStrip').addEventListener('click', e => { const b = e.target.closest('button'); if (b) chooseEmoji(b.dataset.e); });
   $('#btnAnalysis').onclick = openAnalysis;
+  bindOnline();
   $('#board').addEventListener('click', e => { const cell = e.target.closest('.cell'); if (cell) onCellTap(+cell.dataset.r, +cell.dataset.c); });
+}
+
+/* =========================================================
+   ONLAYN REJIM — 2 ta telefon. claude.ai "room" imkoniyati orqali.
+   Har telefon o'yinning to'liq holatini o'z "presence"ida saqlaydi;
+   (g, v) eng katta bo'lgan holat to'g'ri hisoblanadi. Navbatdagi
+   o'yinchigina yozadi, shuning uchun to'qnashuv bo'lmaydi.
+   Eslatma (test versiyasi): holat ikkala telefonga to'liq yuboriladi,
+   ekranda raqib toshlari turi ko'rinmaydi, lekin brauzer
+   dasturchi vositalari orqali o'qish mumkin.
+   ========================================================= */
+const net = { room: null, code: null, seat: null, name: '', g: 0, v: 0, mine: null, busy: false, pending: null,
+  oppOnline: false, winShown: -1, waitT: null };
+const LBX = L.LABELS;
+function packState(s) {
+  const o = { ...s };
+  o.stones = s.stones.map(t => [t.id, t.r, t.c, t.owner, t.real ? 1 : 0, t.revealed ? 1 : 0, LBX.indexOf(t.label)]);
+  o.revealHistory = s.revealHistory.map(h => [h.owner, LBX.indexOf(h.label), h.real ? 1 : 0]);
+  o.log = s.log.slice(-12);
+  return o;
+}
+function unpackState(o) {
+  const s = JSON.parse(JSON.stringify(o));
+  s.stones = o.stones.map(a => ({ id: a[0], r: a[1], c: a[2], owner: a[3], real: !!a[4], revealed: !!a[5], label: LBX[a[6]] || 'neutral' }));
+  s.revealHistory = o.revealHistory.map(a => ({ owner: a[0], label: LBX[a[1]] || 'neutral', real: !!a[2] }));
+  return s;
+}
+async function netConnect() {
+  if (net.room) return net.room;
+  if (!window.claude || typeof window.claude.use !== 'function') return null;
+  let room = null;
+  try { room = await window.claude.use('room'); } catch (e) { room = null; }
+  if (!room) return null;
+  net.room = room;
+  room.onPeers(onNetPeers, (e) => toast('Onlayn aloqa uzildi: ' + e.code, true));
+  return room;
+}
+function setPresence(payload) {
+  net.mine = payload;
+  if (net.room) net.room.presence({ kor: payload }).catch(e => toast('Yuborib bo\'lmadi: ' + (e && e.code), true));
+}
+/** Har bir harakatdan keyin chaqiriladi: yangi holatni raqibga yuborish */
+function netSend(last) {
+  if (ui.mode !== 'online' || !net.room) return;
+  net.v++;
+  setPresence({ code: net.code, seat: net.seat, name: net.name, g: net.g, v: net.v, a: net.seat, st: packState(ui.state),
+    w: ui.wager, tm: ui.netTimer, nm: ui.names, last: last || null });
+}
+const others = () => (net.room ? net.room.peers() : []).filter(p => !p.sameTab && p.presence && p.presence.kor && p.presence.kor.code === net.code);
+// (g, v) taqqoslash; bir xil bo'lsa (ikkalasi bir vaqtda revansh bosganda) 1-o'yinchi muallif bo'lgan holat yutadi.
+// a — holat muallifi; qabul qilingan nusxa muallifni saqlaydi, shuning uchun bir xil holat qayta qabul qilinmaydi.
+const curKey = () => ({ g: net.g, v: net.v, a: net.mine && net.mine.a !== undefined ? net.mine.a : net.seat });
+const newer = (x, y) => x.g > y.g || (x.g === y.g && (x.v > y.v || (x.v === y.v && x.a === 0 && y.a === 1)));
+
+function onNetPeers() {
+  if (!net.code) return;
+  const os = others();
+  net.oppOnline = os.some(o => o.presence.kor.seat === 1 - net.seat);
+  // 1) Eng yangi holatni olish
+  let best = null;
+  for (const o of os) { const k = o.presence.kor; if (k.st && k.g > 0 && newer(k, best || curKey())) best = k; }
+  if (best) { net.pending = best; drainPending(); }
+  // 2) Xona egasi: raqib keldi va hali o'yin yo'q — boshlaymiz
+  else if (net.seat === 0 && net.g === 0) {
+    const guest = os.find(o => o.presence.kor.seat === 1);
+    if (guest && !os.some(o => o.presence.kor.g > 0)) hostStart(String(guest.presence.kor.name || '').slice(0, 14));
+  }
+  if (ui.mode === 'online' && ui.state) render();
+}
+async function drainPending() {
+  if (net.busy) return;
+  net.busy = true;
+  try {
+    while (net.pending) { const pl = net.pending; net.pending = null; if (newer(pl, curKey())) await adoptRemote(pl); }
+  } finally { net.busy = false; }
+}
+/** Raqibdan kelgan holatni qabul qilish (kerak bo'lsa animatsiya bilan) */
+async function adoptRemote(pl) {
+  const st = unpackState(pl.st);
+  const isNewGame = pl.g !== net.g || !ui.state || ui.mode !== 'online';
+  net.g = pl.g; net.v = pl.v;
+  if (isNewGame) {
+    ui.names = pl.nm; ui.wager = pl.w; ui.netTimer = pl.tm; ui.state = st;
+    enterOnlineGame();
+  } else {
+    const last = pl.last, oppActed = last && last.p !== undefined && last.p !== net.seat;
+    if (oppActed && (last.k === 'fake' || last.k === 'real')) await playRemoteChallenge(last);
+    if (oppActed && last.k === 'place') ui.justPlaced = last.id;
+    ui.state = st;
+    render();
+    if (oppActed) {
+      if (last.k === 'move') Sound.step();
+      if (last.k === 'place') Sound.place();
+      if (last.k === 'fake') { Sound.exposed(); sparks(cellEl(last.r, last.c)); banner("Blefingiz fosh bo'ldi!", 'Raqib yana yuradi', 'gold'); }
+      if (last.k === 'real') { Sound.caught(); shake(); vibrate([90, 60, 160]); banner('Raqib ushlandi!', 'Toshingiz haqiqiy edi', 'red'); }
+    }
+    if (last && last.k === 'emoji') Sound.emoji();
+  }
+  // Nusxani o'zimizda ham saqlaymiz (raqib sahifani yangilasa, holat yo'qolmaydi)
+  setPresence({ ...pl, seat: net.seat, name: net.name });
+  if (ui.state.winner !== null) showWin(ui.state.winner);
+  else beginTurn();
+}
+async function playRemoteChallenge(last) {
+  const cell = cellEl(last.r, last.c), se = cell && cell.querySelector('.stone');
+  if (!se) return;
+  const back = se.querySelector('.face.back');
+  back.className = 'face back ' + last.k; back.textContent = last.k === 'fake' ? '✕' : '';
+  if (last.from) nudgePiece(1 - net.seat, last.from, { r: last.r, c: last.c });
+  Sound.flip(); await sleep(30); se.classList.add('flip'); await sleep(700);
+  if (last.k === 'fake') { se.classList.add('vanish'); await sleep(330); }
+}
+function enterOnlineGame() {
+  ui.gameId++;
+  stopTimer(); closeOverlay(); closeSheet();
+  ui.mode = 'online'; ui.viewer = net.seat;
+  ui.selected = false; ui.placeTarget = null; ui.emojiOpen = false; ui.logMark = 0; ui.locked = true;
+  $('#banner').className = 'banner'; $('#toast').classList.add('off');
+  const wb = $('#wagerBar');
+  wb.classList.toggle('hidden', !ui.wager); wb.textContent = wagerBarText(ui.wager);
+  show('game'); buildBoard(ui.state.n); buildEmojiStrip(); render(); showIdleTimer();
+  beginTurn();
+}
+function hostStart(guestName) {
+  clearTimeout(net.waitT);
+  ui.names = [net.name, guestName || "2-o'yinchi"];
+  ui.wager = buildWager(); ui.netTimer = settings.timer;
+  ui.state = L.createState(settings.size, 0);
+  net.g = 1; net.v = 0;
+  enterOnlineGame();
+  netSend(null);
+  Sound.win();
+}
+function netRematch(firstTurn) {
+  if (ui.mode !== 'online') return;
+  ui.wager = ui.wager && !ui.wager.secret ? ui.wager : buildWager();
+  ui.state = L.createState(ui.state.size, firstTurn);
+  net.g++; net.v = 0;
+  enterOnlineGame();
+  netSend(null);
+}
+function saveSession() { try { localStorage.setItem('kor-online', JSON.stringify({ code: net.code, seat: net.seat, name: net.name })); } catch (e) {} }
+function loadSession() { try { return JSON.parse(localStorage.getItem('kor-online') || 'null'); } catch (e) { return null; } }
+function myOnlineName() {
+  const n = $('#inNameOn').value.trim();
+  settings.meName = n; saveSettings();
+  return n || 'Mehmon';
+}
+function waitingOverlay(title, body) {
+  const ov = overlay(`<div class="modal"><h3>${title}</h3>${body}<button class="btn ghost" id="btnNetCancel">Bekor qilish</button></div>`);
+  ov.querySelector('#btnNetCancel').onclick = () => { closeOverlay(); netLeave(); };
+  return ov;
+}
+function noRoomSupport() {
+  toast("Onlayn rejim faqat sahifa claude.ai havolasi orqali ochilganda ishlaydi.", true);
+}
+async function createRoom() {
+  const room = await netConnect();
+  if (!room) return noRoomSupport();
+  net.code = String(1000 + Math.floor(Math.random() * 9000));
+  net.seat = 0; net.g = 0; net.v = 0; net.winShown = -1; net.name = settings.meName || 'Mehmon';
+  saveSession();
+  setPresence({ code: net.code, seat: 0, name: net.name, g: 0, v: 0 });
+  waitingOverlay('Xona tayyor', `<p>Do'stingiz o'z telefonida shu sahifani ochib, <b>Onlayn · 2 telefon</b> → <b>Qo'shilish</b> ga quyidagi kodni kiritsin:</p>
+    <div class="big-timer" style="letter-spacing:.2em">${net.code}</div><p>Raqib kutilmoqda…</p>`);
+  onNetPeers();
+}
+async function joinRoom(code, seat, name) {
+  if (!/^\d{4}$/.test(code)) return toast('Kod 4 ta raqamdan iborat bo\'lishi kerak.', true);
+  const room = await netConnect();
+  if (!room) return noRoomSupport();
+  net.code = code; net.seat = seat; net.g = 0; net.v = 0; net.winShown = -1; net.name = name;
+  ui.state = null; ui.mode = 'menu';
+  saveSession();
+  setPresence({ code, seat, name, g: 0, v: 0 });
+  const ov = waitingOverlay('Ulanmoqda…', `<p>Xona: <b>${esc(code)}</b></p><p id="netStatus">Raqib qidirilmoqda…</p>`);
+  clearTimeout(net.waitT);
+  net.waitT = setTimeout(() => {
+    const el = ov.querySelector('#netStatus');
+    if (el && net.g === 0 && !others().length) el.textContent = "Bu kodli xona hozircha topilmadi. Kodni tekshiring yoki do'stingiz xonani ochiq tutsin.";
+  }, 7000);
+  onNetPeers();
+}
+function netLeave() {
+  if (net.room && net.code) net.room.presence({ kor: null }).catch(() => {});
+  clearTimeout(net.waitT);
+  net.code = null; net.g = 0; net.v = 0; net.pending = null;
+}
+function bindOnline() {
+  $('#btnCreateRoom').onclick = () => { Sound.ensure(); myOnlineName(); setup.mode = 'online'; renderSizeCards(); renderWagerCards(); show('setupSize'); };
+  $('#btnJoinRoom').onclick = () => { Sound.ensure(); joinRoom($('#inCode').value.trim(), 1, myOnlineName()); };
+  $('#btnResume').onclick = () => { const ss = loadSession(); if (ss) { Sound.ensure(); joinRoom(ss.code, ss.seat, ss.name || myOnlineName()); } };
+  document.querySelector('[data-go="online"]').addEventListener('click', () => {
+    $('#inNameOn').value = settings.meName || '';
+    const ss = loadSession();
+    $('#btnResume').classList.toggle('hidden', !ss);
+    if (ss) $('#btnResume').textContent = `Oxirgi xonaga qaytish (${ss.code})`;
+  });
 }
 
 loadSettings(); syncSettingsUI(); bindEvents();
