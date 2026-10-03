@@ -1,122 +1,211 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="uz" data-theme="gold">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#070a12">
-<title>KO'R — blef o'yini</title>
+<title>KO'R — IQ jang va blef</title>
 <style>
 /* =========================================================
    KO'R — 2 kishilik strategik blef o'yini
-   Uslub: to'q fon, oltin aksentlar. Mobile-first.
+   Barcha ranglar CSS o'zgaruvchilari orqali (5 ta dizayn).
    ========================================================= */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{
-  --bg:#070a12; --bg2:#0c1324; --surface:#111a2e; --surface2:#17223a; --line:#24314d;
-  --text:#ece6d6; --muted:#8c94a8;
-  --gold:#e3b04b; --gold2:#f7d98a; --gold-dim:rgba(227,176,75,.18);
-  --red:#e0474f; --red2:#ff8a8f; --red-dim:rgba(224,71,79,.18);
-  --p0:var(--gold); --p0b:var(--gold2); --p1:var(--red); --p1b:var(--red2);
-  --radius:14px;
-  --board:min(calc(100vw - 32px), calc(100vh - 290px), 520px);
+
+/* ---------- 1. Oltin va Qora (asosiy) ---------- */
+:root,[data-theme="gold"]{
+  color-scheme:dark;
+  --bg:#070a12; --bg-grad:radial-gradient(120% 80% at 50% 0%,#121c36 0%,#070a12 60%);
+  --surface:#111a2e; --surface2:#17223a; --field:#0c1324; --line:#24314d; --text:#ece6d6; --muted:#8c94a8;
+  --accent:#e3b04b; --accent2:#f7d98a; --accent-ink:#1a1205; --accent-grad:linear-gradient(180deg,#f0c766,#c8922e);
+  --p0:#e3b04b; --p0b:#f7d98a; --p0hi:#fff3c4; --p0lo:#8a5e14;
+  --p1:#e0474f; --p1b:#ff8a8f; --p1hi:#ffd0d2; --p1lo:#6e161b;
+  --hl0:#e3b04b; --hl1:#e0474f;
+  --cell-a:#0d1426; --cell-b:#0a1020; --grid:rgba(120,140,190,.16); --board-border:#2a3756; --board-glow:0 20px 60px rgba(0,0,0,.5);
+  --stone-a:#2c3a5c; --stone-b:#141c30; --stone-ink:#f7d98a; --wall-a:#3a3f4e; --wall-b:#20242f;
+  --goal0:rgba(227,176,75,.14); --goal1:rgba(224,71,79,.14);
+  --danger:#e0474f; --ok:#3ccf7a; --overlay:rgba(4,6,12,.74); --solid:radial-gradient(100% 70% at 50% 30%,#141e3a,#05070d);
 }
-@supports (height:100dvh){ :root{ --board:min(calc(100vw - 32px), calc(100dvh - 290px), 520px); } }
+/* ---------- 2. Matador ---------- */
+[data-theme="matador"]{
+  color-scheme:dark;
+  --bg:#0a0505; --bg-grad:radial-gradient(120% 80% at 50% 0%,#3a0b10 0%,#0a0505 62%);
+  --surface:#170b0c; --surface2:#221012; --field:#120708; --line:#45161b; --text:#f6ebe4; --muted:#b08a86;
+  --accent:#e2333f; --accent2:#ff7b82; --accent-ink:#fff; --accent-grad:linear-gradient(180deg,#ef4752,#9b111c);
+  --p0:#e0aa45; --p0b:#f6d48a; --p0hi:#fff1c8; --p0lo:#7e5612;
+  --p1:#d81f2c; --p1b:#ff6a73; --p1hi:#ffc2c6; --p1lo:#5c050c;
+  --hl0:#f6d48a; --hl1:#ff4b57;
+  --cell-a:#1d0a0c; --cell-b:#0b0505; --grid:rgba(226,51,63,.18); --board-border:#7a1a22; --board-glow:0 0 40px rgba(216,31,44,.25),0 20px 60px rgba(0,0,0,.6);
+  --stone-a:#3b1418; --stone-b:#140607; --stone-ink:#ffd6d9; --wall-a:#4a2a2c; --wall-b:#1e0e0f;
+  --goal0:rgba(224,170,69,.14); --goal1:rgba(216,31,44,.2);
+  --danger:#ff2d3a; --ok:#3ccf7a; --overlay:rgba(10,2,3,.78); --solid:radial-gradient(100% 70% at 50% 30%,#3a0b10,#050202);
+}
+/* ---------- 3. Yog'och ---------- */
+[data-theme="wood"]{
+  color-scheme:dark;
+  --bg:#1a120b; --bg-grad:radial-gradient(120% 80% at 50% 0%,#4a301b 0%,#1a120b 62%);
+  --surface:#2a1d12; --surface2:#35251a; --field:#22170e; --line:#5a412a; --text:#f6ead6; --muted:#c0a684;
+  --accent:#e0a85c; --accent2:#f5d39c; --accent-ink:#2a1606; --accent-grad:linear-gradient(180deg,#eebc74,#b47a33);
+  --p0:#efe2c6; --p0b:#fff4dc; --p0hi:#ffffff; --p0lo:#a8916a;
+  --p1:#3b2a1f; --p1b:#e8a77a; --p1hi:#8a6a52; --p1lo:#0f0805;
+  --hl0:#fff1cf; --hl1:#ff6a2b;
+  --cell-a:repeating-linear-gradient(100deg,rgba(120,70,20,.10) 0 2px,transparent 2px 7px),linear-gradient(135deg,#e8c592,#d3a465 45%,#e0b67c 70%,#cc9b5e);
+  --cell-b:repeating-linear-gradient(100deg,rgba(0,0,0,.12) 0 2px,transparent 2px 6px),linear-gradient(135deg,#8c5b33,#6c4123 50%,#7f4f2b);
+  --grid:rgba(40,20,5,.35); --board-border:#3a2312; --board-glow:0 0 0 6px #4a2c16,0 20px 60px rgba(0,0,0,.6);
+  --stone-a:#4e5a66; --stone-b:#20262d; --stone-ink:#fff1cf; --wall-a:#5c6670; --wall-b:#2a3036;
+  --goal0:rgba(255,240,200,.18); --goal1:rgba(60,20,0,.22);
+  --danger:#e5482f; --ok:#4fd07f; --overlay:rgba(20,12,6,.78); --solid:radial-gradient(100% 70% at 50% 30%,#4a301b,#120c07);
+}
+/* ---------- 4. Neon ---------- */
+[data-theme="neon"]{
+  color-scheme:dark;
+  --bg:#05010f; --bg-grad:radial-gradient(120% 80% at 50% 0%,#24074d 0%,#05010f 60%);
+  --surface:#0e0820; --surface2:#160c30; --field:#0a0518; --line:#3d2275; --text:#f1eaff; --muted:#a493d1;
+  --accent:#b14dff; --accent2:#e3b0ff; --accent-ink:#fff; --accent-grad:linear-gradient(180deg,#c76bff,#6c22ff);
+  --p0:#1fe3ff; --p0b:#9ff3ff; --p0hi:#e3fdff; --p0lo:#056a80;
+  --p1:#ff3dbb; --p1b:#ff9ddd; --p1hi:#ffe0f5; --p1lo:#6e0750;
+  --hl0:#1fe3ff; --hl1:#ff3dbb;
+  --cell-a:#0c0620; --cell-b:#08041a; --grid:rgba(160,90,255,.45); --board-border:#a15cff; --board-glow:0 0 24px rgba(161,92,255,.55),0 0 60px rgba(31,227,255,.15);
+  --stone-a:#2c1460; --stone-b:#110628; --stone-ink:#e3b0ff; --wall-a:#3a2a62; --wall-b:#140a2c;
+  --goal0:rgba(31,227,255,.13); --goal1:rgba(255,61,187,.13);
+  --danger:#ff2d6f; --ok:#3cffb0; --overlay:rgba(3,0,10,.78); --solid:radial-gradient(100% 70% at 50% 30%,#24074d,#030008);
+}
+/* ---------- 5. Marmar (yorug') ---------- */
+[data-theme="marble"]{
+  color-scheme:light;
+  --bg:#e7e4de; --bg-grad:radial-gradient(120% 80% at 50% 0%,#ffffff 0%,#e2ded6 65%);
+  --surface:#ffffff; --surface2:#f7f5f1; --field:#f1eee8; --line:#d6d0c4; --text:#2a2926; --muted:#7a756c;
+  --accent:#b08a35; --accent2:#7d5f17; --accent-ink:#fff; --accent-grad:linear-gradient(180deg,#d6b462,#a37c26);
+  --p0:#c9a14a; --p0b:#8a6a1c; --p0hi:#fff4d6; --p0lo:#7d5f17;
+  --p1:#7b1f2c; --p1b:#8f2433; --p1hi:#e2a1aa; --p1lo:#3a0b12;
+  --hl0:#b08a35; --hl1:#9b2738;
+  --cell-a:linear-gradient(125deg,transparent 40%,rgba(150,145,140,.18) 42%,transparent 46%),linear-gradient(135deg,#fdfcfa,#efede8 50%,#f9f8f5);
+  --cell-b:linear-gradient(60deg,transparent 30%,rgba(90,90,90,.16) 33%,transparent 37%),linear-gradient(135deg,#dcd8d1,#cbc6bd 50%,#e0ddd6);
+  --grid:rgba(0,0,0,.08); --board-border:#b9b2a4; --board-glow:0 16px 40px rgba(80,70,50,.25);
+  --stone-a:#646b78; --stone-b:#30353e; --stone-ink:#fff4d6; --wall-a:#8a8f99; --wall-b:#4b505a;
+  --goal0:rgba(201,161,74,.18); --goal1:rgba(123,31,44,.14);
+  --danger:#c0303f; --ok:#2f9e5e; --overlay:rgba(235,232,226,.8); --solid:radial-gradient(100% 70% at 50% 30%,#ffffff,#d9d4ca);
+}
+
+/* Maydon o'lchami: ekran eni va bo'yiga qarab avtomatik kichrayadi */
+:root{ --board:min(calc(100vw - 32px), calc(100vh - 330px), 560px); }
+@supports (height:100dvh){ :root{ --board:min(calc(100vw - 32px), calc(100dvh - 330px), 560px); } }
 html,body{height:100%;overflow-x:hidden}
-body{
-  background:radial-gradient(120% 80% at 50% 0%, #121c36 0%, var(--bg) 60%) fixed, var(--bg);
-  color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  touch-action:manipulation; user-select:none; -webkit-user-select:none;
-  min-height:100vh; min-height:100dvh;
-}
+body{background:var(--bg-grad) fixed,var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  touch-action:manipulation;user-select:none;-webkit-user-select:none;min-height:100vh;min-height:100dvh;transition:background .3s,color .3s}
 button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
 .hidden{display:none !important}
+.muted{color:var(--muted)}
 
-/* ---------- Umumiy ekranlar ---------- */
+/* ---------- Ekranlar ---------- */
 .screen{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;
-  padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));}
-.wrap{width:100%;max-width:520px}
-.logo{font-size:clamp(56px,18vw,92px);font-weight:800;letter-spacing:.08em;margin-top:8vh;
-  background:linear-gradient(180deg,var(--gold2),var(--gold) 55%,#9a6f1c);-webkit-background-clip:text;background-clip:text;color:transparent;
-  text-shadow:0 0 40px rgba(227,176,75,.15);text-align:center}
-.tagline{color:var(--muted);text-align:center;margin:6px 0 40px;font-size:15px;letter-spacing:.04em}
-.eye-big{display:block;margin:0 auto -10px;width:64px;height:64px;color:var(--gold);opacity:.9;animation:blink 5s infinite}
+  padding:max(14px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom))}
+.wrap{width:100%;max-width:560px}
+.logo{font-size:clamp(56px,18vw,92px);font-weight:800;letter-spacing:.08em;margin-top:6vh;text-align:center;
+  background:linear-gradient(180deg,var(--accent2),var(--accent) 55%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tagline{color:var(--muted);text-align:center;margin:6px 0 34px;font-size:15px;letter-spacing:.04em}
+.eye-big{display:block;margin:0 auto -10px;width:64px;height:64px;color:var(--accent);animation:blink 5s infinite}
 @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
-.btn{display:block;width:100%;padding:16px 18px;margin:10px 0;border-radius:var(--radius);
-  background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line);
-  font-size:17px;font-weight:600;letter-spacing:.02em;transition:transform .12s, border-color .2s, box-shadow .2s}
+.btn{display:block;width:100%;padding:15px 18px;margin:10px 0;border-radius:14px;background:linear-gradient(180deg,var(--surface2),var(--surface));
+  border:1px solid var(--line);font-size:17px;font-weight:600;transition:transform .12s,border-color .2s}
 .btn:active{transform:scale(.97)}
-.btn:hover{border-color:rgba(227,176,75,.5)}
-.btn.primary{background:linear-gradient(180deg,#f0c766,#c8922e);color:#1a1205;border-color:#f7d98a;box-shadow:0 6px 24px rgba(227,176,75,.25)}
+.btn.primary{background:var(--accent-grad);color:var(--accent-ink);border-color:var(--accent2);box-shadow:0 6px 24px color-mix(in srgb,var(--accent) 30%,transparent)}
 .btn.ghost{background:transparent}
 .btn.small{padding:10px 14px;font-size:15px;margin:0}
 .btn:disabled{opacity:.35;pointer-events:none}
-h2{font-size:24px;color:var(--gold2);margin:12px 0 16px;letter-spacing:.03em}
-.topbar{display:flex;align-items:center;gap:10px;width:100%;max-width:520px}
+h2{font-size:24px;color:var(--accent2);margin:10px 0 6px}
+.step{color:var(--muted);font-size:13px;margin-bottom:14px;letter-spacing:.05em;text-transform:uppercase}
+.topbar{display:flex;align-items:center;gap:8px;width:100%;max-width:560px}
 .icon-btn{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);font-size:18px;flex:none}
 .icon-btn:active{transform:scale(.94)}
-.card{background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
-.rules li{margin:0 0 14px 22px;line-height:1.5;color:#d7d1c2}
-.rules li b{color:var(--gold2)}
+.card{background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.rules li{margin:0 0 13px 22px;line-height:1.5}
+.rules li b{color:var(--accent2)}
 .setting-row{display:flex;flex-direction:column;gap:10px}
-.setting-row label{font-weight:600;color:var(--gold2)}
+.setting-row>label{font-weight:700;color:var(--accent2)}
 .seg{display:flex;gap:6px;flex-wrap:wrap}
-.seg button{flex:1;min-width:60px;padding:11px 8px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);font-weight:600}
-.seg button.on{background:var(--gold-dim);border-color:var(--gold);color:var(--gold2)}
-input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--text);font-size:16px;user-select:text;-webkit-user-select:text}
+.seg button{flex:1;min-width:58px;padding:11px 6px;border-radius:10px;background:var(--field);border:1px solid var(--line);font-weight:600;font-size:14px}
+.seg button.on{background:color-mix(in srgb,var(--accent) 20%,transparent);border-color:var(--accent);color:var(--accent2)}
+input[type=text]{width:100%;padding:13px;border-radius:10px;border:1px solid var(--line);background:var(--field);color:var(--text);font-size:16px;user-select:text;-webkit-user-select:text}
+input[type=text]:focus{outline:2px solid var(--accent);outline-offset:1px}
+.field-label{font-size:13px;color:var(--muted);margin:10px 0 6px;display:block}
+
+/* O'lcham va shart kartalari */
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.pick{text-align:left;padding:13px;border-radius:14px;background:linear-gradient(180deg,var(--surface2),var(--surface));border:1.5px solid var(--line);
+  line-height:1.35;transition:transform .12s,border-color .2s,box-shadow .2s;min-height:64px}
+.pick:active{transform:scale(.97)}
+.pick.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
+.pick .em{font-size:24px;display:block;margin-bottom:4px}
+.pick b{display:block;font-size:15px}
+.pick small{color:var(--muted);font-size:12.5px}
+/* Dizayn preview (har karta o'z data-theme o'zgaruvchilari bilan chiziladi) */
+.theme-card{padding:10px;border-radius:14px;background:var(--surface);border:1.5px solid var(--line);color:var(--text);text-align:center}
+.theme-card.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 40%,transparent)}
+.mini{display:grid;grid-template-columns:repeat(4,1fr);aspect-ratio:1;border-radius:8px;overflow:hidden;border:2px solid var(--board-border);margin-bottom:8px;position:relative}
+.mini i{background:var(--cell-a)} .mini i.dk{background:var(--cell-b)}
+.mini b{position:absolute;width:22%;height:22%;border-radius:50%}
+.mini .d0{left:52%;top:77%;background:radial-gradient(circle at 35% 30%,var(--p0hi),var(--p0) 50%,var(--p0lo))}
+.mini .d1{left:27%;top:2%;background:radial-gradient(circle at 35% 30%,var(--p1hi),var(--p1) 50%,var(--p1lo))}
+.mini .ds{left:52%;top:40%;border-radius:5px;background:radial-gradient(circle at 40% 30%,var(--stone-a),var(--stone-b))}
+.theme-card span{font-size:13px;font-weight:700}
 
 /* ---------- O'yin ekrani ---------- */
-#game{padding-top:max(10px,env(safe-area-inset-top))}
-.turnbar{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:12px;
-  background:var(--surface);border:1px solid var(--line);font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:border-color .3s, box-shadow .3s, color .3s}
+#game{padding-top:max(8px,env(safe-area-inset-top))}
+.turnbar{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:12px;background:var(--surface);
+  border:1px solid var(--line);font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;transition:border-color .3s,box-shadow .3s,color .3s}
+.turnbar span:last-child{overflow:hidden;text-overflow:ellipsis}
 .turnbar .dot{width:10px;height:10px;border-radius:50%;flex:none}
-.turnbar.t0{color:var(--p0b);border-color:var(--p0);box-shadow:0 0 18px var(--gold-dim)}
-.turnbar.t1{color:var(--p1b);border-color:var(--p1);box-shadow:0 0 18px var(--red-dim)}
+.turnbar.t0{color:var(--p0b);border-color:var(--p0);box-shadow:0 0 16px color-mix(in srgb,var(--p0) 30%,transparent)}
+.turnbar.t1{color:var(--p1b);border-color:var(--p1);box-shadow:0 0 16px color-mix(in srgb,var(--p1) 30%,transparent)}
 .turnbar.t0 .dot{background:var(--p0)} .turnbar.t1 .dot{background:var(--p1)}
-.timer{flex:none;min-width:52px;height:42px;padding:0 10px;border-radius:12px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);font-weight:800;font-variant-numeric:tabular-nums;font-size:17px}
-.timer.danger{color:#fff;background:var(--red);border-color:var(--red2);animation:tremble .25s infinite}
-.timer.off{color:var(--muted);font-size:13px}
+.timer{flex:none;min-width:50px;height:42px;padding:0 8px;border-radius:12px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);font-weight:800;font-variant-numeric:tabular-nums;font-size:17px}
+.timer.danger{color:#fff;background:var(--danger);border-color:var(--danger);animation:tremble .25s infinite}
+.timer.off{color:var(--muted);font-size:15px}
 @keyframes tremble{0%,100%{transform:translate(0,0) rotate(0)}25%{transform:translate(-1.5px,1px) rotate(-2deg)}75%{transform:translate(1.5px,-1px) rotate(2deg)}}
-
-.panels{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:520px;margin:10px 0}
-.panel{border-radius:12px;padding:9px 10px;background:var(--surface);border:1px solid var(--line);font-size:12.5px;line-height:1.45;transition:box-shadow .3s,border-color .3s;min-width:0}
+.wagerbar{margin:8px auto 0;max-width:min(560px,100%);padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;text-align:center;
+  background:color-mix(in srgb,var(--accent) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);color:var(--accent2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:560px;margin:8px 0}
+.panel{border-radius:12px;padding:8px 10px;background:var(--surface);border:1px solid var(--line);font-size:12.5px;line-height:1.45;min-width:0;transition:box-shadow .3s,border-color .3s}
 .panel .name{font-weight:800;font-size:14px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .panel .name i{width:10px;height:10px;border-radius:50%;flex:none}
 .panel.p0 .name{color:var(--p0b)} .panel.p0 .name i{background:var(--p0)}
 .panel.p1 .name{color:var(--p1b)} .panel.p1 .name i{background:var(--p1)}
-.panel.active.p0{border-color:var(--p0);box-shadow:0 0 16px var(--gold-dim)}
-.panel.active.p1{border-color:var(--p1);box-shadow:0 0 16px var(--red-dim)}
-.panel .muted{color:var(--muted)}
-.panel b{color:var(--text)}
+.panel.active.p0{border-color:var(--p0);box-shadow:0 0 14px color-mix(in srgb,var(--p0) 30%,transparent)}
+.panel.active.p1{border-color:var(--p1);box-shadow:0 0 14px color-mix(in srgb,var(--p1) 30%,transparent)}
 
-.board-wrap{position:relative;width:var(--board);height:var(--board);margin:4px auto 0;flex:none}
-#board{position:relative;width:100%;height:100%;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);
-  border-radius:16px;overflow:hidden;background:#0a1020;border:1px solid #2a3756;box-shadow:0 20px 60px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.02);transition:box-shadow .35s}
-#board.t0{box-shadow:0 0 0 2px rgba(227,176,75,.55),0 20px 60px rgba(0,0,0,.5)}
-#board.t1{box-shadow:0 0 0 2px rgba(224,71,79,.55),0 20px 60px rgba(0,0,0,.5)}
-.cell{position:relative;box-shadow:inset 0 0 0 .5px rgba(120,140,190,.14);cursor:pointer}
-.cell:nth-child(odd){background:rgba(255,255,255,.012)}
-.cell.goal0{background:linear-gradient(180deg,rgba(227,176,75,.13),rgba(227,176,75,.04))}
-.cell.goal1{background:linear-gradient(0deg,rgba(224,71,79,.13),rgba(224,71,79,.04))}
-/* Yurish mumkin bo'lgan kataklar */
-.cell.hl::after{content:"";position:absolute;inset:36%;border-radius:50%;background:var(--hl,var(--gold));opacity:.75;animation:pulse 1.1s infinite ease-in-out;pointer-events:none}
-.cell.hl-ch::after{content:"?";position:absolute;inset:6%;border-radius:24%;border:2px dashed var(--hl,var(--gold));display:grid;place-items:center;font-weight:900;font-size:calc(var(--board)/16);color:var(--hl,var(--gold));animation:pulse 1.1s infinite ease-in-out;pointer-events:none;z-index:3}
-.cell.place-target{box-shadow:inset 0 0 0 2px var(--hl,var(--gold))}
+.board-wrap{position:relative;width:var(--board);height:var(--board);margin:2px auto 0;flex:none;--cell:calc(var(--board) / var(--n,7))}
+#board{position:relative;width:100%;height:100%;display:grid;grid-template-columns:repeat(var(--n,7),1fr);grid-template-rows:repeat(var(--n,7),1fr);
+  border-radius:14px;overflow:hidden;border:1px solid var(--board-border);box-shadow:var(--board-glow);transition:box-shadow .35s}
+#board.t0{box-shadow:0 0 0 2px color-mix(in srgb,var(--p0) 70%,transparent),var(--board-glow)}
+#board.t1{box-shadow:0 0 0 2px color-mix(in srgb,var(--p1) 70%,transparent),var(--board-glow)}
+.cell{position:relative;background:var(--cell-a);box-shadow:inset 0 0 0 .5px var(--grid);cursor:pointer}
+.cell.dk{background:var(--cell-b)}
+.cell.goal0::before,.cell.goal1::before{content:"";position:absolute;inset:0;pointer-events:none}
+.cell.goal0::before{background:linear-gradient(180deg,var(--goal0),transparent)}
+.cell.goal1::before{background:linear-gradient(0deg,var(--goal1),transparent)}
+.cell.hl::after{content:"";position:absolute;inset:34%;border-radius:50%;background:var(--hl);opacity:.8;animation:pulse 1.1s infinite ease-in-out;pointer-events:none;box-shadow:0 0 8px var(--hl)}
+.cell.hl-ch::after{content:"?";position:absolute;inset:4%;border-radius:24%;border:2px dashed var(--hl);display:grid;place-items:center;font-weight:900;
+  font-size:calc(var(--cell)*.42);color:var(--hl);animation:pulse 1.1s infinite ease-in-out;pointer-events:none;z-index:4;text-shadow:0 0 6px rgba(0,0,0,.8)}
+.cell.place-target{box-shadow:inset 0 0 0 2px var(--hl)}
 .cell.bad{animation:badflash .5s}
-@keyframes badflash{0%,100%{background:transparent}30%{background:rgba(224,71,79,.45)}}
-@keyframes pulse{0%,100%{transform:scale(.85);opacity:.55}50%{transform:scale(1.05);opacity:.95}}
+@keyframes badflash{30%{box-shadow:inset 0 0 0 100px color-mix(in srgb,var(--danger) 50%,transparent)}}
+@keyframes pulse{0%,100%{transform:scale(.85);opacity:.6}50%{transform:scale(1.05);opacity:1}}
 
-/* Figuralar: silliq surilish transform orqali */
-.piece{position:absolute;left:0;top:0;width:calc(100%/7);height:calc(100%/7);z-index:5;pointer-events:none;
-  transition:transform .32s cubic-bezier(.3,.8,.3,1.1)}
-.piece .tok{position:absolute;inset:13%;border-radius:50%;display:grid;place-items:center}
-.piece.p0 .tok{background:radial-gradient(circle at 35% 30%,#fff3c4,var(--gold) 45%,#8a5e14);box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 18px rgba(227,176,75,.4)}
-.piece.p1 .tok{background:radial-gradient(circle at 35% 30%,#ffd0d2,var(--red) 45%,#6e161b);box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 18px rgba(224,71,79,.4)}
-.piece .tok::after{content:"";width:38%;height:38%;border-radius:50%;border:2px solid rgba(0,0,0,.35);background:rgba(255,255,255,.15)}
+/* Figuralar (emoji bilan) */
+.piece{position:absolute;left:0;top:0;width:calc(100% / var(--n,7));height:calc(100% / var(--n,7));z-index:5;pointer-events:none;transition:transform .32s cubic-bezier(.3,.8,.3,1.1)}
+.piece .tok{position:absolute;inset:8%;border-radius:50%;display:grid;place-items:center}
+.piece.p0 .tok{background:radial-gradient(circle at 35% 30%,var(--p0hi),var(--p0) 50%,var(--p0lo));box-shadow:0 3px 10px rgba(0,0,0,.55),0 0 14px color-mix(in srgb,var(--p0) 50%,transparent)}
+.piece.p1 .tok{background:radial-gradient(circle at 35% 30%,var(--p1hi),var(--p1) 50%,var(--p1lo));box-shadow:0 3px 10px rgba(0,0,0,.55),0 0 14px color-mix(in srgb,var(--p1) 50%,transparent)}
+.piece .em{font-size:calc(var(--cell)*.5);line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+.piece .em.pop{animation:emojiPop .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes emojiPop{0%{transform:scale(0) rotate(-30deg)}50%{transform:scale(1.7) rotate(12deg)}75%{transform:scale(.9)}100%{transform:scale(1) rotate(0)}}
 .piece.sel .tok{animation:selpulse .9s infinite}
-@keyframes selpulse{0%,100%{box-shadow:0 0 0 3px rgba(255,255,255,.85),0 0 22px rgba(255,255,255,.4)}50%{box-shadow:0 0 0 6px rgba(255,255,255,.25),0 0 30px rgba(255,255,255,.2)}}
+@keyframes selpulse{0%,100%{box-shadow:0 0 0 3px var(--hl),0 0 22px var(--hl)}50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--hl) 30%,transparent),0 0 30px var(--hl)}}
 
 /* Toshlar: 3D aylanish */
-.stone{position:absolute;inset:11%;perspective:400px;z-index:2;pointer-events:none}
+.stone{position:absolute;inset:9%;perspective:400px;z-index:2;pointer-events:none}
 .stone-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;transition:transform .65s cubic-bezier(.3,.7,.3,1.25)}
 .stone.flip .stone-inner,.stone.revealed .stone-inner{transform:rotateY(180deg)}
 .stone.revealed .stone-inner{transition:none}
@@ -124,66 +213,90 @@ input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid var
 @keyframes vanish{to{opacity:0;transform:scale(.3) rotate(25deg)}}
 .stone.drop{animation:drop .3s cubic-bezier(.3,1.4,.5,1)}
 @keyframes drop{from{transform:translateY(-30%) scale(1.25);opacity:0}to{transform:none;opacity:1}}
+.stone.relabel .lbl,.stone.relabel svg{animation:emojiPop .6s}
 .face{position:absolute;inset:0;border-radius:22%;display:grid;place-items:center;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.face.front{background:radial-gradient(circle at 40% 30%,#2c3a5c,#141c30 70%);box-shadow:0 4px 10px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08)}
-.stone.o0 .face.front{border:2px solid rgba(227,176,75,.75)}
-.stone.o1 .face.front{border:2px solid rgba(224,71,79,.75)}
-.face.front svg{width:58%;height:58%;opacity:.85}
-.stone.o0 .face.front svg{color:var(--gold2)} .stone.o1 .face.front svg{color:var(--red2)}
+.face.front{background:radial-gradient(circle at 40% 30%,var(--stone-a),var(--stone-b) 75%);box-shadow:0 3px 8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.1)}
+.stone.o0 .face.front{border:2px solid var(--p0)} .stone.o1 .face.front{border:2px solid var(--p1)}
+.face.front svg{width:56%;height:56%;color:var(--stone-ink);opacity:.8}
+.lbl{font-size:calc(var(--cell)*.46);line-height:1}
 .face.back{transform:rotateY(180deg)}
-.face.back.real{background:repeating-linear-gradient(0deg,#3a3f4e 0 30%,#20242f 30% 34%),#2b2f3b;border:2px solid;box-shadow:0 4px 10px rgba(0,0,0,.6)}
-.stone.o0 .face.back.real{border-color:var(--gold)} .stone.o1 .face.back.real{border-color:var(--red)}
-.face.back.real::after{content:"";width:40%;height:40%;border-radius:4px;background:linear-gradient(135deg,rgba(255,255,255,.25),rgba(255,255,255,0));}
-.face.back.fake{border:2px dashed var(--gold2);background:rgba(227,176,75,.08);color:var(--gold2);font-weight:900;font-size:calc(var(--board)/14)}
-/* O'z toshingiz turini ko'rsatuvchi nozik belgi (faqat egasiga) */
-.mark{position:absolute;right:6%;top:6%;width:24%;height:24%;z-index:3;transform:translateZ(1px)}
-.mark.real{background:currentColor;border-radius:2px;transform:rotate(45deg) scale(.8)}
-.mark.fake{border:2px solid currentColor;border-radius:50%;}
-.stone.o0 .mark{color:var(--gold2)} .stone.o1 .mark{color:var(--red2)}
+.face.back.real{background:repeating-linear-gradient(0deg,var(--wall-a) 0 30%,var(--wall-b) 30% 34%),var(--wall-a);border:2px solid;box-shadow:0 3px 8px rgba(0,0,0,.6)}
+.stone.o0 .face.back.real{border-color:var(--p0)} .stone.o1 .face.back.real{border-color:var(--p1)}
+.face.back.fake{border:2px dashed var(--accent2);background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent2);font-weight:900;font-size:calc(var(--cell)*.5)}
+.face.back .lbl-sm{position:absolute;right:-8%;bottom:-8%;font-size:calc(var(--cell)*.3);line-height:1}
+/* O'z toshi turi — nozik belgi (faqat egasiga, faqat uning navbatida) */
+.mark{position:absolute;left:7%;top:7%;width:22%;height:22%;z-index:3}
+.mark.real{background:var(--stone-ink);border-radius:2px;transform:rotate(45deg) scale(.8)}
+.mark.fake{border:2px solid var(--stone-ink);border-radius:50%}
 
-.hint{color:var(--muted);font-size:13px;text-align:center;margin:10px 0 0;min-height:36px;max-width:520px;line-height:1.4}
+.actions{display:flex;gap:8px;width:var(--board);max-width:100%;margin:10px auto 0}
+.actions .btn{margin:0;flex:1;padding:11px 8px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px}
+.actions .btn .big{font-size:20px;line-height:1}
+.emoji-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:var(--board);max-width:100%;margin:8px auto 0;padding:8px;border-radius:14px;background:var(--surface);border:1px solid var(--line);animation:modalIn .2s}
+.emoji-strip button{font-size:24px;padding:6px 0;border-radius:10px;border:1px solid transparent;line-height:1.1;min-width:0}
+.emoji-strip button small{display:block;font-size:9.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.emoji-strip button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.hint{color:var(--muted);font-size:12.5px;text-align:center;margin:8px 0 0;min-height:34px;max-width:560px;line-height:1.4}
 
 /* ---------- Effektlar ---------- */
 .shake{animation:shake .45s}
-@keyframes shake{0%,100%{transform:translate(0,0)}15%{transform:translate(-8px,3px)}30%{transform:translate(7px,-4px)}45%{transform:translate(-6px,2px)}60%{transform:translate(5px,-2px)}75%{transform:translate(-3px,1px)}}
-.spark{position:fixed;width:7px;height:7px;border-radius:50%;pointer-events:none;z-index:60;
-  background:radial-gradient(circle,#fff8d6,var(--gold) 60%,transparent 70%);animation:spark .85s ease-out forwards}
+@keyframes shake{15%{transform:translate(-8px,3px)}30%{transform:translate(7px,-4px)}45%{transform:translate(-6px,2px)}60%{transform:translate(5px,-2px)}75%{transform:translate(-3px,1px)}}
+.spark{position:fixed;width:7px;height:7px;border-radius:50%;pointer-events:none;z-index:80;background:radial-gradient(circle,#fff8d6,#f0c766 55%,transparent 70%);animation:spark .85s ease-out forwards}
 @keyframes spark{from{transform:translate(0,0) scale(1);opacity:1}to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
-.banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;pointer-events:none;text-align:center;
-  font-weight:900;font-size:clamp(26px,8vw,40px);letter-spacing:.02em;white-space:nowrap;opacity:0}
-.banner small{display:block;font-size:.45em;font-weight:700;letter-spacing:.05em;margin-top:4px;opacity:.9}
+.banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;pointer-events:none;text-align:center;font-weight:900;font-size:clamp(26px,8vw,40px);white-space:nowrap;opacity:0}
+.banner small{display:block;font-size:.45em;font-weight:700;margin-top:4px}
 .banner.show{animation:bannerPop 1.5s ease forwards}
-.banner.gold{color:var(--gold2);text-shadow:0 0 18px rgba(227,176,75,.8),0 3px 0 #5a3c08}
-.banner.red{color:#fff;text-shadow:0 0 18px rgba(224,71,79,.95),0 3px 0 #5a0d12}
-@keyframes bannerPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-60%) scale(1)}}
-.toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:70;max-width:min(92vw,480px);
-  background:#1c2440;border:1px solid var(--line);border-left:4px solid var(--gold);padding:12px 14px;border-radius:12px;font-size:14px;line-height:1.4;
-  box-shadow:0 10px 30px rgba(0,0,0,.5);transition:opacity .25s, transform .25s}
-.toast.err{border-left-color:var(--red)}
+.banner.gold{color:#ffe7a6;text-shadow:0 0 18px rgba(240,190,80,.9),0 3px 0 #5a3c08}
+.banner.red{color:#fff;text-shadow:0 0 18px rgba(230,40,50,.95),0 3px 0 #5a0d12}
+@keyframes bannerPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-60%)}}
+.toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:90;width:max-content;max-width:min(92vw,480px);
+  background:var(--surface2);color:var(--text);border:1px solid var(--line);border-left:4px solid var(--accent);padding:12px 14px;border-radius:12px;font-size:14px;line-height:1.4;
+  box-shadow:0 10px 30px rgba(0,0,0,.45);transition:opacity .25s,transform .25s}
+.toast.err{border-left-color:var(--danger)}
 .toast.off{opacity:0;transform:translate(-50%,20px);pointer-events:none}
 
-/* ---------- Overlaylar ---------- */
-.overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;
-  background:rgba(4,6,12,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
-.overlay.solid{background:radial-gradient(100% 70% at 50% 30%,#141e3a,#05070d);backdrop-filter:none}
-.modal{width:100%;max-width:400px;text-align:center;background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line);border-radius:20px;padding:24px 20px;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:modalIn .3s ease}
-@keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
-.modal h3{font-size:22px;margin-bottom:10px}
-.modal p{color:var(--muted);line-height:1.5;margin-bottom:14px}
+/* ---------- Overlay / modal / sheet ---------- */
+.overlay{position:fixed;inset:0;z-index:50;display:flex;padding:20px 16px;overflow-y:auto;background:var(--overlay);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.overlay.solid{background:var(--solid);backdrop-filter:none}
+.modal{margin:auto;width:100%;max-width:420px;text-align:center;background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line);border-radius:20px;padding:22px 18px;box-shadow:0 30px 80px rgba(0,0,0,.5);animation:modalIn .3s ease}
+.modal.wide{max-width:520px;text-align:left}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.modal h3{font-size:21px;margin-bottom:10px}
+.modal p{color:var(--muted);line-height:1.5;margin-bottom:12px}
 .handoff-name{font-size:clamp(22px,7vw,30px);font-weight:900;margin:8px 0 6px}
-.handoff-name.c0{color:var(--p0b)} .handoff-name.c1{color:var(--p1b)}
-.lastlog{font-size:13.5px;color:#cfc8b6;background:var(--bg2);border-radius:10px;padding:10px;margin:12px 0 16px;text-align:left;line-height:1.5}
-.win-title{font-size:32px;font-weight:900;margin:6px 0}
-.quote{font-style:italic;color:var(--gold2);margin:18px 0 16px;line-height:1.5;font-size:16px}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:55;display:flex;justify-content:center;padding:0 12px max(12px,env(safe-area-inset-bottom));animation:sheetIn .2s ease}
-.sheet .inner{width:100%;max-width:480px;background:linear-gradient(180deg,#1b2643,#121a2e);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 -10px 40px rgba(0,0,0,.6)}
-.sheet .title{font-weight:700;margin-bottom:12px;text-align:center}
-.sheet .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.sheet .opt{padding:16px 8px;border-radius:14px;border:1px solid var(--line);background:var(--bg2);font-weight:800;font-size:16px}
-.sheet .opt small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:3px}
-.sheet .opt.real{border-color:rgba(227,176,75,.6)} .sheet .opt.fake{border-color:rgba(140,148,168,.6)}
-.sheet .opt:disabled{opacity:.3}
-.sheet .opt:active{transform:scale(.97)}
+.c0{color:var(--p0b)} .c1{color:var(--p1b)}
+.lastlog{font-size:13.5px;background:var(--field);border-radius:10px;padding:10px;margin:12px 0 16px;text-align:left;line-height:1.55}
+.win-title{font-size:30px;font-weight:900;margin:4px 0}
+.quote{font-style:italic;color:var(--accent2);margin:16px 0 12px;line-height:1.5;font-size:16px}
+.wager-box{background:var(--field);border:1px solid var(--line);border-radius:16px;padding:14px;margin:14px 0 4px}
+.wager-box .who{font-weight:800;font-size:16px}
+.wager-box .what{font-size:19px;font-weight:800;color:var(--accent2);margin:8px 0}
+.big-timer{font-size:56px;font-weight:900;font-variant-numeric:tabular-nums;margin:6px 0;letter-spacing:.02em}
+.big-timer.done{color:var(--ok);font-size:34px}
+.counter{width:140px;height:140px;border-radius:50%;margin:8px auto;display:grid;place-items:center;align-content:center;font-size:40px;font-weight:900;
+  background:var(--accent-grad);color:var(--accent-ink);box-shadow:0 8px 30px color-mix(in srgb,var(--accent) 40%,transparent)}
+.counter:active{transform:scale(.94)}
+.counter small{display:block;font-size:14px;font-weight:600}
+.counter.done{background:var(--ok);color:#fff}
+.done-badge{color:var(--ok);font-weight:900;font-size:20px;margin:12px 0 0}
+.an-sec{margin:14px 0}
+.an-sec h4{font-size:13px;color:var(--accent2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.an-row{background:var(--field);border-radius:10px;padding:9px 11px;margin-bottom:6px;font-size:14px;line-height:1.45}
+.an-log{max-height:240px;overflow-y:auto;background:var(--field);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.6}
+.an-log div{border-bottom:1px solid color-mix(in srgb,var(--line) 50%,transparent);padding:3px 0}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:55;display:flex;justify-content:center;padding:0 10px max(10px,env(safe-area-inset-bottom));animation:sheetIn .2s ease}
+.sheet .inner{width:100%;max-width:480px;background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 -10px 40px rgba(0,0,0,.45)}
+.sheet .title{font-weight:800;margin:2px 0 10px;text-align:center}
+.sheet .sub{font-size:12.5px;color:var(--muted);margin:10px 0 6px;text-align:center}
+.sheet .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sheet .row4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.opt{padding:12px 4px;border-radius:12px;border:1.5px solid var(--line);background:var(--field);font-weight:800;font-size:15px;min-width:0}
+.opt small{display:block;font-weight:500;color:var(--muted);font-size:11px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.opt.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.opt:disabled{opacity:.3}
+.opt .e{font-size:22px;display:block}
+.sheet .go{margin-top:12px;display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.sheet .go .btn{margin:0}
 @keyframes sheetIn{from{transform:translateY(100%)}to{transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s !important;transition-duration:.01s !important}}
 </style>
@@ -195,22 +308,64 @@ input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid var
   <div class="wrap">
     <svg class="eye-big" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3.3" fill="currentColor"/></svg>
     <div class="logo">KO'R</div>
-    <div class="tagline">Strategik blef o'yini · 2 kishi</div>
-    <button class="btn primary" data-go="pvp">2 kishi</button>
-    <button class="btn" data-go="botSelect">Botga qarshi</button>
+    <div class="tagline">IQ jang · blef · psixologik urush</div>
+    <button class="btn primary" data-start="pvp">2 kishi</button>
+    <button class="btn" data-start="bot">Botga qarshi</button>
     <button class="btn" data-go="rules">Qoidalar</button>
     <button class="btn" data-go="settings">Sozlamalar</button>
   </div>
 </section>
 
-<!-- ================= BOT DARAJASI ================= -->
-<section id="botSelect" class="screen hidden">
+<!-- ================= 1-QADAM: ISMLAR (+ bot darajasi) ================= -->
+<section id="setupNames" class="screen hidden">
   <div class="topbar"><button class="icon-btn" data-go="menu" aria-label="Orqaga">←</button></div>
   <div class="wrap">
-    <h2>Botga qarshi</h2>
-    <div class="card"><p class="muted" style="color:var(--muted);line-height:1.5">Siz — oltin rang, pastdan boshlaysiz. Bot — qizil rang. Bot raqib toshlarini hisoblab, ehtimollik asosida tavakkal qiladi.</p></div>
-    <button class="btn" data-bot="easy">Oson</button>
-    <button class="btn primary" data-bot="medium">O'rta</button>
+    <h2 id="namesTitle">O'yinchilar</h2>
+    <div class="step">1-qadam / 3</div>
+    <div class="card" id="namesPvp">
+      <label class="field-label" for="inName0" style="margin-top:0">1-o'yinchi (pastdan boshlaydi)</label>
+      <input type="text" id="inName0" maxlength="14" placeholder="1-o'yinchi" autocomplete="off">
+      <label class="field-label" for="inName1">2-o'yinchi (yuqoridan boshlaydi)</label>
+      <input type="text" id="inName1" maxlength="14" placeholder="2-o'yinchi" autocomplete="off">
+    </div>
+    <div id="namesBot">
+      <div class="card">
+        <label class="field-label" for="inNameMe" style="margin-top:0">Ismingiz</label>
+        <input type="text" id="inNameMe" maxlength="14" placeholder="Siz" autocomplete="off">
+      </div>
+      <div class="card setting-row">
+        <label>Bot darajasi</label>
+        <div class="seg" id="segLevel"><button data-v="easy">Oson</button><button data-v="medium">O'rta</button><button data-v="hard">Qiyin</button></div>
+        <small class="muted" id="levelInfo"></small>
+      </div>
+    </div>
+    <button class="btn primary" id="btnNamesNext">Davom etish</button>
+  </div>
+</section>
+
+<!-- ================= 2-QADAM: MAYDON O'LCHAMI ================= -->
+<section id="setupSize" class="screen hidden">
+  <div class="topbar"><button class="icon-btn" data-go="setupNames" aria-label="Orqaga">←</button></div>
+  <div class="wrap">
+    <h2>Maydon o'lchami</h2>
+    <div class="step">2-qadam / 3</div>
+    <div class="grid-cards" id="sizeCards"></div>
+    <button class="btn primary" data-go="setupWager">Davom etish</button>
+  </div>
+</section>
+
+<!-- ================= 3-QADAM: SHART ================= -->
+<section id="setupWager" class="screen hidden">
+  <div class="topbar"><button class="icon-btn" data-go="setupSize" aria-label="Orqaga">←</button></div>
+  <div class="wrap">
+    <h2>Shart</h2>
+    <div class="step">3-qadam / 3 · Yutqazgan nima qiladi?</div>
+    <div class="grid-cards" id="wagerCards"></div>
+    <div class="card hidden" id="customBox">
+      <label class="field-label" for="inCustom" style="margin-top:0">O'zaro kelishilgan shart</label>
+      <input type="text" id="inCustom" maxlength="60" placeholder="Masalan: ertaga non olib keladi" autocomplete="off">
+    </div>
+    <button class="btn primary" id="btnStart">O'yinni boshlash</button>
   </div>
 </section>
 
@@ -221,12 +376,14 @@ input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid var
     <h2>Qoidalar</h2>
     <div class="card">
       <ol class="rules">
-        <li><b>Maqsad:</b> figurangizni raqib tomonidagi eng chekka qatorga birinchi bo'lib olib boring. 7×7 maydon.</li>
-        <li><b>Navbatda bitta ish:</b> figurani 1 katak (yuqori, past, chap yoki o'ng) suring <i>yoki</i> bo'sh katakka tosh qo'ying.</li>
-        <li><b>7 ta tosh:</b> 4 tasi haqiqiy, 3 tasi yolg'on. Raqib uchun hammasi bir xil ko'rinadi — turini faqat siz bilasiz.</li>
-        <li><b>Blefni tekshirish:</b> raqib toshiga yursangiz, u ochiladi. Yolg'on bo'lsa — tosh yo'qoladi, siz o'tasiz va <b>yana bir navbat</b> olasiz. Haqiqiy bo'lsa — u doimiy devorga aylanadi, siz 1 katak orqaga qaytasiz.</li>
-        <li><b>Devorlar:</b> o'z toshingiz va ochilgan haqiqiy toshlar orqali o'tib bo'lmaydi. Raqib figurasi turgan katakka ham yurib bo'lmaydi. Hech kimning yo'lini butunlay yopish taqiqlanadi.</li>
-        <li><b>Vaqt:</b> har navbatga vaqt beriladi (sozlamalarda). Vaqt tugasa, navbat raqibga o'tadi.</li>
+        <li><b>Maqsad:</b> figurangizni qarama-qarshi chetga birinchi bo'lib olib boring. 1-o'yinchi pastdan yuqoriga, 2-o'yinchi yuqoridan pastga boradi.</li>
+        <li><b>Navbatda bitta asosiy ish:</b> figurani 1 katak (yuqori, past, chap, o'ng) suring <i>yoki</i> bo'sh katakka tosh qo'ying.</li>
+        <li><b>Toshlar:</b> bir qismi haqiqiy, bir qismi yolg'on. Raqib uchun hammasi bir xil ko'rinadi — turini faqat siz bilasiz.</li>
+        <li><b>Blefni tekshirish:</b> raqib toshiga yursangiz u ochiladi. Yolg'on bo'lsa — tosh yo'qoladi, siz o'tasiz va <b>yana bir navbat</b> olasiz. Haqiqiy bo'lsa — u doimiy devorga aylanadi, siz 1 katak orqaga qaytasiz.</li>
+        <li><b>Devorlar:</b> o'z toshingiz, ochilgan haqiqiy tosh va raqib figurasi orqali o'tib bo'lmaydi. Hech kimning yo'lini butunlay yopish taqiqlanadi.</li>
+        <li><b>Tosh belgisi:</b> 🧱 Rost devor, 😏 Aldadim, 😈 Sinab ko'r yoki ⚪ Neytral (ko'z belgisi). Belgini raqib ko'radi, lekin u rost bo'lishi shart emas — bu sizning blef qurolingiz! Navbatda 1 marta bitta toshingiz belgisini bepul o'zgartirishingiz mumkin.</li>
+        <li><b>Figura emojisi:</b> 😐😈😎😨… raqibga ko'rsatadigan "yuz ifodangiz". Qo'rqqandek ko'rinib tuzoq qo'ying yoki ishonch bilan bosim o'tkazing. Almashtirish bepul va navbatni sarflamaydi.</li>
+        <li><b>Tahlil va shart:</b> "Tahlil" panelida raqib belgilari qanchalik rost chiqqanini kuzating. Yutqazgan o'yin oldidan kelishilgan shartni bajaradi. Har navbat vaqti cheklangan — tugasa navbat o'tadi.</li>
       </ol>
     </div>
     <button class="btn primary" data-go="menu">Tushunarli</button>
@@ -239,19 +396,20 @@ input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid var
   <div class="wrap">
     <h2>Sozlamalar</h2>
     <div class="card setting-row">
+      <label>Dizayn</label>
+      <div class="grid-cards" id="themeCards" style="grid-template-columns:repeat(auto-fill,minmax(92px,1fr));margin:0"></div>
+    </div>
+    <div class="card setting-row">
+      <label>Maydon o'lchami</label>
+      <div class="seg" id="setSize"></div>
+    </div>
+    <div class="card setting-row">
       <label>Navbat taymeri</label>
-      <div class="seg" id="setTimer">
-        <button data-v="0">O'chiq</button><button data-v="10">10 s</button><button data-v="15">15 s</button><button data-v="30">30 s</button>
-      </div>
+      <div class="seg" id="setTimer"><button data-v="0">O'chiq</button><button data-v="10">10 s</button><button data-v="15">15 s</button><button data-v="30">30 s</button></div>
     </div>
     <div class="card setting-row">
       <label>Ovoz</label>
       <div class="seg" id="setSound"><button data-v="1">Yoqiq</button><button data-v="0">O'chiq</button></div>
-    </div>
-    <div class="card setting-row">
-      <label>O'yinchilar ismi (2 kishi rejimi)</label>
-      <input type="text" id="name0" maxlength="14" placeholder="1-o'yinchi">
-      <input type="text" id="name1" maxlength="14" placeholder="2-o'yinchi">
     </div>
     <button class="btn primary" data-go="menu">Saqlash</button>
   </div>
@@ -265,363 +423,419 @@ input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid var
     <div class="timer" id="timer">15</div>
     <button class="icon-btn" id="btnMute" aria-label="Ovoz">🔊</button>
   </div>
-  <div class="panels">
-    <div class="panel p0" id="panel0"></div>
-    <div class="panel p1" id="panel1"></div>
-  </div>
+  <div class="wagerbar hidden" id="wagerBar"></div>
+  <div class="panels"><div class="panel p0" id="panel0"></div><div class="panel p1" id="panel1"></div></div>
   <div class="board-wrap" id="boardWrap">
     <div id="board"></div>
     <div class="banner" id="banner"></div>
   </div>
+  <div class="actions">
+    <button class="btn" id="btnEmoji"><span class="big" id="emojiNow">😐</span> Emoji</button>
+    <button class="btn" id="btnAnalysis"><span class="big">📊</span> Tahlil</button>
+  </div>
+  <div class="emoji-strip hidden" id="emojiStrip"></div>
   <div class="hint" id="hint"></div>
 </section>
 
-<!-- Overlay konteyneri va toast -->
 <div id="overlayRoot"></div>
 <div class="toast off" id="toast"></div>
 
 <!-- =========================================================
-     1) O'YIN MANTIG'I (state va qoidalar). DOM'ga bog'liq emas.
+     1) O'YIN MANTIG'I — holat, qoidalar, tahlil, bot. DOM'ga bog'liq emas.
      ========================================================= -->
 <script id="kor-logic">
 const KorLogic = (() => {
-  const N = 7;
-  const REAL_TOTAL = 4, FAKE_TOTAL = 3;
+  /** Maydon o'lchamlari va har o'yinchidagi toshlar */
+  const SIZES = {
+    tez:   { key: 'tez',   name: 'Tezkor',     n: 5,  real: 3,  fake: 2 },
+    std:   { key: 'std',   name: 'Standart',   n: 7,  real: 4,  fake: 3 },
+    kla:   { key: 'kla',   name: 'Klassik',    n: 9,  real: 6,  fake: 4 },
+    katta: { key: 'katta', name: 'Katta jang', n: 11, real: 8,  fake: 5 },
+    ulkan: { key: 'ulkan', name: 'Ulkan jang', n: 13, real: 10, fake: 6 },
+  };
+  const LABELS = ['wall', 'lie', 'try', 'neutral'];      // Rost devor, Aldadim, Sinab ko'r, Neytral
+  const EMOJIS = ['😐', '😊', '😨', '😈', '😏', '😎', '🤔', '😂', '😤', '🥱'];
   const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-  const START = [{ r: 6, c: 3 }, { r: 0, c: 3 }];
-  const GOAL_ROW = [0, 6];     // 0-o'yinchi yuqoriga, 1-o'yinchi pastga intiladi
-  const BACK_DR = [1, -1];     // "orqaga" yo'nalishi (boshlang'ich tomon)
+  const BACK_DR = [1, -1];                                // "orqaga" yo'nalishi (boshlang'ich tomon)
 
-  const inBounds = (r, c) => r >= 0 && r < N && c >= 0 && c < N;
+  const inB = (s, r, c) => r >= 0 && r < s.n && c >= 0 && c < s.n;
 
   /** Yangi o'yin holati */
-  function createState() {
+  function createState(sizeKey = 'std', firstTurn = 0) {
+    const z = SIZES[sizeKey] || SIZES.std, n = z.n, mid = Math.floor(n / 2);
     return {
-      pieces: START.map(p => ({ ...p })),
-      stones: [],                 // {id, r, c, owner, real, revealed}
-      hand: [{ real: REAL_TOTAL, fake: FAKE_TOTAL }, { real: REAL_TOTAL, fake: FAKE_TOTAL }],
-      exposedFakes: [0, 0],       // exposedFakes[p]: p ning fosh bo'lgan yolg'on toshlari
-      revealedReals: [0, 0],      // revealedReals[p]: p ning ochilgan haqiqiy toshlari
-      turn: 0,
-      winner: null,
-      nextId: 1,
-      moveCount: 0,
+      size: z.key, n, realTotal: z.real, fakeTotal: z.fake,
+      goalRow: [0, n - 1],
+      pieces: [{ r: n - 1, c: mid }, { r: 0, c: mid }],
+      stones: [],                                       // {id,r,c,owner,real,revealed,label}
+      hand: [{ real: z.real, fake: z.fake }, { real: z.real, fake: z.fake }],
+      exposedFakes: [0, 0],                             // p ning fosh bo'lgan yolg'onlari
+      revealedReals: [0, 0],                            // p ning ochilgan haqiqiylari
+      revealHistory: [],                                // ochilgan toshlar: {owner,label,real} — ochiq ma'lumot
+      emoji: ['😐', '😐'],
+      turn: firstTurn, winner: null, nextId: 1, moveCount: 0,
+      relabelUsed: false,                               // shu navbatda belgi o'zgartirildimi
+      log: [],                                          // ochiq harakatlar tarixi (sirsiz)
     };
   }
 
-  function stoneAt(s, r, c) { return s.stones.find(t => t.r === r && t.c === c) || null; }
-  function pieceAt(s, r, c) { return s.pieces.findIndex(p => p.r === r && p.c === c); }
-  function handTotal(s, p) { return s.hand[p].real + s.hand[p].fake; }
+  const stoneAt = (s, r, c) => s.stones.find(t => t.r === r && t.c === c) || null;
+  const pieceAt = (s, r, c) => s.pieces.findIndex(p => p.r === r && p.c === c);
+  const handTotal = (s, p) => s.hand[p].real + s.hand[p].fake;
+  const addLog = (s, e) => { s.log.push({ ...e, em: s.emoji[e.p] }); if (s.log.length > 200) s.log.shift(); };
+  /** Navbatni berish (qo'shimcha navbat ham yangi navbat — bepul belgi huquqi tiklanadi) */
+  function giveTurn(s, p) { s.turn = p; s.relabelUsed = false; }
 
-  /**
-   * BFS: p o'yinchining figurasidan maqsad qatorigacha yo'l bormi?
-   * BARCHA toshlar (yopiq/ochiq, ikkala tomonniki) devor. Figuralar hisobga olinmaydi.
-   */
+  /** BFS: barcha toshlar devor, figuralar hisobga olinmaydi */
   function hasPathToGoal(s, p) {
-    const blocked = new Set(s.stones.map(t => t.r * N + t.c));
-    const start = s.pieces[p];
-    const seen = new Set([start.r * N + start.c]);
-    const queue = [start];
-    while (queue.length) {
-      const { r, c } = queue.shift();
-      if (r === GOAL_ROW[p]) return true;
+    const n = s.n, blocked = new Set(s.stones.map(t => t.r * n + t.c));
+    const st = s.pieces[p], seen = new Set([st.r * n + st.c]), q = [st];
+    for (let i = 0; i < q.length; i++) {
+      const { r, c } = q[i];
+      if (r === s.goalRow[p]) return true;
       for (const [dr, dc] of DIRS) {
-        const nr = r + dr, nc = c + dc, k = nr * N + nc;
-        if (!inBounds(nr, nc) || blocked.has(k) || seen.has(k)) continue;
-        seen.add(k); queue.push({ r: nr, c: nc });
+        const nr = r + dr, nc = c + dc, k = nr * n + nc;
+        if (!inB(s, nr, nc) || blocked.has(k) || seen.has(k)) continue;
+        seen.add(k); q.push({ r: nr, c: nc });
       }
     }
     return false;
   }
 
-  /**
-   * Tosh qo'yish mumkinmi? (turi muhim emas — yo'l tekshiruvi turga bog'liq emas)
-   * Qaytaradi: {ok:true} yoki {ok:false, code, blocks:[o'yinchilar]}
-   */
+  /** Tosh qo'yish mumkinmi? {ok} yoki {ok:false, code, blocks} */
   function checkPlacement(s, p, r, c) {
     if (s.winner !== null) return { ok: false, code: 'over' };
-    if (!inBounds(r, c)) return { ok: false, code: 'bounds' };
+    if (!inB(s, r, c)) return { ok: false, code: 'bounds' };
     if (handTotal(s, p) === 0) return { ok: false, code: 'empty-hand' };
     if (pieceAt(s, r, c) !== -1 || stoneAt(s, r, c)) return { ok: false, code: 'occupied' };
-    s.stones.push({ r, c });                       // vaqtinchalik
+    s.stones.push({ r, c });                            // vaqtinchalik
     const blocks = [0, 1].filter(q => !hasPathToGoal(s, q));
     s.stones.pop();
-    if (blocks.length) return { ok: false, code: 'blocks', blocks };
-    return { ok: true };
+    return blocks.length ? { ok: false, code: 'blocks', blocks } : { ok: true };
   }
 
-  /** p o'yinchi uchun mumkin bo'lgan yurishlar: type 'move' yoki 'challenge' */
+  /** Mumkin bo'lgan yurishlar: 'move' yoki 'challenge' */
   function legalMoves(s, p) {
     if (s.winner !== null) return [];
-    const me = s.pieces[p], opp = s.pieces[1 - p];
-    const out = [];
+    const me = s.pieces[p], opp = s.pieces[1 - p], out = [];
     for (const [dr, dc] of DIRS) {
       const r = me.r + dr, c = me.c + dc;
-      if (!inBounds(r, c)) continue;
-      if (opp.r === r && opp.c === c) continue;          // raqib figurasi
+      if (!inB(s, r, c) || (opp.r === r && opp.c === c)) continue;   // maydon tashqarisi / raqib figurasi
       const st = stoneAt(s, r, c);
       if (st) {
-        if (st.owner === p) continue;                    // o'z toshi
-        if (st.revealed) continue;                       // ochilgan haqiqiy — devor
-        out.push({ r, c, type: 'challenge' });           // raqibning yopiq toshi
+        if (st.owner === p || st.revealed) continue;                // o'z toshi / ochilgan haqiqiy devor
+        out.push({ r, c, type: 'challenge' });                      // raqibning yopiq toshi
       } else out.push({ r, c, type: 'move' });
     }
     return out;
   }
-
   function hasAnyPlacement(s, p) {
     if (handTotal(s, p) === 0) return false;
-    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++)
-      if (checkPlacement(s, p, r, c).ok) return true;
+    for (let r = 0; r < s.n; r++) for (let c = 0; c < s.n; c++) if (checkPlacement(s, p, r, c).ok) return true;
     return false;
   }
-  function canAct(s, p) { return legalMoves(s, p).length > 0 || hasAnyPlacement(s, p); }
+  const canAct = (s, p) => legalMoves(s, p).length > 0 || hasAnyPlacement(s, p);
 
-  /**
-   * Yurishni bajarish. Navbatni ham o'zi boshqaradi.
-   * Natija: {type:'move'|'fake'|'real', player, from, to, pushedTo, extra, win}
-   */
+  /** Yurish (tekshirish ham). Natija: {type:'move'|'fake'|'real', from, to, pushedTo, extra, win, label} */
   function applyMove(s, p, r, c) {
     if (s.turn !== p) return null;
     const mv = legalMoves(s, p).find(m => m.r === r && m.c === c);
     if (!mv) return null;
-    const piece = s.pieces[p];
-    const from = { r: piece.r, c: piece.c };
+    const piece = s.pieces[p], from = { r: piece.r, c: piece.c };
     const res = { player: p, from, to: { r, c }, extra: false, win: false, pushedTo: null };
     s.moveCount++;
-
     if (mv.type === 'move') {
-      piece.r = r; piece.c = c;
-      res.type = 'move';
+      piece.r = r; piece.c = c; res.type = 'move';
+      addLog(s, { k: 'move', p });
     } else {
       const st = stoneAt(s, r, c);
+      res.label = st.label; res.owner = st.owner;
+      s.revealHistory.push({ owner: st.owner, label: st.label, real: st.real });
       if (!st.real) {
-        // YOLG'ON: tosh olib tashlanadi, o'yinchi o'tadi, qo'shimcha navbat
+        // YOLG'ON: tosh yo'qoladi, o'yinchi o'tadi, qo'shimcha navbat
         s.stones = s.stones.filter(t => t !== st);
         s.exposedFakes[st.owner]++;
         piece.r = r; piece.c = c;
         res.type = 'fake'; res.extra = true;
+        addLog(s, { k: 'fake', p, label: st.label });
       } else {
-        // HAQIQIY: tosh ochiq qoladi, o'yinchi 1 katak orqaga suriladi (imkon bo'lsa)
+        // HAQIQIY: doimiy devor, o'yinchi 1 katak orqaga (imkon bo'lsa)
         st.revealed = true;
         s.revealedReals[st.owner]++;
         res.type = 'real';
         const br = piece.r + BACK_DR[p], bc = piece.c;
-        if (inBounds(br, bc) && pieceAt(s, br, bc) === -1 && !stoneAt(s, br, bc)) {
-          piece.r = br; piece.c = bc;
-          res.pushedTo = { r: br, c: bc };
+        if (inB(s, br, bc) && pieceAt(s, br, bc) === -1 && !stoneAt(s, br, bc)) {
+          piece.r = br; piece.c = bc; res.pushedTo = { r: br, c: bc };
         }
+        addLog(s, { k: 'real', p, label: st.label });
       }
     }
-    if (piece.r === GOAL_ROW[p]) { s.winner = p; res.win = true; res.extra = false; return res; }
-    if (!res.extra) s.turn = 1 - p;
+    if (piece.r === s.goalRow[p]) { s.winner = p; res.win = true; res.extra = false; addLog(s, { k: 'win', p }); return res; }
+    giveTurn(s, res.extra ? p : 1 - p);
     return res;
   }
 
-  /** Tosh qo'yish. Natija: {ok, code?, blocks?} */
-  function applyPlace(s, p, r, c, real) {
+  /** Tosh qo'yish (asosiy harakat) */
+  function applyPlace(s, p, r, c, real, label = 'neutral') {
     if (s.turn !== p) return { ok: false, code: 'turn' };
     const chk = checkPlacement(s, p, r, c);
     if (!chk.ok) return chk;
     const key = real ? 'real' : 'fake';
     if (s.hand[p][key] <= 0) return { ok: false, code: 'no-type' };
+    if (!LABELS.includes(label)) label = 'neutral';     // tanlanmasa — Neytral
     s.hand[p][key]--;
-    s.stones.push({ id: s.nextId++, r, c, owner: p, real: !!real, revealed: false });
+    s.stones.push({ id: s.nextId++, r, c, owner: p, real: !!real, revealed: false, label });
     s.moveCount++;
-    s.turn = 1 - p;
+    addLog(s, { k: 'place', p, label });
+    giveTurn(s, 1 - p);
     return { ok: true, player: p, r, c };
   }
 
-  /** Vaqt tugadi yoki harakat imkoni yo'q — navbat raqibga */
-  function passTurn(s) { if (s.winner === null) s.turn = 1 - s.turn; }
-
-  /**
-   * viewer nuqtai nazaridan raqibning yopiq toshi yolg'on bo'lish ehtimoli.
-   * Faqat OCHIQ ma'lumot ishlatiladi: fosh bo'lgan yolg'onlar, ochilgan haqiqiylar,
-   * raqib qo'lidagi toshlar SONI (turi emas).
-   */
-  function fakeProbability(s, viewer) {
-    const o = 1 - viewer;
-    const unknownFakes = FAKE_TOTAL - s.exposedFakes[o];
-    const unknownReals = REAL_TOTAL - s.revealedReals[o];
-    const total = unknownFakes + unknownReals; // = yopiq toshlar + qo'ldagilar
-    if (total <= 0) return 0;
-    return unknownFakes / total;
+  /** BEPUL: o'z yopiq toshi belgisini o'zgartirish (navbatda 1 marta). Navbat o'zgarmaydi. */
+  function relabel(s, p, r, c, label) {
+    if (s.winner !== null || s.turn !== p) return { ok: false, code: 'turn' };
+    if (s.relabelUsed) return { ok: false, code: 'used' };
+    const st = stoneAt(s, r, c);
+    if (!st || st.owner !== p || st.revealed) return { ok: false, code: 'not-own' };
+    if (!LABELS.includes(label) || st.label === label) return { ok: false, code: 'same' };
+    addLog(s, { k: 'relabel', p, from: st.label, to: label });
+    st.label = label; s.relabelUsed = true;
+    return { ok: true };
   }
 
-  /* ---------------- BOT (sun'iy raqib) ---------------- */
+  /** BEPUL: figura emojisini almashtirish (o'z navbatida, cheksiz). Navbat o'zgarmaydi. */
+  function setEmoji(s, p, em) {
+    if (s.winner !== null || s.turn !== p || !EMOJIS.includes(em) || s.emoji[p] === em) return false;
+    s.emoji[p] = em; return true;
+  }
 
-  /** Dijkstra: har katakdan maqsad qatorigacha "narx" xaritasi. costFn(r,c) — katakka kirish narxi */
-  function distMap(costFn, goalRow) {
-    const dist = new Array(N * N).fill(Infinity), done = new Array(N * N).fill(false);
-    for (let c = 0; c < N; c++) dist[goalRow * N + c] = 0;
+  /** Vaqt tugadi / harakat imkoni yo'q */
+  function passTurn(s, reason = 'timeout') {
+    if (s.winner !== null) return;
+    addLog(s, { k: reason, p: s.turn });
+    giveTurn(s, 1 - s.turn);
+  }
+
+  /**
+   * TAHLIL: viewer nuqtai nazaridan raqib haqida FAQAT ochiq ma'lumot.
+   * Yopiq toshlarning haqiqiy turi bu yerda umuman o'qilmaydi.
+   */
+  function analyze(s, viewer) {
+    const o = 1 - viewer;
+    const hidden = s.stones.filter(t => t.owner === o && !t.revealed).length;
+    const hand = handTotal(s, o);
+    const unknownFakes = s.fakeTotal - s.exposedFakes[o];
+    const unknownReals = s.realTotal - s.revealedReals[o];
+    const total = unknownFakes + unknownReals;          // = yopiq + qo'ldagi
+    const labels = {};
+    for (const L of LABELS) {
+      const h = s.revealHistory.filter(x => x.owner === o && x.label === L);
+      labels[L] = { n: h.length, fake: h.filter(x => !x.real).length, real: h.filter(x => x.real).length };
+    }
+    return {
+      opp: o, exposed: s.exposedFakes[o], fakeTotal: s.fakeTotal, realTotal: s.realTotal,
+      revealedReals: s.revealedReals[o], hidden, hand,
+      maybeFakes: Math.min(unknownFakes, hidden),
+      prob: total > 0 ? unknownFakes / total : 0,
+      labels,
+    };
+  }
+
+  /* ======================= BOT ======================= */
+
+  /** Raqibning bitta yopiq toshi yolg'on bo'lish ehtimoli (faqat ochiq ma'lumot + belgi) */
+  function stoneFakeProb(s, viewer, st, level) {
+    const a = analyze(s, viewer);
+    const uf = a.fakeTotal - a.exposed, ur = a.realTotal - a.revealedReals;
+    if (uf <= 0) return 0;                 // hamma yolg'onlar topilgan — qolgani albatta haqiqiy
+    if (ur <= 0) return 1;                 // hamma haqiqiylar ochilgan — qolgani yolg'on
+    let p = uf / (uf + ur);
+    if (level === 'easy') return p;
+    // Belgilarning avvalgi to'g'riligi ("yolg'on detektori") — Bayes yangilanishi
+    let F = 0, R = 0;
+    for (const k of LABELS) { F += a.labels[k].fake; R += a.labels[k].real; }
+    const l = a.labels[st.label] || { fake: 0, real: 0 };
+    let ratio = ((l.fake + 1) / (F + 4)) / ((l.real + 1) / (R + 4));
+    if (level === 'medium') ratio = Math.sqrt(ratio);    // o'rta bot — yarim ishonch bilan
+    const odds = (p / (1 - p)) * ratio;
+    p = odds / (1 + odds);
+    return Math.min(0.97, Math.max(0.03, p));
+  }
+
+  /** Dijkstra: har katakdan maqsad qatorigacha narx. costFn(r,c) — katakka kirish narxi */
+  function distMap(s, costFn, goalRow) {
+    const n = s.n, N2 = n * n, dist = new Array(N2).fill(Infinity), done = new Uint8Array(N2);
+    for (let c = 0; c < n; c++) dist[goalRow * n + c] = 0;
     for (;;) {
       let v = -1;
-      for (let i = 0; i < N * N; i++) if (!done[i] && (v === -1 || dist[i] < dist[v])) v = i;
+      for (let i = 0; i < N2; i++) if (!done[i] && (v === -1 || dist[i] < dist[v])) v = i;
       if (v === -1 || dist[v] === Infinity) break;
-      done[v] = true;
-      const vr = Math.floor(v / N), vc = v % N, cv = costFn(vr, vc);
-      if (!isFinite(cv)) continue;            // bu katakdan o'tib bo'lmaydi
+      done[v] = 1;
+      const vr = (v / n) | 0, vc = v % n, cv = costFn(vr, vc);
+      if (!isFinite(cv)) continue;                      // bu katakdan o'tib bo'lmaydi
       for (const [dr, dc] of DIRS) {
         const ur = vr + dr, uc = vc + dc;
-        if (!inBounds(ur, uc)) continue;
-        const u = ur * N + uc, nd = dist[v] + cv;
+        if (ur < 0 || ur >= n || uc < 0 || uc >= n) continue;
+        const u = ur * n + uc, nd = dist[v] + cv;
         if (nd < dist[u]) dist[u] = nd;
       }
     }
     return dist;
   }
-
-  // Bot o'zi uchun narx: raqibning yopiq toshi — ehtimollikka qarab
-  function botOwnCost(s, p, pf) {
+  // Bot o'zi uchun narx: raqib yopiq toshi — ehtimollikka qarab
+  function botOwnCost(s, p, level) {
+    const opp = s.pieces[1 - p], cache = new Map();
     return (r, c) => {
       const st = stoneAt(s, r, c);
       if (st) {
         if (st.revealed || st.owner === p) return Infinity;
-        if (pf <= 0) return Infinity;           // hamma yolg'onlar topilgan — bu albatta devor
-        return 1 + (1 - pf) * 4 - pf * 0.6;      // yolg'on bo'lsa qo'shimcha navbat foydasi
+        if (!cache.has(st)) cache.set(st, stoneFakeProb(s, p, st, level));
+        const pf = cache.get(st);
+        if (pf <= 0) return Infinity;
+        return 1 + (1 - pf) * 4 - pf * 0.6;            // yolg'on bo'lsa qo'shimcha navbat foydasi
       }
-      const o = s.pieces[1 - p];
-      if (o.r === r && o.c === c) return 3;
+      if (opp.r === r && opp.c === c) return 3;
       return 1;
     };
   }
   // Raqib uchun haqiqiy narx (bot o'z toshlari turini biladi)
   function oppTrueCost(s, p) {
-    const o = 1 - p;
+    const o = 1 - p, me = s.pieces[p];
     return (r, c) => {
       const st = stoneAt(s, r, c);
-      if (st) {
-        if (st.revealed || st.owner === o) return Infinity;
-        return st.real ? Infinity : 1.5;
-      }
-      const b = s.pieces[p];
-      if (b.r === r && b.c === c) return 2;
+      if (st) { if (st.revealed || st.owner === o) return Infinity; return st.real ? Infinity : 1.5; }
+      if (me.r === r && me.c === c) return 2;
       return 1;
     };
   }
-  function pieceDist(s, q, costFn) {
-    const d = distMap(costFn, GOAL_ROW[q]);
-    return d[s.pieces[q].r * N + s.pieces[q].c];
-  }
+  const posIdx = (s, q) => s.pieces[q].r * s.n + s.pieces[q].c;
+  const pieceDist = (s, q, cost) => distMap(s, cost, s.goalRow[q])[posIdx(s, q)];
 
-  /** Bot uchun eng yaxshi to'siq joyi (raqib yo'lini eng ko'p uzaytiradigan) */
-  function bestBlock(s, p) {
-    const o = 1 - p, pf = fakeProbability(s, p);
-    const baseOpp = pieceDist(s, o, oppTrueCost(s, p));
-    const baseMe = pieceDist(s, p, botOwnCost(s, p, pf));
-    const cands = [];
-    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
-      if (!checkPlacement(s, p, r, c).ok) continue;
-      s.stones.push({ r, c, owner: p, real: true, revealed: false });
-      const no = pieceDist(s, o, oppTrueCost(s, p));
-      const nm = pieceDist(s, p, botOwnCost(s, p, pf));
+  function legalCells(s, p) {
+    const out = [];
+    for (let r = 0; r < s.n; r++) for (let c = 0; c < s.n; c++) if (checkPlacement(s, p, r, c).ok) out.push({ r, c });
+    return out;
+  }
+  /** Raqib yo'lini eng ko'p uzaytiradigan joy */
+  function bestBlock(s, p, level) {
+    const o = 1 - p;
+    const baseOpp = pieceDist(s, o, oppTrueCost(s, p)), baseMe = pieceDist(s, p, botOwnCost(s, p, level));
+    const opp = s.pieces[o], cands = [];
+    for (const { r, c } of legalCells(s, p)) {
+      const near = Math.abs(opp.r - r) + Math.abs(opp.c - c);
+      if (near > 5) continue;                           // katta maydonda tezlik uchun — faqat raqib atrofi
+      s.stones.push({ r, c, owner: p, real: true, revealed: false, label: 'neutral' });
+      const no = pieceDist(s, o, oppTrueCost(s, p)), nm = pieceDist(s, p, botOwnCost(s, p, level));
       s.stones.pop();
-      const op = s.pieces[o];
-      const near = Math.abs(op.r - r) + Math.abs(op.c - c);
       const gain = (Math.min(no, 99) - baseOpp) - (Math.min(nm, 99) - baseMe) * 0.9;
       cands.push({ r, c, gain, near });
     }
     cands.sort((a, b) => b.gain - a.gain || a.near - b.near);
-    return { best: cands[0] || null, cands, baseOpp, baseMe };
+    return cands[0] || null;
   }
-
-  function randomPlacement(s, p, rng, nearPiece) {
-    const list = [];
-    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++)
-      if (checkPlacement(s, p, r, c).ok) list.push({ r, c });
+  function randomNear(s, p, rng) {
+    const list = legalCells(s, p);
     if (!list.length) return null;
-    if (nearPiece) {
-      const o = s.pieces[1 - p];
-      const close = list.filter(x => Math.abs(x.r - o.r) + Math.abs(x.c - o.c) <= 2);
-      if (close.length) return close[Math.floor(rng() * close.length)];
-    }
-    return list[Math.floor(rng() * list.length)];
+    const o = s.pieces[1 - p];
+    const close = list.filter(x => Math.abs(x.r - o.r) + Math.abs(x.c - o.c) <= 2);
+    const src = close.length ? close : list;
+    return src[Math.floor(rng() * src.length)];
+  }
+  /** Bot belgisi: ba'zan rost, ba'zan teskari (blef) */
+  function botLabel(real, level, rng) {
+    const x = rng();
+    if (level === 'easy') return LABELS[Math.floor(x * 4)];
+    if (real) return x < 0.35 ? 'wall' : x < 0.65 ? 'lie' : x < 0.85 ? 'try' : 'neutral';
+    return x < 0.45 ? 'wall' : x < 0.7 ? 'try' : x < 0.85 ? 'lie' : 'neutral';
   }
 
-  /** Bot qaror qabul qiladi: {kind:'move', r, c} yoki {kind:'place', r, c, real} */
+  /** Bot asosiy qarori: {kind:'move',r,c} | {kind:'place',r,c,real,label} */
   function botDecide(s, p, level, rng = Math.random) {
-    const moves = legalMoves(s, p);
-    const pf = fakeProbability(s, p);
-    const hand = s.hand[p];
+    const moves = legalMoves(s, p), hand = s.hand[p];
     const canPlace = hasAnyPlacement(s, p);
-    const pickType = (preferReal) => {
-      if (hand.real === 0) return false;
-      if (hand.fake === 0) return true;
-      return preferReal;
-    };
+    const pickReal = (prefer) => hand.real === 0 ? false : hand.fake === 0 ? true : prefer;
+    const place = (cell, real) => ({ kind: 'place', r: cell.r, c: cell.c, real, label: botLabel(real, level, rng) });
+    const ownCost = botOwnCost(s, p, level);
 
     // 1) Darhol g'alaba
-    for (const m of moves) if (m.r === GOAL_ROW[p] && m.type === 'move') return { kind: 'move', r: m.r, c: m.c };
-    if (pf >= 0.35) for (const m of moves) if (m.r === GOAL_ROW[p]) return { kind: 'move', r: m.r, c: m.c };
+    for (const m of moves) if (m.r === s.goalRow[p] && m.type === 'move') return { kind: 'move', r: m.r, c: m.c };
+    for (const m of moves) if (m.r === s.goalRow[p] && stoneFakeProb(s, p, stoneAt(s, m.r, m.c), level) >= 0.35) return { kind: 'move', r: m.r, c: m.c };
 
     // 2) Oson daraja: ko'pincha tasodifiy
     if (level === 'easy' && rng() < 0.35) {
-      if (canPlace && (rng() < 0.3 || !moves.length)) {
-        const rp = randomPlacement(s, p, rng, true);
-        if (rp) return { kind: 'place', r: rp.r, c: rp.c, real: pickType(rng() < 0.5) };
-      }
+      if (canPlace && (rng() < 0.3 || !moves.length)) { const c = randomNear(s, p, rng); if (c) return place(c, pickReal(rng() < 0.5)); }
       if (moves.length) { const m = moves[Math.floor(rng() * moves.length)]; return { kind: 'move', r: m.r, c: m.c }; }
     }
 
-    // 3) Masofalarni solishtirish
-    const ownCost = botOwnCost(s, p, pf);
-    const myDist = distMap(ownCost, GOAL_ROW[p]);
-    const myD = myDist[s.pieces[p].r * N + s.pieces[p].c];
+    const myDist = distMap(s, ownCost, s.goalRow[p]);
+    const myD = myDist[posIdx(s, p)];
     const oppD = pieceDist(s, 1 - p, oppTrueCost(s, p));
 
     if (canPlace) {
-      const { best } = bestBlock(s, p);
-      const blockChance = level === 'easy' ? 0.55 : 1;
-      // Raqib keyingi navbatda yutishi mumkin — albatta to'samiz (iloji bo'lsa haqiqiy bilan)
-      if (best && best.gain > 0 && oppD <= 1 && rng() < blockChance)
-        return { kind: 'place', r: best.r, c: best.c, real: pickType(true) };
-      // Ortda qolyapmiz — to'siq qo'yamiz. Ba'zan muhim joyga yolg'on (blef)
-      if (best && best.gain >= 1 && myD > oppD && rng() < (level === 'easy' ? 0.45 : 0.9))
-        return { kind: 'place', r: best.r, c: best.c, real: pickType(rng() < (level === 'easy' ? 0.5 : 0.7)) };
-      // Oldindamiz, lekin ba'zan blef qilamiz
-      if (best && best.gain >= 2 && hand.fake > 0 && rng() < 0.1)
-        return { kind: 'place', r: best.r, c: best.c, real: false };
-      // Ba'zan tasodifiy joyga yolg'on tosh
-      if (hand.fake > 0 && rng() < 0.05) {
-        const rp = randomPlacement(s, p, rng, true);
-        if (rp) return { kind: 'place', r: rp.r, c: rp.c, real: false };
-      }
+      const best = bestBlock(s, p, level), hard = level === 'hard';
+      // Raqib keyingi navbatda yutishi mumkin — albatta to'samiz
+      if (best && best.gain > 0 && oppD <= 1 && rng() < (level === 'easy' ? 0.55 : 1)) return place(best, pickReal(true));
+      // Qiyin: xavfni oldindan ko'radi
+      if (hard && best && best.gain >= 1 && oppD <= 2 && myD >= oppD) return place(best, pickReal(rng() < 0.85));
+      // Ortda qolyapmiz — to'siq. Ba'zan muhim joyga yolg'on (blef)
+      if (best && best.gain >= 1 && myD > oppD && rng() < (level === 'easy' ? 0.45 : hard ? 1 : 0.9))
+        return place(best, pickReal(rng() < (level === 'easy' ? 0.5 : hard ? 0.75 : 0.7)));
+      if (best && best.gain >= 2 && hand.fake > 0 && rng() < (hard ? 0.12 : 0.08)) return place(best, false);   // blef muhim joyga
+      if (hand.fake > 0 && rng() < 0.05) { const c = randomNear(s, p, rng); if (c) return place(c, false); } // blef tasodifiy joyga
     }
 
-    // 4) Eng qisqa yo'l bo'ylab yurish (tekshirishga tavakkal ehtimollik asosida)
+    // 3) Eng arzon yo'l bo'ylab yurish (tekshirish — ehtimollik asosida tavakkal)
     let bestMove = null, bestScore = Infinity;
     for (const m of moves) {
-      let score = ownCost(m.r, m.c) + myDist[m.r * N + m.c];
+      let score = ownCost(m.r, m.c) + myDist[m.r * s.n + m.c];
       if (m.type === 'challenge' && level === 'easy') score += (rng() - 0.5) * 3;
-      score += rng() * 0.3; // bir xil yo'llar orasida tasodifiy tanlov
+      score += rng() * 0.3;
       if (score < bestScore) { bestScore = score; bestMove = m; }
     }
-    // Yo'l faqat raqib figurasi orqali bo'lsa yoki yurish foydasiz bo'lsa — tosh qo'yish
     if ((!bestMove || bestScore >= myD + 1.5) && canPlace) {
-      const { best } = bestBlock(s, p);
-      if (best && best.gain > 0) return { kind: 'place', r: best.r, c: best.c, real: pickType(true) };
+      const best = bestBlock(s, p, level);
+      if (best && best.gain > 0) return place(best, pickReal(true));
     }
     if (bestMove && isFinite(bestScore)) return { kind: 'move', r: bestMove.r, c: bestMove.c };
     if (moves.length) { const m = moves[Math.floor(rng() * moves.length)]; return { kind: 'move', r: m.r, c: m.c }; }
-    if (canPlace) {
-      const rp = randomPlacement(s, p, rng, false);
-      const real = hand.real > 0 && (hand.fake === 0 || rng() < 0.5);
-      return { kind: 'place', r: rp.r, c: rp.c, real };
-    }
+    if (canPlace) { const c = randomNear(s, p, rng); return place(c, pickReal(rng() < 0.5)); }
     return null;
   }
 
+  /**
+   * Botning BEPUL harakatlari: emoji (psixologik bosim) va ba'zan belgi almashtirish.
+   * event — oldingi navbatdagi voqea: 'caught' | 'bluffWorked' | 'myFakeExposed' | null
+   */
+  function botFree(s, p, level, event, rng = Math.random) {
+    const out = { emoji: null, relabel: null };
+    const myD = pieceDist(s, p, botOwnCost(s, p, level)), oppD = pieceDist(s, 1 - p, oppTrueCost(s, p));
+    if (event === 'caught') out.emoji = '😤';
+    else if (event === 'bluffWorked') out.emoji = '😏';
+    else if (event === 'myFakeExposed') out.emoji = rng() < 0.5 ? '😤' : '🤔';
+    else if (myD <= 2) out.emoji = '😎';
+    else if (oppD <= 2) out.emoji = ['😨', '😈', '😎'][Math.floor(rng() * 3)];   // qo'rquv ham blef bo'lishi mumkin
+    else if (rng() < 0.3) out.emoji = ['😐', '🤔', '🥱', '😈', '😊'][Math.floor(rng() * 5)];
+    if (out.emoji === s.emoji[p]) out.emoji = null;
+    const relProb = level === 'easy' ? 0.05 : level === 'medium' ? 0.1 : 0.15;
+    const mine = s.stones.filter(t => t.owner === p && !t.revealed);
+    if (mine.length && rng() < relProb) {
+      const st = mine[Math.floor(rng() * mine.length)];
+      const lb = botLabel(st.real, level, rng);
+      if (lb !== st.label) out.relabel = { r: st.r, c: st.c, label: lb };
+    }
+    return out;
+  }
+
   return {
-    N, START, GOAL_ROW, REAL_TOTAL, FAKE_TOTAL,
-    createState, stoneAt, pieceAt, handTotal, hasPathToGoal, checkPlacement,
-    legalMoves, canAct, applyMove, applyPlace, passTurn, fakeProbability, botDecide,
+    SIZES, LABELS, EMOJIS,
+    createState, stoneAt, pieceAt, handTotal, hasPathToGoal, checkPlacement, legalMoves, canAct,
+    applyMove, applyPlace, relabel, setEmoji, passTurn, analyze, stoneFakeProb, botDecide, botFree,
   };
 })();
 </script>
 
 <!-- =========================================================
-     2) OVOZ (Web Audio API — tashqi fayl yo'q)
+     2) OVOZ — Web Audio API (tashqi fayl yo'q)
      ========================================================= -->
 <script>
 const Sound = {
@@ -639,9 +853,7 @@ const Sound = {
     const t = ctx.currentTime + at, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.setValueAtTime(freq, t);
     if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + dur + 0.02);
   },
   noise(dur, { vol = 0.2, freq = 1200, at = 0 } = {}) {
@@ -654,176 +866,222 @@ const Sound = {
     src.connect(f).connect(g).connect(ctx.destination); src.start(t);
   },
   step()   { this.tone(520, 0.07, { type: 'triangle', vol: 0.12, to: 380 }); },
-  place()  { this.tone(140, 0.18, { type: 'sine', vol: 0.35, to: 70 }); this.noise(0.08, { vol: 0.15, freq: 600 }); },
-  flip()   { this.noise(0.35, { vol: 0.18, freq: 2200 }); this.tone(300, 0.3, { type: 'sine', vol: 0.08, to: 900 }); },
+  place()  { this.tone(140, 0.18, { vol: 0.35, to: 70 }); this.noise(0.08, { vol: 0.15, freq: 600 }); },
+  flip()   { this.noise(0.35, { vol: 0.18, freq: 2200 }); this.tone(300, 0.3, { vol: 0.08, to: 900 }); },
   caught() { this.tone(180, 0.45, { type: 'sawtooth', vol: 0.16, to: 60 }); this.tone(95, 0.5, { type: 'square', vol: 0.08, at: 0.05 }); },
   exposed(){ [880, 1175, 1568, 2093].forEach((f, i) => this.tone(f, 0.25, { type: 'triangle', vol: 0.12, at: i * 0.07 })); },
+  emoji()  { this.tone(660, 0.09, { vol: 0.14, to: 1320 }); this.tone(990, 0.08, { type: 'triangle', vol: 0.08, at: 0.07 }); },
+  relabel(){ this.tone(440, 0.08, { type: 'triangle', vol: 0.1 }); this.tone(660, 0.1, { type: 'triangle', vol: 0.1, at: 0.06 }); },
   win()    { [523, 659, 784, 1047, 784, 1047].forEach((f, i) => this.tone(f, i === 5 ? 0.6 : 0.18, { type: 'triangle', vol: 0.16, at: i * 0.13 })); },
   tick()   { this.tone(1000, 0.04, { type: 'square', vol: 0.05 }); },
   bad()    { this.tone(200, 0.12, { type: 'square', vol: 0.07 }); },
+  count()  { this.tone(880, 0.06, { type: 'triangle', vol: 0.12 }); },
 };
 function vibrate(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
 </script>
 
 <!-- =========================================================
-     3) INTERFEYS: chizish, animatsiya, ekranlar, boshqaruv
+     3) INTERFEYS — chizish, animatsiya, ekranlar, boshqaruv
      ========================================================= -->
 <script>
 const L = KorLogic;
 const $ = (sel) => document.querySelector(sel);
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+const esc = (t) => String(t).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 const EYE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>';
 
-/* ---------- Sozlamalar (localStorage — faqat qulaylik uchun) ---------- */
-const settings = { timer: 15, sound: true, names: ['', ''] };
+/* ---------- Ma'lumotnomalar ---------- */
+const LABEL_INFO = {
+  wall:    { e: '🧱', t: 'Rost devor' },
+  lie:     { e: '😏', t: 'Aldadim' },
+  try:     { e: '😈', t: "Sinab ko'r" },
+  neutral: { e: '⚪', t: 'Neytral' },
+};
+const EMOJI_NAMES = { '😐': 'Neytral', '😊': 'Xursand', '😨': "Qo'rqqan", '😈': 'Yovuz', '😏': 'Ayyor', '😎': 'Ishonchli', '🤔': "O'ylanyapti", '😂': 'Kulyapti', '😤': 'Jahldor', '🥱': 'Zerikdi' };
+const THEMES = [
+  { key: 'gold', name: 'Oltin va Qora' }, { key: 'matador', name: 'Matador' }, { key: 'wood', name: "Yog'och" },
+  { key: 'neon', name: 'Neon' }, { key: 'marble', name: 'Marmar' },
+];
+const LEVEL_INFO = {
+  easy: "Ko'pincha tasodifiy yuradi, belgilarni ham tasodifiy qo'yadi.",
+  medium: "Yo'lni hisoblaydi, topilgan yolg'onlar va belgilaringizni qisman hisobga olib tavakkal qiladi.",
+  hard: "'Yolg'on detektori' statistikangizni to'liq tahlil qiladi va xavfli joylarni oldindan to'sadi.",
+};
+// kind: 'count' — bosib sanaladi, 'timer' — vaqtli
+const WAGERS = [
+  { id: 'squat',  e: '💪', t: "10 marta o'tirib-turish",               does: "10 marta o'tirib-turadi",             kind: 'count', amount: 10 },
+  { id: 'pushup', e: '💪', t: '10 marta otjimaniya',                   does: '10 marta otjimaniya qiladi',          kind: 'count', amount: 10 },
+  { id: 'sweet',  e: '🍫', t: "G'olibga shirinlik olib berish",        does: "g'olibga shirinlik olib beradi" },
+  { id: 'clean',  e: '🧹', t: 'Xonani tozalash',                       does: 'xonani tozalaydi' },
+  { id: 'praise', e: '👑', t: "G'olibni 1 daqiqa maqtash",             does: "g'olibni 1 daqiqa maqtaydi",          kind: 'timer', amount: 60 },
+  { id: 'smile',  e: '😁', t: "3 daqiqa jilmayib-tirjayib o'tirish",   does: "3 daqiqa jilmayib-tirjayib o'tiradi", kind: 'timer', amount: 180 },
+  { id: 'tea',    e: '☕', t: "G'olibga choy damlab berish",           does: "g'olibga choy damlab beradi" },
+  { id: 'story',  e: '📱', t: "G'olibni maqtab story qo'yish",         does: "g'olibni maqtab story qo'yadi" },
+  { id: 'chicken',e: '🐔', t: '30 soniya tovuqdek qaqillab yurish',    does: '30 soniya tovuqdek qaqillab yuradi',  kind: 'timer', amount: 30 },
+  { id: 'song',   e: '🎤', t: "G'olib tanlagan qo'shiqni kuylash",     does: "g'olib tanlagan qo'shiqni kuylaydi" },
+  { id: 'admit',  e: '🙇', t: '"Sen mendan aqlliroqsan" deb tan olish', does: '"Sen mendan aqlliroqsan" deb tan oladi' },
+  { id: 'random', e: '🎲', t: 'Tasodifiy shart',                       sub: "O'yin oxirigacha sir" },
+  { id: 'custom', e: '✍️', t: "O'zaro kelishilgan shart",              sub: "O'zingiz yozasiz" },
+  { id: 'none',   e: '🚫', t: "Shartsiz o'ynash" },
+];
+
+/* ---------- Sozlamalar (localStorage, try/catch bilan) ---------- */
+const settings = { timer: 15, sound: true, theme: 'gold', size: 'std', names: ['', ''], meName: '', level: 'medium', wager: 'squat', custom: '' };
 function loadSettings() {
-  try {
-    const raw = localStorage.getItem('kor-settings');
-    if (raw) Object.assign(settings, JSON.parse(raw));
-  } catch (e) {}
-  Sound.on = settings.sound;
+  try { const raw = localStorage.getItem('kor-settings-v2'); if (raw) Object.assign(settings, JSON.parse(raw)); } catch (e) {}
+  if (!L.SIZES[settings.size]) settings.size = 'std';
+  if (!THEMES.some(t => t.key === settings.theme)) settings.theme = 'gold';
+  if (![0, 10, 15, 30].includes(settings.timer)) settings.timer = 15;
+  Sound.on = !!settings.sound; applyTheme();
 }
-function saveSettings() { try { localStorage.setItem('kor-settings', JSON.stringify(settings)); } catch (e) {} }
+function saveSettings() { try { localStorage.setItem('kor-settings-v2', JSON.stringify(settings)); } catch (e) {} }
+function applyTheme() {
+  document.documentElement.dataset.theme = settings.theme;
+  const meta = document.querySelector('meta[name=theme-color]');
+  if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#070a12';
+}
 
 /* ---------- UI holati ---------- */
 const ui = {
-  mode: 'pvp',          // 'pvp' | 'bot'
-  botLevel: 'medium',
-  botPlayer: 1,
+  mode: 'pvp', level: 'medium', botPlayer: 1, names: ['', ''],
+  wager: null,             // {id, e, t, does, kind, amount, secret?}
   state: null,
-  viewer: null,         // kimning yashirin ma'lumoti ko'rsatiladi (null — hech kim)
-  locked: true,         // animatsiya / bot / overlay paytida kiritish yopiq
-  selected: false,      // figura tanlanganmi
-  placeTarget: null,
+  viewer: null,            // kimning yashirin ma'lumoti ko'rsatiladi (null — hech kim)
+  locked: true, selected: false, placeTarget: null, emojiOpen: false,
   timerId: null, deadline: 0, lastTickSec: null,
-  log: [],              // handoff ekrani uchun so'nggi harakatlar
-  gameId: 0,            // eski asinxron vazifalarni bekor qilish uchun
+  logMark: 0,              // handoff ekranidagi "so'nggi harakatlar" boshlanishi
+  seenEmoji: [null, null], // har o'yinchi raqib emojisini oxirgi marta qanday ko'rgan
+  shownEmoji: [null, null],
+  botEvent: null, gameId: 0, wagerTimer: null, justPlaced: null,
 };
 const isBot = (p) => ui.mode === 'bot' && p === ui.botPlayer;
+const humanP = () => 1 - ui.botPlayer;
 function nameOf(p) {
-  if (ui.mode === 'bot') return p === ui.botPlayer ? 'Bot' : 'Siz';
-  return (settings.names[p] || '').trim() || (p === 0 ? "1-o'yinchi" : "2-o'yinchi");
+  if (ui.mode === 'bot') return p === ui.botPlayer ? 'Bot' : ((ui.names[0] || '').trim() || 'Siz');
+  return (ui.names[p] || '').trim() || (p === 0 ? "1-o'yinchi" : "2-o'yinchi");
 }
-// "Telefonni ...ga uzating" uchun qaratqich shakl
-function nameDative(p) { return nameOf(p) + 'ga'; }
 
-/* ---------- Ekranlar ---------- */
 function show(id) {
   document.querySelectorAll('.screen').forEach(el => el.classList.toggle('hidden', el.id !== id));
   window.scrollTo(0, 0);
 }
 
-/* ---------- Taxta DOM'ini bir marta yaratish ---------- */
-const cells = [];
-let pieceEls = [];
-function buildBoard() {
+/* ---------- Taxta DOM'i (o'lchamga qarab) ---------- */
+let cells = [], pieceEls = [];
+function buildBoard(n) {
   const board = $('#board');
-  board.innerHTML = '';
-  cells.length = 0;
-  for (let r = 0; r < L.N; r++) for (let c = 0; c < L.N; c++) {
+  $('#boardWrap').style.setProperty('--n', n);
+  board.innerHTML = ''; cells = [];
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
     const el = document.createElement('div');
-    el.className = 'cell' + (r === L.GOAL_ROW[0] ? ' goal0' : '') + (r === L.GOAL_ROW[1] ? ' goal1' : '');
+    el.className = 'cell' + ((r + c) % 2 ? ' dk' : '') + (r === 0 ? ' goal0' : '') + (r === n - 1 ? ' goal1' : '');
     el.dataset.r = r; el.dataset.c = c;
     board.appendChild(el); cells.push(el);
   }
   pieceEls = [0, 1].map(p => {
     const el = document.createElement('div');
-    el.className = 'piece p' + p; el.innerHTML = '<div class="tok"></div>';
+    el.className = 'piece p' + p; el.innerHTML = '<div class="tok"><span class="em"></span></div>';
     board.appendChild(el); return el;
   });
+  ui.shownEmoji = [null, null];
 }
-const cellEl = (r, c) => cells[r * L.N + c];
+const cellEl = (r, c) => cells[r * ui.state.n + c];
 
 /* ---------- Chizish ---------- */
 function render() {
   const s = ui.state; if (!s) return;
-  const v = ui.viewer;
-  const turnP = s.turn;
+  const v = ui.viewer, turnP = s.turn;
+  const myTurnUI = s.winner === null && !ui.locked && !isBot(turnP);
 
-  // Kataklar va toshlar
-  for (let r = 0; r < L.N; r++) for (let c = 0; c < L.N; c++) {
+  for (let r = 0; r < s.n; r++) for (let c = 0; c < s.n; c++) {
     const el = cellEl(r, c);
     el.classList.remove('hl', 'hl-ch', 'place-target');
-    const st = L.stoneAt(s, r, c);
-    const existing = el.querySelector('.stone');
-    // Toshning ko'rinish "imzosi" — yashirin turi faqat egasi viewer bo'lsa qo'shiladi
-    const sig = st ? `${st.id}|${st.owner}|${st.revealed ? 'R' : 'H'}|${(!st.revealed && v === st.owner) ? (st.real ? 'r' : 'f') : '-'}` : '';
+    const st = L.stoneAt(s, r, c), existing = el.querySelector('.stone');
     if (!st) { if (existing) existing.remove(); continue; }
+    // Yashirin tur faqat egasi viewer bo'lgandagina DOM'ga qo'shiladi
+    const own = !st.revealed && v === st.owner;
+    const sig = `${st.id}|${st.revealed ? 'R' : 'H'}|${st.label}|${own ? (st.real ? 'r' : 'f') : '-'}`;
     if (existing && existing.dataset.sig === sig) continue;
+    const wasLabel = existing && existing.dataset.label;
     if (existing) existing.remove();
     const se = document.createElement('div');
     se.className = `stone o${st.owner}` + (st.revealed ? ' revealed' : '');
-    se.dataset.sig = sig;
-    let mark = '';
-    if (!st.revealed && v === st.owner) mark = `<span class="mark ${st.real ? 'real' : 'fake'}"></span>`;
-    // Ochilmagan toshning orqa tomoni BO'SH: turi DOM'da ham ko'rinmaydi
-    const back = st.revealed ? '<div class="face back real"></div>' : '<div class="face back"></div>';
-    se.innerHTML = `<div class="stone-inner"><div class="face front">${EYE_SVG}${mark}</div>${back}</div>`;
-    if (!existing && st.id === ui.justPlaced) se.classList.add('drop');
+    se.dataset.sig = sig; se.dataset.label = st.label;
+    const lab = LABEL_INFO[st.label];
+    const front = st.label === 'neutral' ? EYE_SVG : `<span class="lbl">${lab.e}</span>`;
+    const mark = own ? `<span class="mark ${st.real ? 'real' : 'fake'}"></span>` : '';
+    // Ochilmagan toshning orqa tomoni BO'SH — turi DOM'da ham yo'q
+    const back = st.revealed ? `<div class="face back real"><span class="lbl-sm">${lab.e}</span></div>` : '<div class="face back"></div>';
+    se.innerHTML = `<div class="stone-inner"><div class="face front">${front}${mark}</div>${back}</div>`;
+    if (st.id === ui.justPlaced) se.classList.add('drop');
+    else if (wasLabel && wasLabel !== st.label) se.classList.add('relabel');
     el.appendChild(se);
   }
   ui.justPlaced = null;
 
-  // Figuralar
+  // Figuralar va emojilar
   s.pieces.forEach((pc, p) => {
-    pieceEls[p].style.transform = `translate(${pc.c * 100}%, ${pc.r * 100}%)`;
-    pieceEls[p].classList.toggle('sel', ui.selected && p === turnP && !ui.locked);
+    const el = pieceEls[p];
+    el.style.transform = `translate(${pc.c * 100}%, ${pc.r * 100}%)`;
+    el.classList.toggle('sel', ui.selected && p === turnP && myTurnUI);
+    if (ui.shownEmoji[p] !== s.emoji[p]) {
+      el.querySelector('.em').textContent = s.emoji[p];
+      if (ui.shownEmoji[p] !== null) popEmoji(p);
+      ui.shownEmoji[p] = s.emoji[p];
+    }
   });
 
-  // Yoritish: tanlangan figura yurishlari
-  const color = turnP === 0 ? 'var(--gold)' : 'var(--red)';
-  $('#board').style.setProperty('--hl', color);
-  if (ui.selected && !ui.locked) {
-    for (const m of L.legalMoves(s, turnP)) cellEl(m.r, m.c).classList.add(m.type === 'challenge' ? 'hl-ch' : 'hl');
-  }
+  const board = $('#board');
+  board.style.setProperty('--hl', `var(--hl${turnP})`);
+  if (ui.selected && myTurnUI) for (const m of L.legalMoves(s, turnP)) cellEl(m.r, m.c).classList.add(m.type === 'challenge' ? 'hl-ch' : 'hl');
   if (ui.placeTarget) cellEl(ui.placeTarget.r, ui.placeTarget.c).classList.add('place-target');
+  board.className = s.winner === null ? 't' + turnP : '';
 
-  // Navbat ko'rsatkichi
-  const tb = $('#turnbar');
-  tb.className = 'turnbar t' + turnP;
-  $('#board').className = s.winner === null ? 't' + turnP : '';
-  let tt;
-  if (s.winner !== null) tt = `${nameOf(s.winner)} yutdi!`;
-  else if (ui.mode === 'bot') tt = isBot(turnP) ? 'Bot o\'ylamoqda…' : 'Siz yurasiz';
-  else tt = `${nameOf(turnP)} yuradi`;
-  $('#turnText').textContent = tt;
+  // Navbat ko'rsatkichi (rang + yozuv)
+  $('#turnbar').className = 'turnbar t' + turnP;
+  $('#turnText').textContent = s.winner !== null ? `${nameOf(s.winner)} yutdi!` : isBot(turnP) ? "Bot o'ylamoqda…" : `${nameOf(turnP)} yuradi`;
 
   // Panellar
   [0, 1].forEach(p => {
-    const el = $('#panel' + p);
+    const el = $('#panel' + p), h = s.hand[p];
     el.classList.toggle('active', s.winner === null && turnP === p);
-    const h = s.hand[p];
-    // Qo'ldagi toshlar turi faqat egasiga ko'rinadi (aks holda qo'yilgan tosh turi aniqlanib qoladi)
-    const stones = (v === p)
-      ? `Haqiqiy: <b>${h.real}</b> | Yolg'on: <b>${h.fake}</b>`
-      : `<span class="muted">Qo'lida:</span> <b>${h.real + h.fake}</b> <span class="muted">ta tosh</span>`;
-    el.innerHTML = `<div class="name"><i></i>${escapeHtml(nameOf(p))}</div>
-      <div>${stones}</div>
-      <div class="muted">Raqib blefi: <b>${s.exposedFakes[1 - p]}/${L.FAKE_TOTAL}</b> fosh bo'ldi</div>`;
+    // Qo'ldagi tosh TURLARI faqat egasiga (aks holda qo'yilgan tosh turi aniqlanib qoladi)
+    const stones = v === p ? `Haqiqiy: <b>${h.real}</b> | Yolg'on: <b>${h.fake}</b>` : `<span class="muted">Qo'lida:</span> <b>${h.real + h.fake}</b> <span class="muted">ta tosh</span>`;
+    el.innerHTML = `<div class="name"><i></i><span style="overflow:hidden;text-overflow:ellipsis">${esc(nameOf(p))}</span> ${s.emoji[p]}</div><div>${stones}</div>
+      <div class="muted">Raqib blefi: <b style="color:var(--text)">${s.exposedFakes[1 - p]}/${s.fakeTotal}</b> fosh bo'ldi</div>`;
   });
 
-  // Maslahat matni
+  // Emoji tugmasi va paneli
+  const me = ui.mode === 'bot' ? humanP() : turnP;
+  $('#emojiNow').textContent = s.emoji[me];
+  $('#btnEmoji').disabled = !myTurnUI;
+  $('#btnAnalysis').disabled = v === null;
+  const strip = $('#emojiStrip');
+  strip.classList.toggle('hidden', !(ui.emojiOpen && myTurnUI));
+  strip.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.e === s.emoji[turnP]));
+
   let hint = '';
-  if (s.winner === null && !ui.locked && !isBot(turnP)) {
-    hint = ui.selected
-      ? 'Yoritilgan katakka bosing. "?" — raqib toshini tekshirish.'
-      : 'Figurangizni bosing — yurish. Bo\'sh katakni bosing — tosh qo\'yish.';
-  }
+  if (myTurnUI) hint = ui.selected
+    ? 'Yoritilgan katakka bosing. "?" — raqib toshini tekshirish. Emoji almashtirish bepul.'
+    : "Figurangiz — yurish va emoji. Bo'sh katak — tosh qo'yish. O'z toshingiz — belgini o'zgartirish (navbatda 1 marta, bepul).";
   $('#hint').textContent = hint;
 }
-function escapeHtml(t) { return t.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
+function popEmoji(p) {
+  const em = pieceEls[p].querySelector('.em');
+  em.classList.remove('pop'); void em.offsetWidth; em.classList.add('pop');
+}
 
-/* ---------- Toast va banner ---------- */
+/* ---------- Toast, banner, effektlar ---------- */
 let toastT = null;
 function toast(msg, err) {
   const t = $('#toast');
   t.textContent = msg; t.className = 'toast' + (err ? ' err' : '');
-  clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('off'), 2600);
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('off'), 2800);
 }
 function banner(text, sub, cls) {
   const b = $('#banner');
   b.className = 'banner'; void b.offsetWidth;
-  b.innerHTML = escapeHtml(text) + (sub ? `<small>${escapeHtml(sub)}</small>` : '');
+  b.innerHTML = esc(text) + (sub ? `<small>${esc(sub)}</small>` : '');
   b.className = 'banner show ' + cls;
 }
 function sparks(el, n = 26) {
@@ -839,27 +1097,26 @@ function sparks(el, n = 26) {
 }
 function shake() { const g = $('#game'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); }
 
-/* ---------- Overlaylar ---------- */
+/* ---------- Overlay ---------- */
 function overlay(html, solid) {
+  clearInterval(ui.wagerTimer);
   const root = $('#overlayRoot');
   root.innerHTML = `<div class="overlay${solid ? ' solid' : ''}">${html}</div>`;
   return root.firstElementChild;
 }
-function closeOverlay() { $('#overlayRoot').innerHTML = ''; }
+function closeOverlay() { $('#overlayRoot').innerHTML = ''; clearInterval(ui.wagerTimer); }
 
-/* ---------- Taymer ---------- */
+/* ---------- Navbat taymeri ---------- */
 function startTimer() {
   stopTimer();
   const el = $('#timer');
   if (!settings.timer) { el.textContent = '∞'; el.className = 'timer off'; return; }
-  ui.deadline = Date.now() + settings.timer * 1000;
-  ui.lastTickSec = null;
+  ui.deadline = Date.now() + settings.timer * 1000; ui.lastTickSec = null;
   const gid = ui.gameId;
   const upd = () => {
     if (gid !== ui.gameId) return stopTimer();
     const left = Math.max(0, Math.ceil((ui.deadline - Date.now()) / 1000));
-    el.textContent = left;
-    el.className = 'timer' + (left <= 5 ? ' danger' : '');
+    el.textContent = left; el.className = 'timer' + (left <= 5 ? ' danger' : '');
     if (left <= 5 && left > 0 && ui.lastTickSec !== left) Sound.tick();
     ui.lastTickSec = left;
     if (left <= 0) { stopTimer(); onTimeout(); }
@@ -867,132 +1124,180 @@ function startTimer() {
   upd(); ui.timerId = setInterval(upd, 200);
 }
 function stopTimer() { clearInterval(ui.timerId); ui.timerId = null; }
-function showIdleTimer() {
-  const el = $('#timer');
-  el.className = 'timer' + (settings.timer ? '' : ' off');
-  el.textContent = settings.timer ? settings.timer : '∞';
-}
+function showIdleTimer() { const el = $('#timer'); el.className = 'timer' + (settings.timer ? '' : ' off'); el.textContent = settings.timer || '∞'; }
 
-/* ---------- O'yin oqimi ---------- */
-function startGame(mode, level) {
+/* =================== O'YIN OLDIDAN: rejim → ismlar → o'lcham → shart =================== */
+const setup = { mode: 'pvp' };
+function openSetup(mode) {
+  setup.mode = mode;
+  $('#namesPvp').classList.toggle('hidden', mode !== 'pvp');
+  $('#namesBot').classList.toggle('hidden', mode !== 'bot');
+  $('#namesTitle').textContent = mode === 'pvp' ? "O'yinchilar" : 'Botga qarshi';
+  $('#inName0').value = settings.names[0] || ''; $('#inName1').value = settings.names[1] || '';
+  $('#inNameMe').value = settings.meName || '';
+  syncLevel(); renderSizeCards(); renderWagerCards();
+  show('setupNames');
+}
+function syncLevel() {
+  document.querySelectorAll('#segLevel button').forEach(b => b.classList.toggle('on', b.dataset.v === settings.level));
+  $('#levelInfo').textContent = LEVEL_INFO[settings.level] || '';
+}
+function renderSizeCards() {
+  $('#sizeCards').innerHTML = Object.values(L.SIZES).map(z => `
+    <button class="pick${z.key === settings.size ? ' on' : ''}" data-size="${z.key}">
+      <b>${z.name}</b><small>${z.n}×${z.n} · ${z.real} haqiqiy + ${z.fake} yolg'on</small></button>`).join('');
+  $('#setSize').innerHTML = Object.values(L.SIZES).map(z => `<button data-v="${z.key}" class="${z.key === settings.size ? 'on' : ''}">${z.n}×${z.n}</button>`).join('');
+}
+function renderWagerCards() {
+  $('#wagerCards').innerHTML = WAGERS.map(w => `
+    <button class="pick${w.id === settings.wager ? ' on' : ''}" data-wager="${w.id}"><span class="em">${w.e}</span><b>${esc(w.t)}</b>${w.sub ? `<small>${w.sub}</small>` : ''}</button>`).join('');
+  $('#customBox').classList.toggle('hidden', settings.wager !== 'custom');
+  $('#inCustom').value = settings.custom || '';
+}
+/** Tanlangan shartdan o'yin uchun shart obyekti */
+function buildWager() {
+  const id = settings.wager;
+  if (id === 'none' || !WAGERS.some(w => w.id === id)) return null;
+  if (id === 'custom') {
+    const t = (settings.custom || '').trim() || "O'zaro kelishilgan shart";
+    return { id, e: '✍️', t, does: t };
+  }
+  if (id === 'random') {
+    const pool = WAGERS.filter(w => w.does);
+    return { ...pool[Math.floor(Math.random() * pool.length)], secret: true };   // o'yin oxirigacha yashirin
+  }
+  return { ...WAGERS.find(w => w.id === id) };
+}
+const wagerBarText = (w) => !w ? '' : w.secret ? '🎲 Yutqazgan: sirli shartni bajaradi' : `${w.e} Yutqazgan: ${w.does}`;
+
+/* =================== O'YIN OQIMI =================== */
+function startGame(opts = {}) {
   ui.gameId++;
   stopTimer(); closeOverlay(); closeSheet();
-  ui.mode = mode; ui.botLevel = level || 'medium';
-  ui.state = L.createState();
-  ui.selected = false; ui.placeTarget = null; ui.log = [];
-  ui.locked = true;
-  ui.viewer = mode === 'bot' ? 0 : null;
-  // Oldingi o'yindan qolgan banner/toast qayta ko'rinmasin (display o'zgarsa CSS animatsiya qayta boshlanadi)
+  ui.mode = setup.mode; ui.level = settings.level;
+  ui.names = ui.mode === 'pvp' ? [...settings.names] : [settings.meName, 'Bot'];
+  // Revansh: odatiy shart saqlanadi, tasodifiy shart qaytadan (sirli) tanlanadi
+  ui.wager = opts.keepWager && ui.wager && !ui.wager.secret ? ui.wager : buildWager();
+  ui.state = L.createState(settings.size, opts.firstTurn || 0);
+  ui.selected = false; ui.placeTarget = null; ui.emojiOpen = false; ui.logMark = 0;
+  ui.seenEmoji = [null, null]; ui.botEvent = null; ui.locked = true;
+  ui.viewer = ui.mode === 'bot' ? humanP() : null;
   $('#banner').className = 'banner'; $('#toast').classList.add('off');
-  show('game'); buildBoard(); render(); showIdleTimer();
-  if (mode === 'pvp') showHandoff(0, true); else beginTurn();
+  const wb = $('#wagerBar');
+  wb.classList.toggle('hidden', !ui.wager); wb.textContent = wagerBarText(ui.wager);
+  show('game'); buildBoard(ui.state.n); buildEmojiStrip(); render(); showIdleTimer();
+  if (ui.mode === 'pvp') showHandoff(ui.state.turn, true); else beginTurn();
 }
 
-/** Navbat boshlanishi (inson yoki bot) */
+/** Navbat boshlanishi */
 function beginTurn() {
   const s = ui.state, p = s.turn, gid = ui.gameId;
   if (s.winner !== null) return;
   if (ui.mode === 'pvp') ui.viewer = p;
-  ui.selected = false; ui.placeTarget = null;
+  ui.selected = false; ui.placeTarget = null; ui.emojiOpen = false;
   if (!L.canAct(s, p)) {
-    // Juda kam uchraydigan holat: yurish ham, tosh qo'yish ham mumkin emas
     toast(`${nameOf(p)}: harakat imkoni yo'q — navbat o'tdi.`);
-    ui.log.push(`${nameOf(p)} harakat qila olmadi.`);
-    L.passTurn(s); ui.locked = true; render();
+    L.passTurn(s, 'pass'); ui.locked = true; render();
     setTimeout(() => { if (gid === ui.gameId) afterTurnSwitch(); }, 1200);
     return;
   }
-  if (isBot(p)) {
-    ui.locked = true; render(); showIdleTimer(); botTurn();
-  } else {
-    ui.locked = false; render(); startTimer();
+  if (isBot(p)) { ui.locked = true; render(); showIdleTimer(); botTurn(); return; }
+  ui.locked = false; render(); startTimer();
+  // 2 kishilik rejim: raqib emojisi o'zgargan bo'lsa — e'tiborni tortish uchun "sakratamiz"
+  if (ui.mode === 'pvp') {
+    const o = 1 - p;
+    if (ui.seenEmoji[p] !== null && ui.seenEmoji[p] !== s.emoji[o]) { popEmoji(o); Sound.emoji(); }
+    ui.seenEmoji[p] = s.emoji[o];
   }
 }
-
-/** Harakatdan keyin: g'alaba, qo'shimcha navbat yoki navbat almashuvi */
 function afterAction(actor) {
   const s = ui.state;
   if (s.winner !== null) return showWin(s.winner);
-  if (s.turn === actor) return beginTurn();    // qo'shimcha navbat
+  if (s.turn === actor) return beginTurn();       // qo'shimcha navbat
   afterTurnSwitch();
 }
-function afterTurnSwitch() {
-  if (ui.mode === 'pvp') showHandoff(ui.state.turn, false);
-  else beginTurn();
-}
+function afterTurnSwitch() { if (ui.mode === 'pvp') showHandoff(ui.state.turn, false); else beginTurn(); }
 
-/** "Telefonni uzating" ekrani — maydon va yashirin ma'lumot butunlay yashiriladi */
+/** "Telefonni uzating" — maydon va yashirin ma'lumot butunlay yashiriladi */
 function showHandoff(p, first) {
   stopTimer(); showIdleTimer(); closeSheet();
-  ui.locked = true; ui.selected = false; ui.placeTarget = null;
-  ui.viewer = null; render();                    // DOM'dan yashirin belgilarni olib tashlash
-  const logHtml = (!first && ui.log.length)
-    ? `<div class="lastlog"><b>So'nggi harakatlar:</b><br>${ui.log.map(escapeHtml).join('<br>')}</div>` : '';
-  ui.log = [];
+  ui.locked = true; ui.selected = false; ui.placeTarget = null; ui.emojiOpen = false;
+  ui.viewer = null; render();                       // DOM'dan yashirin belgilarni olib tashlash
+  const s = ui.state, recent = s.log.slice(ui.logMark).slice(-6);
+  ui.logMark = s.log.length;
+  const logHtml = (!first && recent.length) ? `<div class="lastlog"><b>So'nggi harakatlar:</b><br>${recent.map(e => esc(fmtLog(e))).join('<br>')}</div>` : '';
   const ov = overlay(`<div class="modal">
       <p style="margin:0">${first ? "O'yin boshlanadi" : 'Navbat almashdi'}</p>
-      <div class="handoff-name c${p}">Telefonni <span style="white-space:nowrap">${escapeHtml(nameDative(p))}</span> uzating</div>
-      <p>Faqat ${escapeHtml(nameOf(p))} ekranga qarasin. Tayyor bo'lgach tugmani bosing.</p>
+      <div class="handoff-name c${p}">Telefonni <span style="white-space:nowrap">${esc(nameOf(p))}ga</span> uzating</div>
+      <p>Faqat ${esc(nameOf(p))} ekranga qarasin. Tayyor bo'lgach tugmani bosing.</p>
       ${logHtml}
-      <button class="btn primary" id="btnReady">Tayyorman</button>
-    </div>`, true);
+      <button class="btn primary" id="btnReady">Tayyorman</button></div>`, true);
   ov.querySelector('#btnReady').onclick = () => { Sound.ensure(); closeOverlay(); beginTurn(); };
 }
-
 function onTimeout() {
   const s = ui.state; if (!s || s.winner !== null) return;
-  const p = s.turn;
-  closeSheet(); ui.locked = true; ui.selected = false; ui.placeTarget = null;
-  ui.log.push(`${nameOf(p)}ning vaqti tugadi.`);
-  Sound.bad(); toast('Vaqt tugadi! Navbat raqibga o\'tdi.', true);
-  L.passTurn(s); render();
+  closeSheet(); closeAnalysisIfOpen();
+  ui.locked = true; ui.selected = false; ui.placeTarget = null; ui.emojiOpen = false;
+  Sound.bad(); toast("Vaqt tugadi! Navbat raqibga o'tdi.", true);
+  L.passTurn(s, 'timeout'); render();
   const gid = ui.gameId;
   setTimeout(() => { if (gid === ui.gameId) afterTurnSwitch(); }, 900);
+}
+
+/** Harakatlar tarixi matni (faqat ochiq ma'lumot) */
+function fmtLog(e) {
+  const who = `${nameOf(e.p)} (${e.em})`, lb = (k) => `'${LABEL_INFO[k].t}'`;
+  switch (e.k) {
+    case 'move': return `${who} yurdi`;
+    case 'place': return `${who} tosh qo'ydi ${lb(e.label)} belgisi bilan`;
+    case 'fake': return `${who} ${lb(e.label)} toshni tekshirdi — YOLG'ON chiqdi`;
+    case 'real': return `${who} ${lb(e.label)} toshni tekshirdi — HAQIQIY chiqdi`;
+    case 'relabel': return `${who} tosh belgisini ${lb(e.from)} → ${lb(e.to)} qildi`;
+    case 'timeout': return `${who}ning vaqti tugadi`;
+    case 'pass': return `${who} harakat qila olmadi`;
+    case 'win': return `${who} maqsadga yetdi!`;
+  }
+  return '';
 }
 
 /* ---------- Harakatlarni bajarish (inson va bot uchun umumiy) ---------- */
 async function performMove(r, c) {
   const s = ui.state, p = s.turn, gid = ui.gameId;
-  ui.locked = true; ui.selected = false; ui.placeTarget = null; stopTimer();
+  ui.locked = true; ui.selected = false; ui.placeTarget = null; ui.emojiOpen = false; stopTimer(); closeSheet();
   const target = L.stoneAt(s, r, c);
   const res = L.applyMove(s, p, r, c);
   if (!res) { ui.locked = false; render(); return; }
-
   if (res.type === 'move') {
-    Sound.step(); render();
-    ui.log.push(`${nameOf(p)} figurasini surdi.`);
-    await sleep(340);
+    Sound.step(); render(); await sleep(340);
   } else {
-    // Toshning 3D ochilishi: orqa tomonni natija bilan to'ldirib, aylantiramiz
-    // Holat allaqachon o'zgargan, lekin ochilish animatsiyasigacha render QILMAYMIZ —
-    // faqat yoritishlarni olib tashlaymiz
+    // Holat o'zgargan, lekin ochilish animatsiyasigacha render qilmaymiz — faqat yoritishni olamiz
     cells.forEach(el => el.classList.remove('hl', 'hl-ch', 'place-target'));
     pieceEls.forEach(el => el.classList.remove('sel'));
-    $('#hint').textContent = '';
+    $('#emojiStrip').classList.add('hidden'); $('#hint').textContent = '';
     const se = cellEl(r, c).querySelector('.stone') || makeTempStone(r, c, target.owner);
     const back = se.querySelector('.face.back');
-    back.className = 'face back ' + (res.type === 'fake' ? 'fake' : 'real');
+    back.className = 'face back ' + res.type;
     back.textContent = res.type === 'fake' ? '✕' : '';
-    // Figura toshga "urinadi"
     nudgePiece(p, res.from, { r, c });
     Sound.flip();
     await sleep(30); se.classList.add('flip');
     await sleep(700); if (gid !== ui.gameId) return;
-
-    const actorHuman = !isBot(p);
+    const botActs = isBot(p);
     if (res.type === 'fake') {
       Sound.exposed(); sparks(cellEl(r, c));
-      if (ui.mode === 'bot' && isBot(p)) banner('Blefingiz fosh bo\'ldi!', 'Bot yana yuradi', 'gold');
-      else banner('Blef fosh bo\'ldi!', res.win ? '' : 'Qo\'shimcha navbat!', 'gold');
-      ui.log.push(`${nameOf(p)} raqib toshini tekshirdi: yolg'on chiqdi (qo'shimcha navbat).`);
+      if (botActs) banner("Blefingiz fosh bo'ldi!", 'Bot yana yuradi', 'gold');
+      else banner("Blef fosh bo'ldi!", res.win ? '' : "Qo'shimcha navbat!", 'gold');
+      if (ui.mode === 'bot') {
+        if (botActs) { if (L.setEmoji(s, p, '😂')) Sound.emoji(); }   // hali botning navbati (qo'shimcha)
+        else ui.botEvent = 'myFakeExposed';
+      }
       se.classList.add('vanish'); await sleep(330);
       render(); await sleep(700);
     } else {
-      Sound.caught(); shake();
-      if (actorHuman || ui.mode === 'pvp') vibrate([90, 60, 160]);
-      if (ui.mode === 'bot' && isBot(p)) banner('Bot ushlandi!', 'Toshingiz haqiqiy edi', 'red');
+      Sound.caught(); shake(); vibrate([90, 60, 160]);
+      if (botActs) banner('Bot ushlandi!', 'Toshingiz haqiqiy edi', 'red');
       else banner('Ushlandingiz!', 'Tosh haqiqiy edi', 'red');
-      ui.log.push(`${nameOf(p)} raqib toshini tekshirdi: haqiqiy chiqdi (orqaga qaytdi).`);
+      if (ui.mode === 'bot') ui.botEvent = botActs ? 'caught' : 'bluffWorked';   // bot keyingi navbatida 😤 / 😏
       render(); await sleep(1000);
     }
   }
@@ -1006,36 +1311,32 @@ function makeTempStone(r, c, owner) {
   cellEl(r, c).appendChild(se); return se;
 }
 function nudgePiece(p, from, to) {
-  const el = pieceEls[p];
-  const x = from.c + (to.c - from.c) * 0.28, y = from.r + (to.r - from.r) * 0.28;
+  const el = pieceEls[p], x = from.c + (to.c - from.c) * 0.28, y = from.r + (to.r - from.r) * 0.28;
   el.style.transform = `translate(${x * 100}%, ${y * 100}%)`;
   setTimeout(() => { el.style.transform = `translate(${from.c * 100}%, ${from.r * 100}%)`; }, 220);
 }
-
-async function performPlace(r, c, real) {
+async function performPlace(r, c, real, label) {
   const s = ui.state, p = s.turn, gid = ui.gameId;
-  ui.locked = true; ui.selected = false; ui.placeTarget = null; stopTimer(); closeSheet();
-  const res = L.applyPlace(s, p, r, c, real);
+  ui.locked = true; ui.selected = false; ui.placeTarget = null; ui.emojiOpen = false; stopTimer(); closeSheet();
+  const res = L.applyPlace(s, p, r, c, real, label);
   if (!res.ok) { ui.locked = false; render(); placementError(r, c, res); startTimer(); return; }
   ui.justPlaced = L.stoneAt(s, r, c).id;
   Sound.place(); render();
-  ui.log.push(`${nameOf(p)} tosh qo'ydi.`);
   await sleep(450);
   if (gid !== ui.gameId) return;
   afterAction(p);
 }
-
 function placementError(r, c, res) {
   const el = cellEl(r, c); el.classList.remove('bad'); void el.offsetWidth; el.classList.add('bad');
   Sound.bad();
   const p = ui.state.turn;
-  let msg = 'Bu katakka tosh qo\'yib bo\'lmaydi.';
+  let msg = "Bu katakka tosh qo'yib bo'lmaydi.";
   if (res.code === 'occupied') msg = 'Bu katak band.';
   else if (res.code === 'empty-hand') msg = 'Sizda tosh qolmadi.';
   else if (res.code === 'blocks') {
     const b = res.blocks;
-    if (b.length === 2) msg = 'Ruxsat yo\'q: bu tosh ikkala o\'yinchining ham maqsadga yo\'lini butunlay yopadi.';
-    else if (b[0] === p) msg = 'Ruxsat yo\'q: bu tosh o\'zingizning maqsadga yo\'lingizni butunlay yopadi.';
+    if (b.length === 2) msg = "Ruxsat yo'q: bu tosh ikkala o'yinchining ham maqsadga yo'lini butunlay yopadi.";
+    else if (b[0] === p) msg = "Ruxsat yo'q: bu tosh o'zingizning maqsadga yo'lingizni butunlay yopadi.";
     else msg = `Ruxsat yo'q: bu tosh ${nameOf(b[0])}ning maqsadga yo'lini butunlay yopadi. Kamida bitta yo'l qolishi shart.`;
   }
   toast(msg, true);
@@ -1047,79 +1348,200 @@ function onCellTap(r, c) {
   if (!s || ui.locked || s.winner !== null || isBot(s.turn)) return;
   Sound.ensure();
   const p = s.turn, me = s.pieces[p];
-  // O'z figurasini bosish — tanlash / bekor qilish
-  if (me.r === r && me.c === c) { ui.selected = !ui.selected; closeSheet(); render(); return; }
+  if (me.r === r && me.c === c) {            // o'z figurasi — tanlash + emoji paneli
+    ui.selected = !ui.selected; ui.emojiOpen = ui.selected; closeSheet(); ui.placeTarget = null; render(); return;
+  }
   if (ui.selected) {
     const mv = L.legalMoves(s, p).find(m => m.r === r && m.c === c);
     if (mv) { performMove(r, c); return; }
   }
-  ui.selected = false;
-  // Bo'sh katak — tosh qo'yish
-  if (L.pieceAt(s, r, c) === -1 && !L.stoneAt(s, r, c)) {
-    const chk = L.checkPlacement(s, p, r, c);
-    if (!chk.ok) { render(); placementError(r, c, chk); return; }
-    ui.placeTarget = { r, c }; render(); openSheet(r, c);
-    return;
-  }
-  render();
+  ui.selected = false; ui.emojiOpen = false;
   const st = L.stoneAt(s, r, c);
-  if (st && st.owner !== p && !st.revealed) toast('Raqib toshini tekshirish uchun avval figurangizni tanlang.');
-  else if (st) toast(st.revealed ? 'Ochilgan haqiqiy tosh — devor.' : 'Bu sizning toshingiz.');
+  if (!st && L.pieceAt(s, r, c) === -1) {    // bo'sh katak — tosh qo'yish
+    const chk = L.checkPlacement(s, p, r, c);
+    if (!chk.ok) { ui.placeTarget = null; closeSheet(); render(); placementError(r, c, chk); return; }
+    ui.placeTarget = { r, c }; render(); openPlaceSheet(r, c); return;
+  }
+  ui.placeTarget = null; closeSheet(); render();
+  if (st && st.owner === p && !st.revealed) {
+    if (s.relabelUsed) toast("Bu navbatda belgini allaqachon o'zgartirdingiz.");
+    else openRelabelSheet(st);
+  } else if (st && !st.revealed) toast('Raqib toshini tekshirish uchun avval figurangizni tanlang.');
+  else if (st) toast('Ochilgan haqiqiy tosh — devor.');
 }
 
-/* Tosh turini tanlash paneli */
-function openSheet(r, c) {
+/* Tosh qo'yish paneli: tur + belgi + tasdiq */
+function openPlaceSheet(r, c) {
   closeSheet();
   const h = ui.state.hand[ui.state.turn];
+  let real = h.real && !h.fake ? true : (!h.real && h.fake ? false : null), label = 'neutral';
   const sh = document.createElement('div');
   sh.className = 'sheet'; sh.id = 'sheet';
-  sh.innerHTML = `<div class="inner">
-     <div class="title">Qanday tosh qo'yasiz?</div>
-     <div class="row">
-       <button class="opt real" data-real="1" ${h.real ? '' : 'disabled'}>Haqiqiy<small>qoldi: ${h.real}</small></button>
-       <button class="opt fake" data-real="0" ${h.fake ? '' : 'disabled'}>Yolg'on<small>qoldi: ${h.fake}</small></button>
-     </div>
-     <button class="btn ghost small" style="width:100%" data-cancel>Bekor qilish</button>
-   </div>`;
+  const draw = () => {
+    sh.innerHTML = `<div class="inner">
+      <div class="title">Tosh qo'yish</div>
+      <div class="row">
+        <button class="opt${real === true ? ' on' : ''}" data-real="1" ${h.real ? '' : 'disabled'}>Haqiqiy<small>qoldi: ${h.real}</small></button>
+        <button class="opt${real === false ? ' on' : ''}" data-real="0" ${h.fake ? '' : 'disabled'}>Yolg'on<small>qoldi: ${h.fake}</small></button>
+      </div>
+      <div class="sub">Raqib ko'radigan belgi (rost bo'lishi shart emas):</div>
+      <div class="row4">${L.LABELS.map(k => `<button class="opt${label === k ? ' on' : ''}" data-label="${k}"><span class="e">${LABEL_INFO[k].e}</span><small>${LABEL_INFO[k].t}</small></button>`).join('')}</div>
+      <div class="go"><button class="btn ghost small" data-cancel>Bekor</button><button class="btn primary small" data-ok ${real === null ? 'disabled' : ''}>${real === null ? 'Turini tanlang' : "Qo'yish"}</button></div>
+    </div>`;
+  };
+  draw();
   sh.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.hasAttribute('data-cancel')) { closeSheet(); ui.placeTarget = null; render(); return; }
-    performPlace(r, c, b.dataset.real === '1');
+    if (b.hasAttribute('data-ok')) { if (real !== null) performPlace(r, c, real, label); return; }
+    if (b.dataset.real) real = b.dataset.real === '1';
+    if (b.dataset.label) label = b.dataset.label;
+    draw();
+  });
+  document.body.appendChild(sh);
+}
+/* Belgini bepul o'zgartirish paneli */
+function openRelabelSheet(st) {
+  closeSheet();
+  const sh = document.createElement('div');
+  sh.className = 'sheet'; sh.id = 'sheet';
+  sh.innerHTML = `<div class="inner">
+    <div class="title">Belgini o'zgartirish</div>
+    <div class="sub" style="margin-top:0">Bepul · navbatda 1 marta · asosiy harakat sarflanmaydi</div>
+    <div class="row4">${L.LABELS.map(k => `<button class="opt${st.label === k ? ' on' : ''}" data-label="${k}" ${st.label === k ? 'disabled' : ''}><span class="e">${LABEL_INFO[k].e}</span><small>${LABEL_INFO[k].t}</small></button>`).join('')}</div>
+    <div class="go" style="grid-template-columns:1fr"><button class="btn ghost small" data-cancel>Bekor</button></div></div>`;
+  sh.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.label) {
+      const res = L.relabel(ui.state, ui.state.turn, st.r, st.c, b.dataset.label);
+      if (res.ok) { Sound.relabel(); toast(`Yangi belgi: ${LABEL_INFO[b.dataset.label].e} ${LABEL_INFO[b.dataset.label].t}`); }
+    }
+    closeSheet(); render();
   });
   document.body.appendChild(sh);
 }
 function closeSheet() { const sh = $('#sheet'); if (sh) sh.remove(); }
 
-/* ---------- Bot navbati ---------- */
-async function botTurn() {
-  const gid = ui.gameId, p = ui.state.turn;
-  await sleep(600 + Math.random() * 400);       // "o'ylash"
-  if (gid !== ui.gameId || ui.state.turn !== p || ui.state.winner !== null) return;
-  const act = L.botDecide(ui.state, p, ui.botLevel);
-  if (!act) { L.passTurn(ui.state); render(); return afterTurnSwitch(); }
-  if (act.kind === 'move') performMove(act.r, act.c);
-  else performPlace(act.r, act.c, act.real);
+/* Emoji paneli */
+function buildEmojiStrip() {
+  $('#emojiStrip').innerHTML = L.EMOJIS.map(e => `<button data-e="${e}">${e}<small>${EMOJI_NAMES[e]}</small></button>`).join('');
+}
+function chooseEmoji(e) {
+  const s = ui.state;
+  if (!s || ui.locked || isBot(s.turn)) return;
+  if (L.setEmoji(s, s.turn, e)) { Sound.emoji(); render(); }
 }
 
-/* ---------- G'alaba ---------- */
+/* Tahlil paneli — faqat ochiq ma'lumot (L.analyze yopiq toshlar turini o'qimaydi) */
+function openAnalysis() {
+  const s = ui.state; if (!s || ui.viewer === null) return;
+  const a = L.analyze(s, ui.viewer), on = nameOf(a.opp);
+  const det = L.LABELS.filter(k => a.labels[k].n > 0).map(k => {
+    const l = a.labels[k], I = LABEL_INFO[k];
+    let honest = '';
+    if (k === 'wall') honest = ` · rostgo'ylik: ${Math.round(l.real / l.n * 100)}%`;
+    if (k === 'lie') honest = ` · rostgo'ylik: ${Math.round(l.fake / l.n * 100)}%`;
+    return `<div class="an-row">${I.e} Raqib '${I.t}' degan ${l.n} toshidan <b>${l.fake}</b> tasi yolg'on, <b>${l.real}</b> tasi haqiqiy chiqdi${honest}</div>`;
+  }).join('') || `<div class="an-row muted">Hali raqibning birorta toshi ochilmagan. Tekshirib ko'ring!</div>`;
+  const log = s.log.slice(-20).reverse().map(e => `<div>${esc(fmtLog(e))}</div>`).join('') || "<div class=\"muted\">Hali harakat yo'q</div>";
+  let note = '';
+  if (a.hidden && a.prob === 0) note = ' — qolganlari albatta HAQIQIY!';
+  if (a.hidden && a.prob === 1) note = " — qolganlari albatta YOLG'ON!";
+  const ov = overlay(`<div class="modal wide" id="analysis">
+    <h3>📊 Tahlil: ${esc(on)} ${s.emoji[a.opp]}</h3>
+    <div class="an-sec"><h4>Yolg'on detektori</h4>${det}</div>
+    <div class="an-sec"><h4>Raqib blefi hisobi</h4>
+      <div class="an-row">Yolg'on: <b>${a.exposed}/${a.fakeTotal}</b> fosh bo'ldi, qolgan yopiq toshlar: <b>${a.hidden}</b>, ulardan yolg'on bo'lishi mumkin: <b>${a.maybeFakes}</b></div>
+      <div class="an-row">Ochilgan haqiqiylar: <b>${a.revealedReals}/${a.realTotal}</b> · Qo'lida: <b>${a.hand}</b> ta tosh</div>
+      <div class="an-row">Yopiq tosh yolg'on bo'lish ehtimoli: <b>${Math.round(a.prob * 100)}%</b>${note}</div>
+    </div>
+    <div class="an-sec"><h4>Harakatlar tarixi (oxirgi 20)</h4><div class="an-log">${log}</div></div>
+    <button class="btn primary" id="btnCloseAn">Yopish</button></div>`);
+  ov.querySelector('#btnCloseAn').onclick = closeOverlay;
+  ov.addEventListener('click', e => { if (e.target === ov) closeOverlay(); });
+}
+function closeAnalysisIfOpen() { if ($('#analysis')) closeOverlay(); }
+
+/* ---------- Bot navbati ---------- */
+async function botTurn() {
+  const gid = ui.gameId, s = ui.state, p = s.turn;
+  await sleep(600 + Math.random() * 400);                 // "o'ylash" 0.6–1 s
+  if (gid !== ui.gameId || s.turn !== p || s.winner !== null) return;
+  // Bepul harakatlar: emoji va ba'zan belgi almashtirish
+  const free = L.botFree(s, p, ui.level, ui.botEvent); ui.botEvent = null;
+  if (free.emoji && L.setEmoji(s, p, free.emoji)) { Sound.emoji(); render(); }
+  if (free.relabel && L.relabel(s, p, free.relabel.r, free.relabel.c, free.relabel.label).ok) {
+    Sound.relabel(); render(); await sleep(450);
+    if (gid !== ui.gameId) return;
+  }
+  const act = L.botDecide(s, p, ui.level);
+  if (!act) { L.passTurn(s, 'pass'); render(); return afterTurnSwitch(); }
+  if (act.kind === 'move') performMove(act.r, act.c);
+  else performPlace(act.r, act.c, act.real, act.label);
+}
+
+/* ---------- G'alaba va shart ---------- */
 async function showWin(p) {
-  stopTimer(); ui.locked = true; render();
+  stopTimer(); ui.locked = true; closeSheet(); render();
   const gid = ui.gameId;
-  Sound.win(); vibrate([120, 60, 120, 60, 300]);
-  sparks(pieceEls[p], 40);
+  Sound.win(); vibrate([120, 60, 120, 60, 300]); sparks(pieceEls[p], 40);
   await sleep(900); if (gid !== ui.gameId) return;
-  if (ui.mode === 'pvp') { ui.viewer = null; render(); }
-  const title = ui.mode === 'bot' ? (isBot(p) ? 'Bot yutdi' : 'Siz yutdingiz!') : `${nameOf(p)} yutdi!`;
-  const ov = overlay(`<div class="modal">
-      <div style="font-size:48px">${ui.mode === 'bot' && isBot(p) ? '👁' : '🏆'}</div>
-      <div class="win-title" style="color:${p === 0 ? 'var(--p0b)' : 'var(--p1b)'}">${escapeHtml(title)}</div>
-      <p style="margin:0">Raqib blefi fosh qilindi: ${ui.state.exposedFakes[1 - p]}/${L.FAKE_TOTAL}</p>
+  if (ui.mode === 'pvp') { ui.viewer = null; render(); }   // o'yin oxirida ham yopiq toshlar sirligicha qoladi
+  const s = ui.state, loser = 1 - p, w = ui.wager;
+  const title = ui.mode === 'bot' ? (isBot(p) ? 'Bot yutdi!' : `${nameOf(p)}, siz yutdingiz!`) : `${nameOf(p)} yutdi!`;
+  let wHtml = '';
+  if (w) {
+    let tool = '';
+    if (w.kind === 'timer') tool = `<div class="big-timer" id="wTime">${fmtTime(w.amount)}</div><button class="btn small" id="wTimerBtn" style="width:auto;display:inline-block;padding:10px 22px">▶ Boshlash</button>`;
+    if (w.kind === 'count') tool = `<button class="counter" id="wCount">0<small>/ ${w.amount}</small></button><div class="muted" style="font-size:13px">Har bir marta uchun bosing</div>`;
+    wHtml = `<div class="wager-box">
+      <div class="who">${esc(nameOf(loser))} shartni bajaradi:</div>
+      <div class="what">${w.secret ? '🎲 ' : ''}${w.e} ${esc(w.t)}</div>${tool}
+      <div id="wDoneWrap"><button class="btn primary" id="wDone" style="margin-top:12px">Bajarildi ✅</button></div></div>`;
+  }
+  const ov = overlay(`<div class="modal" id="winModal">
+      <div style="font-size:46px">${ui.mode === 'bot' && isBot(p) ? '👁' : '🏆'}</div>
+      <div class="win-title c${p}">${esc(title)}</div>
+      <p style="margin:0">Raqib blefi fosh qilindi: ${s.exposedFakes[loser]}/${s.fakeTotal} · Harakatlar: ${s.moveCount}</p>
+      ${wHtml}
       <div class="quote">"Ko'rgan odamni boshqarib bo'lmaydi. Ko'radigan bo'ling."</div>
-      <button class="btn primary" id="btnAgain">Qayta o'ynash</button>
-      <button class="btn ghost" id="btnMenu">Bosh menyu</button>
-    </div>`);
-  ov.querySelector('#btnAgain').onclick = () => startGame(ui.mode, ui.botLevel);
-  ov.querySelector('#btnMenu').onclick = () => { closeOverlay(); quitToMenu(); };
+      <button class="btn primary" id="btnAgain">Revansh</button>
+      <button class="btn ghost" id="btnMenu">Bosh menyu</button></div>`);
+  if (w) bindWagerTools(ov, w);
+  ov.querySelector('#btnAgain').onclick = () => startGame({ firstTurn: loser, keepWager: true });   // revanshda yutqazgan birinchi yuradi
+  ov.querySelector('#btnMenu').onclick = quitToMenu;
+}
+const fmtTime = (sec) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+function bindWagerTools(ov, w) {
+  const tBtn = ov.querySelector('#wTimerBtn');
+  if (tBtn) tBtn.onclick = () => {
+    clearInterval(ui.wagerTimer);
+    const end = Date.now() + w.amount * 1000, el = ov.querySelector('#wTime');
+    tBtn.textContent = '↺ Qaytadan'; el.classList.remove('done');
+    let last = null;
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+      el.textContent = fmtTime(left);
+      if (left <= 3 && left > 0 && last !== left) Sound.tick();
+      last = left;
+      if (left === 0) { clearInterval(ui.wagerTimer); el.textContent = 'Vaqt tugadi!'; el.classList.add('done'); Sound.win(); vibrate(200); }
+    };
+    tick(); ui.wagerTimer = setInterval(tick, 250);
+  };
+  const cBtn = ov.querySelector('#wCount');
+  if (cBtn) {
+    let n = 0;
+    cBtn.onclick = () => {
+      if (n >= w.amount) return;
+      n++; cBtn.innerHTML = `${n}<small>/ ${w.amount}</small>`; Sound.count(); vibrate(15);
+      if (n >= w.amount) { cBtn.classList.add('done'); Sound.exposed(); }
+    };
+  }
+  ov.querySelector('#wDone').onclick = () => {
+    clearInterval(ui.wagerTimer);
+    ov.querySelector('#wDoneWrap').innerHTML = '<div class="done-badge">✅ Shart bajarildi!</div>';
+    Sound.exposed(); sparks(ov.querySelector('.wager-box'), 34);
+  };
 }
 function quitToMenu() { ui.gameId++; stopTimer(); closeSheet(); closeOverlay(); ui.state = null; show('menu'); }
 
@@ -1127,37 +1549,56 @@ function quitToMenu() { ui.gameId++; stopTimer(); closeSheet(); closeOverlay(); 
 function syncSettingsUI() {
   document.querySelectorAll('#setTimer button').forEach(b => b.classList.toggle('on', +b.dataset.v === settings.timer));
   document.querySelectorAll('#setSound button').forEach(b => b.classList.toggle('on', (b.dataset.v === '1') === settings.sound));
-  $('#name0').value = settings.names[0] || ''; $('#name1').value = settings.names[1] || '';
+  let mini = '';
+  for (let i = 0; i < 16; i++) mini += `<i class="${((i >> 2) + i) % 2 ? 'dk' : ''}"></i>`;
+  $('#themeCards').innerHTML = THEMES.map(t => `<button class="theme-card${t.key === settings.theme ? ' on' : ''}" data-theme="${t.key}" data-pick-theme="${t.key}">
+      <div class="mini">${mini}<b class="d1"></b><b class="ds"></b><b class="d0"></b></div><span>${t.name}</span></button>`).join('');
+  renderSizeCards();
   $('#btnMute').textContent = settings.sound ? '🔊' : '🔇';
 }
 
 /* ---------- Hodisalar ---------- */
 function bindEvents() {
-  document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => {
-    Sound.ensure();
-    const g = b.dataset.go;
-    if (g === 'pvp') startGame('pvp');
-    else { if (g === 'settings') syncSettingsUI(); show(g); }
-  }));
-  document.querySelectorAll('[data-bot]').forEach(b => b.addEventListener('click', () => { Sound.ensure(); startGame('bot', b.dataset.bot); }));
+  document.addEventListener('click', e => {
+    const go = e.target.closest('[data-go]');
+    if (go) { Sound.ensure(); if (go.dataset.go === 'settings') syncSettingsUI(); show(go.dataset.go); return; }
+    const st = e.target.closest('[data-start]');
+    if (st) { Sound.ensure(); openSetup(st.dataset.start); return; }
+    const sz = e.target.closest('[data-size]');
+    if (sz) { settings.size = sz.dataset.size; saveSettings(); renderSizeCards(); return; }
+    const wg = e.target.closest('[data-wager]');
+    if (wg) { settings.wager = wg.dataset.wager; saveSettings(); renderWagerCards(); if (settings.wager === 'custom') $('#inCustom').focus(); return; }
+    const th = e.target.closest('[data-pick-theme]');
+    if (th) { settings.theme = th.dataset.pickTheme; saveSettings(); applyTheme(); syncSettingsUI(); return; }
+  });
+  $('#segLevel').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; settings.level = b.dataset.v; saveSettings(); syncLevel(); });
+  $('#btnNamesNext').onclick = () => {
+    if (setup.mode === 'pvp') settings.names = [$('#inName0').value.trim(), $('#inName1').value.trim()];
+    else settings.meName = $('#inNameMe').value.trim();
+    saveSettings(); renderSizeCards(); show('setupSize');
+  };
+  $('#inCustom').addEventListener('input', e => { settings.custom = e.target.value; saveSettings(); });
+  $('#btnStart').onclick = () => {
+    if (settings.wager === 'custom' && !(settings.custom || '').trim()) { toast('Shart matnini yozing.', true); $('#inCustom').focus(); return; }
+    Sound.ensure(); startGame();
+  };
+  $('#setSize').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; settings.size = b.dataset.v; saveSettings(); renderSizeCards(); });
   $('#setTimer').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; settings.timer = +b.dataset.v; saveSettings(); syncSettingsUI(); });
   $('#setSound').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; settings.sound = b.dataset.v === '1'; Sound.on = settings.sound; saveSettings(); syncSettingsUI(); });
-  ['name0', 'name1'].forEach((id, i) => $('#' + id).addEventListener('input', e => { settings.names[i] = e.target.value; saveSettings(); }));
-  $('#btnMute').addEventListener('click', () => { settings.sound = !settings.sound; Sound.on = settings.sound; saveSettings(); syncSettingsUI(); });
-  $('#btnQuit').addEventListener('click', () => {
+  $('#btnMute').onclick = () => { settings.sound = !settings.sound; Sound.on = settings.sound; saveSettings(); syncSettingsUI(); };
+  $('#btnQuit').onclick = () => {
     const ov = overlay(`<div class="modal"><h3>O'yinni tark etasizmi?</h3><p>Joriy o'yin yakunlanadi.</p>
       <button class="btn primary" id="qYes">Ha, menyuga</button><button class="btn ghost" id="qNo">Davom etish</button></div>`);
-    // Overlay ostida taymer ishlashda davom etadi — adolatli bo'lishi uchun
     ov.querySelector('#qYes').onclick = quitToMenu;
     ov.querySelector('#qNo').onclick = closeOverlay;
-  });
-  $('#board').addEventListener('click', e => {
-    const cell = e.target.closest('.cell'); if (!cell) return;
-    onCellTap(+cell.dataset.r, +cell.dataset.c);
-  });
+  };
+  $('#btnEmoji').onclick = () => { if (ui.locked) return; ui.emojiOpen = !ui.emojiOpen; render(); };
+  $('#emojiStrip').addEventListener('click', e => { const b = e.target.closest('button'); if (b) chooseEmoji(b.dataset.e); });
+  $('#btnAnalysis').onclick = openAnalysis;
+  $('#board').addEventListener('click', e => { const cell = e.target.closest('.cell'); if (cell) onCellTap(+cell.dataset.r, +cell.dataset.c); });
 }
 
-loadSettings(); syncSettingsUI(); bindEvents(); buildBoard();
+loadSettings(); syncSettingsUI(); bindEvents();
 </script>
 </body>
 </html>
