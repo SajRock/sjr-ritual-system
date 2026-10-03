@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="uz" data-theme="gold">
+<html lang="uz" data-skin="gold">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#070a12">
-<title>KO'R — IQ jang va blef</title>
+<title>KO'R</title>
 <style>
 /* =========================================================
    KO'R — 2 kishilik strategik blef o'yini
@@ -13,7 +13,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 
 /* ---------- 1. Oltin va Qora (asosiy) ---------- */
-:root,[data-theme="gold"]{
+:root,[data-skin="gold"]{
   color-scheme:dark;
   --bg:#070a12; --bg-grad:radial-gradient(120% 80% at 50% 0%,#121c36 0%,#070a12 60%);
   --surface:#111a2e; --surface2:#17223a; --field:#0c1324; --line:#24314d; --text:#ece6d6; --muted:#8c94a8;
@@ -27,7 +27,7 @@
   --danger:#e0474f; --ok:#3ccf7a; --overlay:rgba(4,6,12,.74); --solid:radial-gradient(100% 70% at 50% 30%,#141e3a,#05070d);
 }
 /* ---------- 2. Matador ---------- */
-[data-theme="matador"]{
+[data-skin="matador"]{
   color-scheme:dark;
   --bg:#0a0505; --bg-grad:radial-gradient(120% 80% at 50% 0%,#3a0b10 0%,#0a0505 62%);
   --surface:#170b0c; --surface2:#221012; --field:#120708; --line:#45161b; --text:#f6ebe4; --muted:#b08a86;
@@ -41,7 +41,7 @@
   --danger:#ff2d3a; --ok:#3ccf7a; --overlay:rgba(10,2,3,.78); --solid:radial-gradient(100% 70% at 50% 30%,#3a0b10,#050202);
 }
 /* ---------- 3. Yog'och ---------- */
-[data-theme="wood"]{
+[data-skin="wood"]{
   color-scheme:dark;
   --bg:#1a120b; --bg-grad:radial-gradient(120% 80% at 50% 0%,#4a301b 0%,#1a120b 62%);
   --surface:#2a1d12; --surface2:#35251a; --field:#22170e; --line:#5a412a; --text:#f6ead6; --muted:#c0a684;
@@ -57,7 +57,7 @@
   --danger:#e5482f; --ok:#4fd07f; --overlay:rgba(20,12,6,.78); --solid:radial-gradient(100% 70% at 50% 30%,#4a301b,#120c07);
 }
 /* ---------- 4. Neon ---------- */
-[data-theme="neon"]{
+[data-skin="neon"]{
   color-scheme:dark;
   --bg:#05010f; --bg-grad:radial-gradient(120% 80% at 50% 0%,#24074d 0%,#05010f 60%);
   --surface:#0e0820; --surface2:#160c30; --field:#0a0518; --line:#3d2275; --text:#f1eaff; --muted:#a493d1;
@@ -71,7 +71,7 @@
   --danger:#ff2d6f; --ok:#3cffb0; --overlay:rgba(3,0,10,.78); --solid:radial-gradient(100% 70% at 50% 30%,#24074d,#030008);
 }
 /* ---------- 5. Marmar (yorug') ---------- */
-[data-theme="marble"]{
+[data-skin="marble"]{
   color-scheme:light;
   --bg:#e7e4de; --bg-grad:radial-gradient(120% 80% at 50% 0%,#ffffff 0%,#e2ded6 65%);
   --surface:#ffffff; --surface2:#f7f5f1; --field:#f1eee8; --line:#d6d0c4; --text:#2a2926; --muted:#7a756c;
@@ -139,7 +139,7 @@ input[type=text]:focus{outline:2px solid var(--accent);outline-offset:1px}
 .pick .em{font-size:24px;display:block;margin-bottom:4px}
 .pick b{display:block;font-size:15px}
 .pick small{color:var(--muted);font-size:12.5px}
-/* Dizayn preview (har karta o'z data-theme o'zgaruvchilari bilan chiziladi) */
+/* Dizayn preview (har karta o'z data-skin o'zgaruvchilari bilan chiziladi) */
 .theme-card{padding:10px;border-radius:14px;background:var(--surface);border:1.5px solid var(--line);color:var(--text);text-align:center}
 .theme-card.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 40%,transparent)}
 .mini{display:grid;grid-template-columns:repeat(4,1fr);aspect-ratio:1;border-radius:8px;overflow:hidden;border:2px solid var(--board-border);margin-bottom:8px;position:relative}
@@ -936,7 +936,7 @@ function loadSettings() {
 }
 function saveSettings() { try { localStorage.setItem('kor-settings-v2', JSON.stringify(settings)); } catch (e) {} }
 function applyTheme() {
-  document.documentElement.dataset.theme = settings.theme;
+  document.documentElement.dataset.skin = settings.theme;
   const meta = document.querySelector('meta[name=theme-color]');
   if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#070a12';
 }
@@ -1551,7 +1551,7 @@ function syncSettingsUI() {
   document.querySelectorAll('#setSound button').forEach(b => b.classList.toggle('on', (b.dataset.v === '1') === settings.sound));
   let mini = '';
   for (let i = 0; i < 16; i++) mini += `<i class="${((i >> 2) + i) % 2 ? 'dk' : ''}"></i>`;
-  $('#themeCards').innerHTML = THEMES.map(t => `<button class="theme-card${t.key === settings.theme ? ' on' : ''}" data-theme="${t.key}" data-pick-theme="${t.key}">
+  $('#themeCards').innerHTML = THEMES.map(t => `<button class="theme-card${t.key === settings.theme ? ' on' : ''}" data-skin="${t.key}" data-pick-theme="${t.key}">
       <div class="mini">${mini}<b class="d1"></b><b class="ds"></b><b class="d0"></b></div><span>${t.name}</span></button>`).join('');
   renderSizeCards();
   $('#btnMute').textContent = settings.sound ? '🔊' : '🔇';
