@@ -338,7 +338,7 @@ input[type=text]:focus{outline:2px solid var(--accent);outline-offset:1px}
       <button class="btn" id="btnJoinRoom" style="margin:0">Qo'shilish</button>
     </div>
     <button class="btn ghost hidden" id="btnResume">Oxirgi xonaga qaytish</button>
-    <p class="muted" style="font-size:13px;line-height:1.5;margin-top:6px">Ikkalangiz ham shu sahifani claude.ai havolasi orqali ochgan bo'lishingiz kerak. Telefon ekrani o'chsa, qayta ochib "Oxirgi xonaga qaytish"ni bosing — o'yin davom etadi.</p>
+    <p class="muted" style="font-size:13px;line-height:1.5;margin-top:6px">Ikkalangiz ham shu sahifani internetga ulangan holda ochgan bo'lishingiz kerak. Telefon ekrani o'chsa, qayta ochib "Oxirgi xonaga qaytish"ni bosing — o'yin davom etadi.</p>
   </div>
 </section>
 
@@ -1668,15 +1668,101 @@ function unpackState(o) {
   s.revealHistory = o.revealHistory.map(a => ({ owner: a[0], label: LBX[a[1]] || 'neutral', real: !!a[2] }));
   return s;
 }
-async function netConnect() {
-  if (net.room) return net.room;
-  if (!window.claude || typeof window.claude.use !== 'function') return null;
+/**
+ * Ulanish: claude.ai ichida — platformaning "room" imkoniyati;
+ * boshqa joyda (Netlify, Cloudflare, oddiy fayl) — PeerJS orqali
+ * ikki telefon bevosita (WebRTC) ulanadi. Ikkalasi bir xil API'ga ega:
+ * presence(patch), peers(), onPeers(handler), close().
+ */
+async function netConnect(code, seat) {
+  if (net.room && (net.roomFor === code + ':' + seat || typeof net.room.close !== 'function')) return net.room;  // claude.ai xonasi qayta ishlatiladi
+  netDisconnect();
   let room = null;
-  try { room = await window.claude.use('room'); } catch (e) { room = null; }
+  if (window.claude && typeof window.claude.use === 'function') {
+    try { room = await window.claude.use('room'); } catch (e) { room = null; }
+  }
+  if (!room) room = await peerRoom(code, seat);
   if (!room) return null;
-  net.room = room;
+  net.room = room; net.roomFor = code + ':' + seat;
   room.onPeers(onNetPeers, (e) => toast('Onlayn aloqa uzildi: ' + e.code, true));
   return room;
+}
+function netDisconnect() {
+  if (!net.room || typeof net.room.close !== 'function') return;   // faqat PeerJS ulanishi yopiladi
+  net.room.close(); net.room = null; net.roomFor = null;
+}
+
+/* ---------- PeerJS (bulutda ishlash uchun) ---------- */
+const PEERJS_URLS = [
+  'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',
+  'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',
+];
+let peerLibPromise = null;
+function loadPeerLib() {
+  if (window.Peer) return Promise.resolve(window.Peer);
+  if (peerLibPromise) return peerLibPromise;
+  peerLibPromise = (async () => {
+    for (const url of PEERJS_URLS) {
+      const ok = await new Promise(res => {
+        const sc = document.createElement('script');
+        sc.src = url; sc.async = true;
+        sc.onload = () => res(true); sc.onerror = () => { sc.remove(); res(false); };
+        document.head.appendChild(sc);
+      });
+      if (ok && window.Peer) return window.Peer;
+    }
+    peerLibPromise = null;
+    return null;
+  })();
+  return peerLibPromise;
+}
+/** Xona egasi "kor-oyini-<kod>" nomi bilan ro'yxatdan o'tadi, mehmon unga ulanadi. */
+async function peerRoom(code, seat) {
+  const Peer = await loadPeerLib();
+  if (!Peer) { toast("Onlayn kutubxona yuklanmadi. Internetni tekshiring.", true); return null; }
+  const hostId = 'kor-oyini-uz-' + code;
+  let peer = null, conn = null, mine = {}, other = null, closed = false, retryT = null;
+  const handlers = [];
+  const fire = () => setTimeout(() => { if (!closed) handlers.forEach(h => h({ peers: api.peers() })); }, 0);
+  const sendMine = () => { if (conn && conn.open) { try { conn.send({ t: 'p', pr: mine }); } catch (e) {} } };
+  const attach = (c) => {
+    if (conn && conn !== c) { try { conn.close(); } catch (e) {} }   // yangi ulanish eskisini almashtiradi (qayta kirish)
+    conn = c;
+    c.on('open', () => { sendMine(); fire(); });
+    c.on('data', (d) => { if (c === conn && d && d.t === 'p' && d.pr && typeof d.pr === 'object') { other = d.pr; fire(); } });
+    c.on('close', () => { if (c !== conn) return; conn = null; other = null; fire(); if (seat === 1) scheduleRetry(); });
+    c.on('error', () => {});
+  };
+  const connectToHost = () => { if (!closed && peer && peer.open && !(conn && conn.open)) attach(peer.connect(hostId, { reliable: true })); };
+  const scheduleRetry = () => {
+    clearTimeout(retryT);
+    retryT = setTimeout(() => { if (closed) return; if (seat === 0 && (!peer || peer.destroyed)) start(); else if (seat === 1) connectToHost(); }, 3000);
+  };
+  const start = () => {
+    peer = new Peer(seat === 0 ? hostId : undefined, { debug: 0 });
+    peer.on('open', () => { if (seat === 1) connectToHost(); fire(); });
+    peer.on('connection', (c) => { if (seat === 0) attach(c); else c.close(); });
+    peer.on('disconnected', () => { if (!closed && !peer.destroyed) try { peer.reconnect(); } catch (e) {} });
+    peer.on('error', (e) => {
+      if (closed) return;
+      const t = e && e.type;
+      if (t === 'peer-unavailable') { scheduleRetry(); return; }          // xona egasi hali ulanmagan — kutamiz
+      if (t === 'unavailable-id') { try { peer.destroy(); } catch (x) {} scheduleRetry(); return; }  // eski ulanish hali band
+      if (t === 'network' || t === 'server-error' || t === 'socket-error' || t === 'socket-closed') { scheduleRetry(); return; }
+    });
+  };
+  const api = {
+    presence: async (patch) => {
+      for (const k in patch) { if (patch[k] === null) delete mine[k]; else mine[k] = JSON.parse(JSON.stringify(patch[k])); }
+      sendMine(); fire();
+    },
+    peers: () => [{ peer: 'me', isMe: true, sameTab: true, presence: mine },
+      ...(other ? [{ peer: 'opp', isMe: false, sameTab: false, presence: other }] : [])],
+    onPeers: (h) => { handlers.push(h); fire(); return () => {}; },
+    close: () => { closed = true; clearTimeout(retryT); try { if (peer) peer.destroy(); } catch (e) {} },
+  };
+  start();
+  return api;
 }
 function setPresence(payload) {
   net.mine = payload;
@@ -1795,12 +1881,13 @@ function waitingOverlay(title, body) {
   return ov;
 }
 function noRoomSupport() {
-  toast("Onlayn rejim faqat sahifa claude.ai havolasi orqali ochilganda ishlaydi.", true);
+  toast("Onlayn ulanib bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.", true);
 }
 async function createRoom() {
-  const room = await netConnect();
+  const code = String(1000 + Math.floor(Math.random() * 9000));
+  const room = await netConnect(code, 0);
   if (!room) return noRoomSupport();
-  net.code = String(1000 + Math.floor(Math.random() * 9000));
+  net.code = code;
   net.seat = 0; net.g = 0; net.v = 0; net.winShown = -1; net.name = settings.meName || 'Mehmon';
   saveSession();
   setPresence({ code: net.code, seat: 0, name: net.name, g: 0, v: 0 });
@@ -1810,7 +1897,7 @@ async function createRoom() {
 }
 async function joinRoom(code, seat, name) {
   if (!/^\d{4}$/.test(code)) return toast('Kod 4 ta raqamdan iborat bo\'lishi kerak.', true);
-  const room = await netConnect();
+  const room = await netConnect(code, seat);
   if (!room) return noRoomSupport();
   net.code = code; net.seat = seat; net.g = 0; net.v = 0; net.winShown = -1; net.name = name;
   ui.state = null; ui.mode = 'menu';
@@ -1828,6 +1915,7 @@ function netLeave() {
   if (net.room && net.code) net.room.presence({ kor: null }).catch(() => {});
   clearTimeout(net.waitT);
   net.code = null; net.g = 0; net.v = 0; net.pending = null;
+  netDisconnect();
 }
 function bindOnline() {
   $('#btnCreateRoom').onclick = () => { Sound.ensure(); myOnlineName(); setup.mode = 'online'; renderSizeCards(); renderWagerCards(); show('setupSize'); };
