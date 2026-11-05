@@ -358,7 +358,7 @@ body:not(.light) .board-area{background:transparent}
 .task-card:active{cursor:grabbing;opacity:.85}
 .task-card.done-card{opacity:.5}
 .task-card .tc-title{font-size:13px;font-weight:600;margin-bottom:5px;word-break:break-word;line-height:1.4}
-.task-card .tc-desc{font-size:11px;color:var(--muted);margin-bottom:7px;line-height:1.5}
+.task-card .tc-desc{font-size:11px;color:var(--muted);margin-bottom:7px;line-height:1.5;white-space:pre-line}
 .task-card .tc-meta{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
 .task-card .tc-label{padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600}
 .task-card .tc-deadline{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
@@ -788,8 +788,7 @@ async function hashPin(pin) {
 }
 async function storePin(pin) {
   const h = await hashPin(pin);
-  STORE.setItem('sjr_pin', h || pin);
-  try { localStorage.removeItem('sjr_pin'); } catch (e) {} // eski ochiq PINni tozalash
+  STORE.setItem('sjr_pin', h || pin); // localStorage dagi eski ochiq PIN ham shu bilan almashtiriladi
 }
 async function verifyPin(pin) {
   const stored = STORE.getItem('sjr_pin');
@@ -857,6 +856,11 @@ const LOCAL_ONLY = new Set(['sjr_device_uid']);
 const STORE = (() => {
   let _c = {}, _ref = null, _t = null, _status = 'local', _lastSync = null;
   const listeners = [];
+  let _chg = new Set(), _chgT = null;
+  function _changed(k) {
+    _chg.add(k); clearTimeout(_chgT);
+    _chgT = setTimeout(() => { const keys = [..._chg]; _chg = new Set(); try { window.dispatchEvent(new CustomEvent('sjr:change', { detail: { keys } })); } catch (e) {} }, 250);
+  }
   function _emit() { listeners.forEach(fn => { try { fn(_status, _lastSync); } catch (e) {} }); }
   function _readLocal() {
     const out = {};
@@ -921,7 +925,7 @@ const STORE = (() => {
       if (_c[k] === v) return;
       _c[k] = v;
       try { localStorage.setItem(k, v); } catch (e) {}
-      if (!LOCAL_ONLY.has(k)) { const ts = String(Date.now()); _c.sjr__ts = ts; try { localStorage.setItem('sjr__ts', ts); } catch (e) {} _push(); }
+      if (!LOCAL_ONLY.has(k)) { const ts = String(Date.now()); _c.sjr__ts = ts; try { localStorage.setItem('sjr__ts', ts); } catch (e) {} _push(); _changed(k); }
     },
     removeItem(k) {
       if (!(k in _c)) { try { localStorage.removeItem(k); } catch (e) {} return; }
@@ -2834,8 +2838,8 @@ function renderTasks(){
 
     colCards.forEach(c=>{
       const pd=c.deadline?daysUntil(c.deadline):null;
-      const dClass=pd===null?'':pd<0?'overdue':pd===0?'today-due':'';
-      const dText=pd===null?'':`📅 ${pd<0?'Kechikdi '+Math.abs(pd)+' kun':pd===0?'Bugun!':pd+' kun'}`;
+      const dClass=pd===null||c.done?'':pd<0?'overdue':pd===0?'today-due':'';
+      const dText=pd===null?'':c.done?`📅 ${escapeHtml(c.deadline)}`:`📅 ${pd<0?'Kechikdi '+Math.abs(pd)+' kun':pd===0?'Bugun!':pd+' kun'}`;
       const labelsHtml=(c.labels||[]).map(l=>{const lc=/^#[0-9a-f]{3,8}$/i.test(l.color||'')?l.color:'#58a6ff';return `<span class="tc-label" style="background:${lc}20;color:${lc}">${escapeHtml(l.name)}</span>`;}).join('');
       html+=`<div class="task-card ${c.done?'done-card':''}" draggable="true" ondragstart="onDragStart('${c.id}')">
         <div class="tc-actions">
@@ -3500,7 +3504,7 @@ function renderStats(){
   <div class="ritual-stats"><div class="rs-row rs-header"><div>Ritual</div><div></div><div>%</div><div>Holat</div></div>`;
   rStats.forEach(({r,p,t,d})=>{
     const bc=p>=70?'var(--green)':p>=40?'var(--yellow)':'var(--red)';
-    html+=`<div class="rs-row"><div style="font-size:11px">${escapeHtml(r.name)}<div style="font-size:9.5px;color:var(--muted)">${d}/${t}</div></div><div><div class="rs-bar-wrap"><div class="rs-bar" style="width:${p}%;background:${bc}"></div></div></div><div class="rs-pct">${t?p+'%':'–'}</div><div>${!t?'':p>=80?'<span class="badge great">Ajoyib</span>':p>=50?'<span class="badge good">Yaxshi</span>':'<span class="badge bad">Kuchaytir</span>'}</div></div>`;
+    html+=`<div class="rs-row"><div style="font-size:11px">${escapeHtml(r.name)}<div style="font-size:9.5px;color:var(--muted)">${d}/${t}${r.target?` · oylik maqsad: ${d}/${r.target} kun`:''}</div></div><div><div class="rs-bar-wrap"><div class="rs-bar" style="width:${p}%;background:${bc}"></div></div></div><div class="rs-pct">${t?p+'%':'–'}</div><div>${!t?'':p>=80?'<span class="badge great">Ajoyib</span>':p>=50?'<span class="badge good">Yaxshi</span>':'<span class="badge bad">Kuchaytir</span>'}</div></div>`;
   });
   html+=`</div>`;
   setPageContent('stats',html);
@@ -3574,8 +3578,12 @@ function renderSettings(){
   html+=`<div class="set-head">Ma'lumotlar</div>`;
   html+=`<div class="settings-row"><div><div class="settings-label">💾 Zaxira nusxa olish</div><div class="settings-sub">Barcha ma'lumotlarni JSON faylga saqlash</div></div><button class="set-btn" onclick="exportBackup()">Yuklab olish</button></div>`;
   html+=`<div class="settings-row"><div><div class="settings-label">📥 Zaxiradan tiklash</div><div class="settings-sub">Avval saqlangan JSON faylni yuklash</div></div><button class="set-btn" onclick="importBackup()">Tanlash</button></div>`;
+  html+=`<div class="settings-row"><div><div class="settings-label">📊 Excel'dan import (Hayot planneri)</div><div class="settings-sub">Odatlar → rituallar, vazifalar → kartochkalar, maqsadlar, moliya · dublikatsiz<br>${escapeHtml(plannerImportStatus())}</div></div><button class="set-btn" onclick="pickPlannerFile()">Fayl tanlash</button></div>`;
   html+=`<div class="settings-row"><div><div class="settings-label" style="color:var(--red)">⚠️ Barchasini o'chirish</div><div class="settings-sub">Ilovani boshlang'ich holatga qaytarish</div></div><button class="set-btn danger" onclick="resetAllData()">O'chirish</button></div>`;
 
+  html+=`<div class="set-head">🤖 Sun'iy intellekt (Jarvis)</div>`;
+  html+=`<div class="settings-row"><div><div class="settings-label">🧠 AI uchun so'rov nusxalash</div><div class="settings-sub">Rejangiz + tahlil topshirig'i — ChatGPT/Claude/Jarvis ga joylang</div></div><button class="set-btn" onclick="copyAiPrompt()">Nusxalash</button></div>`;
+  html+=`<div class="settings-row"><div><div class="settings-label">📦 AI ma'lumotlari (JSON)</div><div class="settings-sub">window.SJR API bilan bir xil format · maxfiy eslatmalarsiz</div></div><button class="set-btn" onclick="downloadAiSnapshot()">Yuklab olish</button></div>`;
   html+=`<div class="set-head">Joriy holat</div>`;
   html+=`<div class="stat-grid">
     <div class="stat-card"><div class="label">🔥 Seria</div><div class="value" style="color:var(--orange)">${streak} kun</div></div>
@@ -3848,6 +3856,7 @@ function showMainApp(){
     if(STORE.keys().length>20&&(!lb||daysUntil(lb)<-7))setTimeout(()=>showNotif(`Ma'lumotlar faqat shu qurilmada saqlanmoqda. <a onclick="exportBackup()" style="color:var(--accent);cursor:pointer;text-decoration:underline">Zaxira nusxa oling</a>`,'warn'),6500);
   }
   showPage('today');updateScoreDisplays();
+  autoPlannerImport();
   checkGlobalRewardUnlocks();
 }
 function enterApp(){
@@ -3858,6 +3867,578 @@ function enterApp(){
   if(!onboarded){document.getElementById('onboardScreen').style.display='flex';}
   else showMainApp();
 }
+
+// =========================================================
+//  "HAYOT PLANNERI" IMPORTI (Excel → platformaning mavjud tuzilmalari)
+//  Odatlar → Rituallar · Vazifalar → Kanban kartochkalari
+//  Maqsadlar → Maqsadlar ro'yxati + "🎯 Maqsadlar" papkasidagi kartochkalar
+//  Moliya → "💰 Moliya" daftaridagi eslatma + sjr_finance (AI uchun)
+//  Qoidalar: har element barqaror ID oladi (xl_<key>); mavjud bo'lsa — tegilmaydi;
+//  avval import qilinib, keyin foydalanuvchi o'chirgan bo'lsa — qayta qo'shilmaydi.
+// =========================================================
+const IMPORT_KEY = 'sjr_import_hayot';
+// Excel odati → platformadagi xuddi shu odat (standart ritual ID si)
+const HABIT_ALIASES = {
+  'erta turish (6:00)': 'wake',
+  'mashq / sport': 'sport',
+  '2 litr suv': 'water',
+  'kitob (20 bet)': 'book',
+  'ingliz tili 30 daqiqa': 'english',
+  'shakarsiz kun': 'diet',
+};
+const HABIT_SECTION_HINTS = { 'meditatsiya': 'morning', 'kundalik yozish': 'evening' };
+const LABEL_COLORS = { 'Ish': '#3fb950', 'Shaxsiy': '#58a6ff', "O'qish": '#bc8cff', "Sog'liq": '#f0883e', 'Moliya': '#ffd700', 'Uy': '#22d3ee', 'Shoshilinch': '#f85149', 'Maqsad': '#ffd700', 'Bekor': '#7d8590' };
+const xlId = k => 'xl_' + k;
+function _nrm(s) { return String(s || '').toLowerCase().replace(/[ʻʼ‘’`´']/g, "'").replace(/\s+/g, ' ').trim(); }
+function fmtNum(n) { return Math.round(n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+
+function getImportRegistry() {
+  try { const r = JSON.parse(STORE.getItem(IMPORT_KEY) || 'null'); if (r && typeof r === 'object') return { items: {}, ...r }; } catch (e) {}
+  return { items: {} };
+}
+function getPlannerData() {
+  const el = document.getElementById('sjr-import-hayot');
+  if (!el) return null;
+  try { const d = JSON.parse(el.textContent); return d?.schema === 'sjr.import.hayot-planneri/v1' ? d : null; } catch (e) { return null; }
+}
+
+// Asosiy import funksiyasi — idempotent. Natija: {added:{...}, skipped, total}
+function runPlannerImport(data, { silent = false } = {}) {
+  data = data || getPlannerData();
+  if (!data) return null;
+  const reg = getImportRegistry();
+  const seen = reg.items; // id → turi (avval import qilinganlar)
+  const added = { rituals: 0, linked: 0, marks: 0, tasks: 0, goals: 0, goalCards: 0, notes: 0, tx: 0 };
+  let skipped = 0;
+  const once = (id, type, fn) => {           // id ni faqat bir marta qo'llash
+    if (seen[id]) { skipped++; return false; }
+    const r = fn();
+    if (r !== false) seen[id] = type;
+    return r;
+  };
+
+  // ── 1. ODATLAR → RITUALLAR ──
+  const rituals = getRituals().map(r => ({ ...r }));
+  const sections = getSections();
+  const secIds = new Set(sections.map(s => s.id));
+  const habitIdMap = {};
+  let ritualsChanged = false;
+  (data.habits || []).forEach(h => {
+    const id = xlId(h.key), n = _nrm(h.name);
+    // Allaqachon bog'langanmi?
+    if (seen[id]) { habitIdMap[h.key] = typeof seen[id] === 'string' && seen[id].startsWith('ritual:') ? seen[id].slice(7) : id; skipped++; return; }
+    let target = rituals.find(r => r.id === id) || rituals.find(r => _nrm(r.name) === n);
+    if (!target && HABIT_ALIASES[n]) target = rituals.find(r => r.id === HABIT_ALIASES[n]);
+    if (target) {
+      if (!target.target && h.targetDaysPerMonth) { target.target = h.targetDaysPerMonth; ritualsChanged = true; }
+      if (!target.source) { target.source = 'excel:' + h.name; ritualsChanged = true; }
+      habitIdMap[h.key] = target.id; seen[id] = 'ritual:' + target.id;
+      if (target.id !== id) added.linked++;
+      return;
+    }
+    let sec = HABIT_SECTION_HINTS[n] || 'day';
+    if (!secIds.has(sec)) sec = sections[0]?.id || 'day';
+    const secObj = sections.find(s => s.id === sec);
+    rituals.push({ id, name: h.name, cat: 'Odat', color: secObj?.color || '#58a6ff', sectionId: sec, target: h.targetDaysPerMonth || undefined, source: 'excel:' + h.name });
+    habitIdMap[h.key] = id; seen[id] = 'ritual:' + id; added.rituals++; ritualsChanged = true;
+  });
+  if (ritualsChanged) saveRituals(rituals);
+
+  // Kunlik belgilar — har bir odat uchun faqat bir marta (keyin foydalanuvchi o'zgartirsa, ustiga yozilmaydi)
+  let earliest = null;
+  (data.habits || []).forEach(h => {
+    const rid = habitIdMap[h.key]; if (!rid) return;
+    once('marks:' + h.key, 'marks', () => {
+      (h.doneDates || []).forEach(ds => {
+        const set = getDoneSet(ds);
+        if (!set.has(rid)) { set.add(rid); STORE.setItem('rd_' + ds, JSON.stringify([...set])); added.marks++; }
+        if (!earliest || ds < earliest) earliest = ds;
+      });
+    });
+  });
+  if (earliest && earliest < firstUseDate()) STORE.setItem('sjr_first_day', earliest);
+
+  // ── 2. VAZIFALAR → KANBAN KARTOCHKALARI ("Umumiy" papka) ──
+  const folders = getFolders();
+  const mainFolder = folders.find(f => f.id === 'folder_default') || folders[0];
+  if (!STORE.getItem('sjr_folders')) saveFolders(folders);
+  let cards = getKanbanCards();
+  const cardIds = new Set(cards.map(c => c.id));
+  const colFor = (folderId, status) => {
+    const cols = getColumns(folderId);
+    if (status === 'done' || status === 'cancelled') return getDoneColumn(folderId).id;
+    if (status === 'doing') return (cols.find(c => c.id === 'col_doing') || cols.find(c => /jarayon/i.test(c.title)) || cols[Math.min(1, cols.length - 1)]).id;
+    return (cols.find(c => c.id === 'col_todo') || cols[0]).id;
+  };
+  const lbl = name => ({ name, color: LABEL_COLORS[name] || '#58a6ff' });
+  const QN = { 1: '1. Hozir qil', 2: '2. Rejalashtir', 3: '3. Topshir', 4: '4. Olib tashla' };
+  (data.tasks || []).forEach(t => {
+    const id = xlId(t.key);
+    once(id, 'task', () => {
+      if (cardIds.has(id) || cards.some(c => _nrm(c.title) === _nrm(t.title) && c.folderId === mainFolder.id)) return; // dublikat
+      const labels = [];
+      if (t.category) labels.push(lbl(t.category));
+      if (t.urgent) labels.push(lbl('Shoshilinch'));
+      if (t.status === 'cancelled') labels.push(lbl('Bekor'));
+      const done = t.status === 'done' || t.status === 'cancelled';
+      cards.push({
+        id, folderId: mainFolder.id, colId: colFor(mainFolder.id, t.status),
+        title: t.title,
+        desc: `Eyzenxauer: ${QN[t.quadrant] || ''}${t.status === 'cancelled' ? ' · Bekor qilingan' : ''}`,
+        url: '', priority: t.important ? 'high' : t.urgent ? 'mid' : 'low',
+        important: !!t.important, urgent: !!t.urgent, category: t.category || '',
+        deadline: t.deadline || '', labels, done, ...(done ? { doneAt: t.deadline || todayStr } : {}),
+        status: t.status, createdAt: todayStr, source: 'excel',
+      });
+      added.tasks++;
+    });
+  });
+
+  // ── 3. MAQSADLAR → maqsadlar ro'yxati + kartochkalar ──
+  const goalsData = data.goals || [];
+  if (goalsData.length) {
+    const gFolderId = 'xl_folder_goals';
+    let fl = getFolders();
+    if (!fl.some(f => f.id === gFolderId) && !seen['folder:' + gFolderId]) {
+      fl.push({ id: gFolderId, name: 'Maqsadlar', emoji: '🎯', color: '#ffd700' }); saveFolders(fl);
+      seen['folder:' + gFolderId] = 'folder';
+    }
+    const gFolderExists = getFolders().some(f => f.id === gFolderId);
+    const motiv = getGoals();
+    goalsData.forEach(g => {
+      const steps = g.steps || [];
+      const doneN = steps.filter(s => s.done).length;
+      const pct = steps.length ? Math.round(doneN / steps.length * 100) : 0;
+      // Motivatsion maqsadlar ro'yxati (Bugun sahifasi, Energiya) — faqat tugallanmaganlar
+      once('goal:' + g.key, 'goal', () => {
+        if (pct < 100 && !motiv.some(x => _nrm(x) === _nrm(g.title))) { motiv.push(g.title); added.goals++; }
+      });
+      if (!gFolderExists) return;
+      const id = xlId(g.key);
+      once(id, 'goalcard', () => {
+        if (cards.some(c => c.id === id)) return;
+        const status = pct >= 100 ? 'done' : pct > 0 ? 'doing' : 'todo';
+        cards.push({
+          id, folderId: gFolderId, colId: colFor(gFolderId, status), title: g.title,
+          desc: `Progress: ${pct}% (${doneN}/${steps.length} qadam)\n` + steps.map(s => `${s.done ? '✅' : '⬜'} ${s.title}`).join('\n'),
+          url: '', priority: pct >= 100 ? 'low' : 'high', deadline: g.deadline || '',
+          labels: [lbl('Maqsad'), ...(g.area ? [lbl(g.area)] : [])],
+          done: pct >= 100, ...(pct >= 100 ? { doneAt: g.deadline && g.deadline < todayStr ? g.deadline : todayStr } : {}),
+          goal: { area: g.area, steps, progress: pct }, createdAt: todayStr, source: 'excel',
+        });
+        added.goalCards++;
+      });
+    });
+    saveGoals(motiv);
+  }
+  saveKanbanCards(cards);
+
+  // ── 4. MOLIYA → tartiblangan ma'lumot + eslatma ──
+  const fin = data.finance;
+  if (fin && (fin.transactions || []).length) {
+    let F = {};
+    try { F = JSON.parse(STORE.getItem('sjr_finance') || '{}') || {}; } catch (e) {}
+    F = { currency: F.currency || fin.currency, plans: F.plans || {}, transactions: F.transactions || [] };
+    if (!F.plans[fin.month]) F.plans[fin.month] = fin.plan;
+    const txIds = new Set(F.transactions.map(t => t.id));
+    fin.transactions.forEach(t => {
+      const id = xlId(t.key);
+      once(id, 'tx', () => {
+        if (txIds.has(id)) return;
+        F.transactions.push({ id, date: t.date, type: t.type, category: t.category, amount: t.amount, note: t.note || '', source: 'excel' });
+        added.tx++;
+      });
+    });
+    F.transactions.sort((a, b) => a.date.localeCompare(b.date));
+    STORE.setItem('sjr_finance', JSON.stringify(F));
+
+    // Daftar va oylik hisobot eslatmasi (mavjud "Eslatmalar" bo'limida)
+    const nbId = 'xl_nb_finance';
+    let nbs = getNotebooks();
+    if (!nbs.some(n => n.id === nbId) && !seen['nb:' + nbId]) {
+      nbs.push({ id: nbId, name: 'Moliya', emoji: '💰', color: '#3fb950' }); saveNotebooks(nbs);
+      seen['nb:' + nbId] = 'notebook';
+    }
+    if (getNotebooks().some(n => n.id === nbId)) {
+      const noteId = 'xl_fin_' + fin.month;
+      once(noteId, 'note', () => {
+        const notes = getNotes();
+        if (notes.some(n => n.id === noteId)) return;
+        notes.unshift({ id: noteId, notebookId: nbId, title: `Moliya — ${ymTitle(fin.month)}`, text: financeReportText(F, fin.month), url: '', date: todayStr, updated: nowStamp(), source: 'excel' });
+        saveNotes(notes); added.notes++;
+      });
+    }
+  }
+
+  const total = Object.values(added).reduce((a, b) => a + b, 0);
+  reg.items = seen;
+  reg.source = data.source; reg.schema = data.schema;
+  reg.lastRunAt = new Date().toISOString();
+  if (total) reg.importedAt = reg.lastRunAt;
+  reg.lastResult = { added, skipped };
+  STORE.setItem(IMPORT_KEY, JSON.stringify(reg));
+  _streakCache = { key: '', val: 0 };
+  if (total && !silent) {
+    showNotif(`Hayot planneri import qilindi: <b>${added.rituals + added.linked}</b> odat, <b>${added.tasks}</b> vazifa, <b>${added.goalCards || added.goals}</b> maqsad, <b>${added.tx}</b> moliya yozuvi`, 'ok');
+  }
+  return { added, skipped, total };
+}
+
+function ymTitle(ym) { const [y, m] = ym.split('-').map(Number); return MONTHS[m - 1] + ' ' + y; }
+function financeMonthSummary(F, ym) {
+  const tx = (F.transactions || []).filter(t => t.date.startsWith(ym));
+  const plan = F.plans?.[ym] || { income: {}, expense: {} };
+  const byIn = {}, byOut = {}; let income = 0, expense = 0;
+  tx.forEach(t => { if (t.type === 'income') { income += t.amount; byIn[t.category] = (byIn[t.category] || 0) + t.amount; } else { expense += t.amount; byOut[t.category] = (byOut[t.category] || 0) + t.amount; } });
+  const savingsCat = Object.keys({ ...plan.expense, ...byOut }).find(c => /jamg/i.test(c));
+  const saved = savingsCat ? (byOut[savingsCat] || 0) : 0;
+  const planExpense = Object.values(plan.expense || {}).reduce((a, b) => a + b, 0);
+  const planIncome = Object.values(plan.income || {}).reduce((a, b) => a + b, 0);
+  const top = Object.entries(byOut).filter(([c]) => c !== savingsCat).sort((a, b) => b[1] - a[1])[0] || null;
+  const overLimit = Object.entries(plan.expense || {}).filter(([c, lim]) => (byOut[c] || 0) > lim).map(([c, lim]) => ({ category: c, limit: lim, spent: byOut[c] }));
+  return { month: ym, currency: F.currency, income, expense, balance: income - expense, planIncome, planExpense,
+    limitLeft: planExpense ? planExpense - expense : null, savingsRate: income ? Math.round((income - expense + saved) / income * 100) : null,
+    biggestExpense: top ? { category: top[0], amount: top[1] } : null, incomeByCategory: byIn, expenseByCategory: byOut, plan, overLimit, transactionCount: tx.length };
+}
+function financeReportText(F, ym) {
+  const s = financeMonthSummary(F, ym), c = ' ' + (F.currency || '');
+  const lines = [];
+  lines.push(`📊 ${ymTitle(ym)} — umumiy`);
+  lines.push(`Daromad (fakt): ${fmtNum(s.income)}${c}${s.planIncome ? ` (reja ${fmtNum(s.planIncome)})` : ''}`);
+  lines.push(`Xarajat (fakt): ${fmtNum(s.expense)}${c}${s.planExpense ? ` (limit ${fmtNum(s.planExpense)})` : ''}`);
+  lines.push(`Balans: ${fmtNum(s.balance)}${c}`);
+  if (s.limitLeft !== null) lines.push(`Limitdan qoldi: ${fmtNum(s.limitLeft)}${c}`);
+  if (s.savingsRate !== null) lines.push(`Jamg'arma ulushi: ${s.savingsRate}%`);
+  if (s.biggestExpense) lines.push(`Eng katta xarajat: ${s.biggestExpense.category} — ${fmtNum(s.biggestExpense.amount)}${c}`);
+  lines.push('', '💸 Xarajatlar (fakt / limit):');
+  const cats = [...new Set([...Object.keys(s.plan.expense || {}), ...Object.keys(s.expenseByCategory)])];
+  cats.forEach(cat => { const f = s.expenseByCategory[cat] || 0, l = (s.plan.expense || {})[cat] || 0; lines.push(`${l && f > l ? '⚠️' : '•'} ${cat}: ${fmtNum(f)} / ${l ? fmtNum(l) : '—'}${l ? ` (${Math.round(f / l * 100)}%)` : ''}`); });
+  lines.push('', '💰 Daromad (fakt / reja):');
+  [...new Set([...Object.keys(s.plan.income || {}), ...Object.keys(s.incomeByCategory)])].forEach(cat => lines.push(`• ${cat}: ${fmtNum(s.incomeByCategory[cat] || 0)} / ${fmtNum((s.plan.income || {})[cat] || 0)}`));
+  lines.push('', '🧾 Jurnal:');
+  (F.transactions || []).filter(t => t.date.startsWith(ym)).forEach(t => lines.push(`${t.date.slice(8)}.${t.date.slice(5, 7)}  ${t.type === 'income' ? '+' : '−'}${fmtNum(t.amount)}  ${t.category}${t.note ? ' — ' + t.note : ''}`));
+  return lines.join('\n');
+}
+
+// Ilova ochilganda avtomatik (bir marta, jim emas — natija bildirishnomasi bilan)
+function autoPlannerImport() {
+  try {
+    const data = getPlannerData(); if (!data) return;
+    const res = runPlannerImport(data);
+    if (res?.total) render();
+  } catch (e) { console.error('Import xatosi:', e); }
+}
+function plannerImportStatus() {
+  const r = getImportRegistry();
+  if (!r.lastRunAt) return 'Hali import qilinmagan';
+  return `Oxirgi import: ${r.lastRunAt.slice(0, 10)} · ${Object.keys(r.items || {}).length} ta element bog'langan`;
+}
+function rerunPlannerImport() {
+  const res = runPlannerImport(null, { silent: true });
+  if (!res) { showNotif('Import ma\'lumoti topilmadi', 'warn'); return; }
+  showNotif(res.total ? `${res.total} ta yangi element qo'shildi` : `Yangi narsa yo'q — dublikat qo'shilmadi (${res.skipped} ta allaqachon mavjud)`, 'ok');
+  render();
+}
+
+// ===== XLSX O'QUVCHI (tashqi kutubxonasiz: ZIP + DecompressionStream + DOMParser) =====
+async function _unzip(buf) {
+  const dv = new DataView(buf), u8 = new Uint8Array(buf), files = {};
+  let eocd = -1;
+  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 66000); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error('Bu Excel (.xlsx) fayl emas');
+  const count = dv.getUint16(eocd + 10, true);
+  let p = dv.getUint32(eocd + 16, true);
+  const dec = new TextDecoder();
+  for (let n = 0; n < count; n++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
+    const nlen = dv.getUint16(p + 28, true), elen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true);
+    const off = dv.getUint32(p + 42, true);
+    const name = dec.decode(u8.subarray(p + 46, p + 46 + nlen));
+    const lstart = off + 30 + dv.getUint16(off + 26, true) + dv.getUint16(off + 28, true);
+    files[name] = { method, data: u8.subarray(lstart, lstart + csize) };
+    p += 46 + nlen + elen + clen;
+  }
+  return {
+    async text(name) {
+      const f = files[name]; if (!f) return null;
+      if (f.method === 0) return dec.decode(f.data);
+      if (f.method !== 8 || typeof DecompressionStream === 'undefined') throw new Error('Brauzer bu faylni ocha olmaydi');
+      const stream = new Blob([f.data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      return await new Response(stream).text();
+    },
+  };
+}
+// → { "Varaq nomi": { "C5": qiymat, ... } }
+async function readXlsx(buf) {
+  const zip = await _unzip(buf);
+  const xml = t => new DOMParser().parseFromString(t, 'application/xml');
+  const wb = xml(await zip.text('xl/workbook.xml'));
+  const rels = xml(await zip.text('xl/_rels/workbook.xml.rels') || '<r/>');
+  const relMap = {};
+  [...rels.getElementsByTagName('Relationship')].forEach(r => { relMap[r.getAttribute('Id')] = r.getAttribute('Target'); });
+  const ssText = await zip.text('xl/sharedStrings.xml');
+  const shared = ssText ? [...xml(ssText).getElementsByTagName('si')].map(si => [...si.getElementsByTagName('t')].map(t => t.textContent).join('')) : [];
+  const out = {};
+  for (const sh of [...wb.getElementsByTagName('sheet')]) {
+    const rid = sh.getAttribute('r:id') || sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
+    let target = relMap[rid] || ''; target = target.replace(/^\/?xl\//, '').replace(/^\//, '');
+    const t = await zip.text('xl/' + target); if (!t) continue;
+    const cells = {};
+    [...xml(t).getElementsByTagName('c')].forEach(c => {
+      const r = c.getAttribute('r'), type = c.getAttribute('t');
+      const v = c.getElementsByTagName('v')[0]?.textContent;
+      let val = null;
+      if (type === 's') val = v != null ? shared[+v] : null;
+      else if (type === 'inlineStr') val = [...c.getElementsByTagName('t')].map(x => x.textContent).join('');
+      else if (type === 'str' || type === 'e') val = v ?? null;
+      else if (type === 'b') val = v === '1';
+      else if (v != null && v !== '') val = Number(v);
+      if (val !== null && val !== '') cells[r] = val;
+    });
+    out[sh.getAttribute('name')] = cells;
+  }
+  return out;
+}
+function _xlNorm(s) { return String(s ?? '').replace(/[ʻʼ‘’`]/g, "'").replace(/\s+/g, ' ').trim(); }
+async function _xlKey(...parts) {
+  const text = parts.map(p => _xlNorm(p).toLowerCase()).join(' ');
+  const slug = text.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'item'; // Python: .strip('-')[:40]
+  const h = await sha1Hex(text);
+  return `${slug}-${h.slice(0, 6)}`;
+}
+async function sha1Hex(text) {
+  const b = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(text));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+function _xlDate(v) {
+  if (typeof v === 'number' && v > 20000 && v < 80000) { const d = new Date(Date.UTC(1899, 11, 30) + Math.round(v) * 86400000); return d.toISOString().slice(0, 10); }
+  if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10);
+  return null;
+}
+function _xlNum(v) { return typeof v === 'number' ? v : (typeof v === 'string' && /^\d+(\.\d+)?$/.test(v.trim()) ? Number(v) : null); }
+const _COLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+function _col(n) { let s = ''; n++; while (n > 0) { const m = (n - 1) % 26; s = _COLS[m] + s; n = Math.floor((n - 1) / 26); } return s; } // 0 → A
+// Python konvertori (tools/import_hayot_planneri.py) bilan AYNAN bir xil natija va kalitlar
+async function plannerFromSheets(S) {
+  const XL_MONTHS = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+  const STATUS = { 'Rejada': 'todo', 'Jarayonda': 'doing', 'Bajarildi': 'done', 'Bekor': 'cancelled' };
+  const need = ['Sozlamalar', 'Odatlar', 'Vazifalar', 'Moliya', 'Maqsadlar'];
+  const missing = need.filter(n => !S[n]);
+  if (missing.length === need.length) throw new Error('Bu "Hayot Planneri" fayli emas');
+  const g = (sh, a) => (S[sh] || {})[a];
+  const yes = v => ['ha', 'yes', 'true', '1'].includes(_xlNorm(v).toLowerCase());
+  const colVals = (sh, c, a, b) => { const o = []; for (let r = a; r <= b; r++) { const v = _xlNorm(g(sh, c + r)); if (v) o.push(v); } return o; };
+  const lists = {
+    taskCategories: colVals('Sozlamalar', 'D', 4, 20), statuses: colVals('Sozlamalar', 'E', 4, 20),
+    goalAreas: colVals('Sozlamalar', 'F', 4, 20), incomeCategories: colVals('Sozlamalar', 'G', 4, 20),
+    expenseCategories: colVals('Sozlamalar', 'H', 4, 20),
+  };
+  // Odatlar
+  const mName = _xlNorm(g('Odatlar', 'C5')), year = parseInt(g('Odatlar', 'C6')) || today.getFullYear();
+  const month = XL_MONTHS.includes(mName) ? XL_MONTHS.indexOf(mName) + 1 : 1;
+  const ym = `${year}-${String(month).padStart(2, '0')}`;
+  const dim = new Date(year, month, 0).getDate();
+  const habits = [];
+  for (let r = 10; r <= 24; r++) {
+    const name = _xlNorm(g('Odatlar', 'C' + r)); if (!name) continue;
+    const done = [];
+    for (let d = 1; d <= dim; d++) if (['✔', '✓', 'v', 'x', '1'].includes(_xlNorm(g('Odatlar', _col(3 + d) + r)))) done.push(`${ym}-${String(d).padStart(2, '0')}`);
+    const t = _xlNum(g('Odatlar', 'D' + r));
+    habits.push({ key: await _xlKey('habit', name), name, targetDaysPerMonth: t != null ? Math.trunc(t) : null, doneDates: done });
+  }
+  // Vazifalar
+  const tasks = [];
+  for (let r = 12; r <= 71; r++) {
+    const title = _xlNorm(g('Vazifalar', 'C' + r)); if (!title) continue;
+    const imp = yes(g('Vazifalar', 'E' + r)), urg = yes(g('Vazifalar', 'F' + r));
+    tasks.push({ key: await _xlKey('task', title), title, category: _xlNorm(g('Vazifalar', 'D' + r)) || null, important: imp, urgent: urg,
+      quadrant: imp && urg ? 1 : imp ? 2 : urg ? 3 : 4, deadline: _xlDate(g('Vazifalar', 'H' + r)), status: STATUS[_xlNorm(g('Vazifalar', 'I' + r))] || 'todo' });
+  }
+  // Maqsadlar
+  const goals = [];
+  for (let r = 9; r <= 23; r++) {
+    const title = _xlNorm(g('Maqsadlar', 'C' + r)); if (!title) continue;
+    const steps = [];
+    for (const c of [5, 7, 9, 11, 13]) { const st = _xlNorm(g('Maqsadlar', _col(c) + r)); if (st) steps.push({ title: st, done: ['✔', '✓'].includes(_xlNorm(g('Maqsadlar', _col(c + 1) + r))) }); }
+    goals.push({ key: await _xlKey('goal', title), title, area: _xlNorm(g('Maqsadlar', 'D' + r)) || null, deadline: _xlDate(g('Maqsadlar', 'E' + r)), steps });
+  }
+  // Moliya
+  const fmName = _xlNorm(g('Moliya', 'C5')), fYear = parseInt(g('Moliya', 'C6')) || year;
+  const finYm = XL_MONTHS.includes(fmName) ? `${fYear}-${String(XL_MONTHS.indexOf(fmName) + 1).padStart(2, '0')}` : ym;
+  const planIn = {}, planOut = {};
+  lists.incomeCategories.slice(0, 5).forEach((c, i) => { const v = _xlNum(g('Moliya', 'C' + (12 + i))); if (v > 0) planIn[c] = Math.trunc(v); });
+  lists.expenseCategories.slice(0, 12).forEach((c, i) => { const v = _xlNum(g('Moliya', 'C' + (20 + i))); if (v > 0) planOut[c] = Math.trunc(v); });
+  const txs = [];
+  for (let r = 12; r <= 211; r++) {
+    const date = _xlDate(g('Moliya', 'G' + r)), amount = _xlNum(g('Moliya', 'J' + r));
+    if (amount == null || !date) continue;
+    const kind = _xlNorm(g('Moliya', 'H' + r)), cat = _xlNorm(g('Moliya', 'I' + r)), note = _xlNorm(g('Moliya', 'K' + r));
+    const typ = kind === 'Daromad' ? 'income' : 'expense';
+    // Python: key_of('tx', date, typ, cat, amount, note) — son butun bo'lsa "3000000"
+    const amtStr = Number.isInteger(amount) ? String(amount) : String(amount);
+    txs.push({ key: await _xlKey('tx', date, typ, cat, amtStr, note), date, type: typ, category: cat, amount: Math.trunc(amount), note: note || null });
+  }
+  txs.sort((a, b) => a.date.localeCompare(b.date));
+  return { schema: 'sjr.import.hayot-planneri/v1', source: 'Hayot_Planneri.xlsx', convertedAt: todayStr, habitsMonth: ym, lists, habits, tasks, goals,
+    finance: { currency: _xlNorm(g('Moliya', 'C7')) || "so'm", month: finYm, plan: { income: planIn, expense: planOut }, transactions: txs } };
+}
+// Sozlamalar → "Excel'dan import": .xlsx (to'g'ridan-to'g'ri) yoki konvertor yaratgan .json
+function pickPlannerFile() {
+  const inp = document.createElement('input'); inp.type = 'file';
+  inp.accept = '.xlsx,.json,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  inp.onchange = async () => {
+    const f = inp.files?.[0]; if (!f) return;
+    try {
+      if (f.size > 10 * 1024 * 1024) throw new Error('Fayl juda katta');
+      let data;
+      if (/\.json$/i.test(f.name)) { data = JSON.parse(await f.text()); if (data?.schema !== 'sjr.import.hayot-planneri/v1') throw new Error('Noto\'g\'ri JSON format'); }
+      else data = await plannerFromSheets(await readXlsx(await f.arrayBuffer()));
+      data.source = f.name;
+      const sum = `${data.habits.length} odat, ${data.tasks.length} vazifa, ${data.goals.length} maqsad, ${data.finance.transactions.length} moliya yozuvi`;
+      if (!confirm(`"${f.name}" faylida: ${sum}.\n\nPlatformaga import qilinsinmi? (Mavjudlari takrorlanmaydi)`)) return;
+      const res = runPlannerImport(data, { silent: true });
+      const a = res.added;
+      showNotif(res.total
+        ? `Import tugadi: <b>${a.rituals}</b> yangi ritual (+${a.linked} mavjudiga bog'landi, ${a.marks} kunlik belgi), <b>${a.tasks}</b> vazifa, <b>${a.goalCards}</b> maqsad kartochkasi, <b>${a.tx}</b> moliya yozuvi`
+        : `Yangi narsa yo'q — hammasi allaqachon import qilingan (${res.skipped} ta)`, 'ok');
+      render();
+    } catch (e) { console.error(e); showNotif('Import xatosi: ' + escapeHtml(e.message), 'danger'); }
+  };
+  inp.click();
+}
+
+// =========================================================
+//  AI / JARVIS API — window.SJR
+//  Ma'lumotni tartibli o'qish, o'zgarishlarni kuzatish va xavfsiz amallar.
+//  Hujjat: AI_INTEGRATION.md
+// =========================================================
+function _ritualSectionName(r) { return getSections().find(s => s.id === r.sectionId)?.name || ''; }
+function sjrHabits({ from, to } = {}) {
+  to = to || todayStr;
+  if (!from) { const d = parseDS(to); d.setDate(d.getDate() - 29); from = dsOf(d); }
+  const days = [];
+  for (let d = parseDS(from); dsOf(d) <= to; d.setDate(d.getDate() + 1)) days.push(dsOf(d));
+  const first = firstUseDate();
+  return getRituals().map(r => {
+    const sched = days.filter(ds => ds >= first && !isRestDay(ds) && isScheduled(r, ds));
+    const done = sched.filter(ds => isDone(ds, r.id));
+    return { id: r.id, name: r.name, category: r.cat || '', section: _ritualSectionName(r), weekdays: r.days || null,
+      targetDaysPerMonth: r.target || null, source: r.source || null,
+      period: { from, to }, scheduledDays: sched.length, doneDays: done.length,
+      completionRate: sched.length ? Math.round(done.length / sched.length * 100) : null, doneDates: done };
+  });
+}
+function sjrTasks() {
+  const folders = getFolders();
+  return getKanbanCards().map(c => {
+    const cols = getColumns(c.folderId);
+    const imp = typeof c.important === 'boolean' ? c.important : c.priority === 'high';
+    const urg = typeof c.urgent === 'boolean' ? c.urgent : (!!c.deadline && daysUntil(c.deadline) <= 2);
+    return { id: c.id, title: c.title, description: c.desc || '', folder: folders.find(f => f.id === c.folderId)?.name || '',
+      column: cols.find(x => x.id === c.colId)?.title || '', done: !!c.done, status: c.status || (c.done ? 'done' : 'open'),
+      priority: c.priority, important: imp, urgent: urg, eisenhowerQuadrant: imp && urg ? 1 : imp ? 2 : urg ? 3 : 4,
+      category: c.category || '', labels: (c.labels || []).map(l => l.name), deadline: c.deadline || null,
+      daysUntilDeadline: c.deadline ? daysUntil(c.deadline) : null, overdue: !c.done && !!c.deadline && daysUntil(c.deadline) < 0,
+      goal: c.goal || null, createdAt: c.createdAt || null, doneAt: c.doneAt || null, source: c.source || null };
+  });
+}
+function sjrFinance() {
+  let F = {}; try { F = JSON.parse(STORE.getItem('sjr_finance') || '{}') || {}; } catch (e) {}
+  F = { currency: F.currency || "so'm", plans: F.plans || {}, transactions: F.transactions || [] };
+  const months = [...new Set([...Object.keys(F.plans), ...F.transactions.map(t => t.date.slice(0, 7))])].sort();
+  return { currency: F.currency, months: months.map(m => financeMonthSummary(F, m)), transactions: F.transactions };
+}
+function sjrSnapshot() {
+  const score = getDayScore(todayStr), streak = calcStreak();
+  const tasks = sjrTasks(), open = tasks.filter(t => !t.done);
+  const goalCards = tasks.filter(t => t.goal);
+  return {
+    schema: 'sjr.snapshot/v1', app: 'SJR Ritual System', version: APP_VERSION, generatedAt: new Date().toISOString(),
+    user: { name: USER_NAME || null, restWeekdays: getRestDays() },
+    today: { date: todayStr, isRestDay: score.rest, completionPct: score.rest ? null : score.pct, done: score.done, total: score.total,
+      streakDays: streak, level: calcLevel(streak).name, energyDone: getEnergyDoneToday(),
+      rituals: getRituals().filter(r => isScheduled(r, todayStr)).map(r => ({ id: r.id, name: r.name, done: isDone(todayStr, r.id) })) },
+    habits: sjrHabits(),
+    goals: { motivational: getGoals(), detailed: goalCards.map(g => ({ id: g.id, title: g.title, area: g.goal.area, deadline: g.deadline, daysLeft: g.daysUntilDeadline, progress: g.goal.progress, steps: g.goal.steps, done: g.done })) },
+    tasks: { total: tasks.length, done: tasks.length - open.length, overdue: open.filter(t => t.overdue).length,
+      byQuadrant: [1, 2, 3, 4].map(q => open.filter(t => t.eisenhowerQuadrant === q).length), items: tasks.filter(t => !t.goal) },
+    finance: sjrFinance(),
+    rewards: { daily: getRewards(), global: getGlobalRewards().map(r => ({ ...r, progress: calcGlobalCondition(r) })) },
+    notes: { count: getNotes().length, notebooks: getNotebooks().map(n => n.name) }, // maxfiy eslatmalar hech qachon berilmaydi
+  };
+}
+// AI uchun tayyor matn (prompt) — rejani tahlil qilib maslahat berish uchun
+function sjrAiPrompt() {
+  const s = sjrSnapshot();
+  return `Sen mening shaxsiy hayot murabbiyimsan (Jarvis). Quyida SJR Ritual System platformamdagi joriy ma'lumotlarim (JSON).\n` +
+    `Vazifa: 1) odatlarim barqarorligini tahlil qil (eng kuchli/zaif odatlar), 2) vazifalarim bo'yicha Eyzenxauer matritsasi asosida bugun nimaga e'tibor berishimni ayt, ` +
+    `3) maqsadlarim progressi va muddatlarini baholab, keyingi aniq qadamlarni taklif qil, 4) moliyaviy holatimni (limitlar, jamg'arma ulushi) tahlil qil. ` +
+    `Javobni o'zbek tilida, qisqa va amaliy ber.\n\n` + JSON.stringify(s, null, 1);
+}
+// Xavfsiz amallar (faqat ro'yxatdagilar; o'chirish yo'q). Jarvis shular orqali ishlaydi.
+function sjrExec(action) {
+  const a = action || {}; const type = String(a.type || '');
+  const ok = (message, extra) => ({ ok: true, message, ...(extra || {}) }), fail = message => ({ ok: false, message });
+  try {
+    switch (type) {
+      case 'ritual.done': case 'ritual.undo': {
+        const r = getRituals().find(x => x.id === a.id) || getRituals().find(x => _nrm(x.name).includes(_nrm(a.name || '')) && a.name);
+        if (!r) return fail('Ritual topilmadi');
+        const date = a.date || todayStr; const want = type === 'ritual.done';
+        if (isDone(date, r.id) !== want) toggleRitual(date, r.id);
+        return ok(`${r.name}: ${want ? 'bajarildi' : 'bekor qilindi'}`);
+      }
+      case 'task.add': {
+        if (!String(a.title || '').trim()) return fail('title kerak');
+        addKanbanCard({ title: String(a.title), desc: a.description || '', deadline: a.deadline || '', priority: a.important ? 'high' : 'mid', folderId: getFolders()[0]?.id });
+        const cs = getKanbanCards(); const c = cs[cs.length - 1];
+        if (typeof a.important === 'boolean') c.important = a.important; if (typeof a.urgent === 'boolean') c.urgent = a.urgent; c.source = 'ai';
+        saveKanbanCards(cs); render(); return ok('Vazifa qo\'shildi', { id: c.id });
+      }
+      case 'task.done': {
+        const c = getKanbanCards().find(x => x.id === a.id); if (!c) return fail('Vazifa topilmadi');
+        if (!c.done) toggleKanbanDone(c.id); return ok('Vazifa bajarildi');
+      }
+      case 'goal.add': { if (!String(a.title || '').trim()) return fail('title kerak'); addGoal(String(a.title)); render(); return ok('Maqsad qo\'shildi'); }
+      case 'note.add': {
+        const n = getNotes(); const note = { id: uid('n_'), notebookId: getNotebooks()[0]?.id, title: String(a.title || 'Jarvis').slice(0, 120), text: String(a.text || ''), url: '', date: todayStr, updated: nowStamp(), source: 'ai' };
+        n.unshift(note); saveNotes(n); return ok('Eslatma saqlandi', { id: note.id });
+      }
+      case 'gratitude.add': { if (!a.text) return fail('text kerak'); addGratitude(String(a.text)); return ok('Qo\'shildi'); }
+      case 'finance.add': {
+        const amt = Math.round(Number(a.amount)); if (!(amt > 0)) return fail('amount kerak');
+        let F = {}; try { F = JSON.parse(STORE.getItem('sjr_finance') || '{}') || {}; } catch (e) {}
+        F.transactions = F.transactions || []; F.plans = F.plans || {}; F.currency = F.currency || "so'm";
+        const t = { id: uid('tx_'), date: a.date || todayStr, type: a.kind === 'income' ? 'income' : 'expense', category: String(a.category || 'Boshqa'), amount: amt, note: String(a.note || ''), source: 'ai' };
+        F.transactions.push(t); STORE.setItem('sjr_finance', JSON.stringify(F)); return ok('Moliya yozuvi qo\'shildi', { id: t.id });
+      }
+      case 'navigate': { if (!PAGE_TITLES[a.page]) return fail('Noma\'lum sahifa'); showPage(a.page); return ok('OK'); }
+      case 'notify': { showNotif(escapeHtml(String(a.text || '')), 'info'); return ok('OK'); }
+      default: return fail('Noma\'lum amal: ' + type);
+    }
+  } catch (e) { return fail(e.message); }
+}
+function downloadAiSnapshot() {
+  const blob = new Blob([JSON.stringify(sjrSnapshot(), null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `sjr-ai-snapshot-${todayStr}.json`;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+async function copyAiPrompt() {
+  const text = sjrAiPrompt();
+  try { await navigator.clipboard.writeText(text); showNotif('AI uchun so\'rov nusxalandi — ChatGPT/Claude/Jarvis ga joylashtiring', 'ok'); }
+  catch (e) { downloadAiSnapshot(); showNotif('Nusxalab bo\'lmadi — JSON fayl yuklab olindi', 'warn'); }
+}
+window.SJR = Object.freeze({
+  version: APP_VERSION,
+  snapshot: () => (appUnlocked ? sjrSnapshot() : null),       // qulflangan bo'lsa ma'lumot berilmaydi
+  habits: (opts) => (appUnlocked ? sjrHabits(opts) : null),
+  tasks: () => (appUnlocked ? sjrTasks() : null),
+  finance: () => (appUnlocked ? sjrFinance() : null),
+  aiPrompt: () => (appUnlocked ? sjrAiPrompt() : null),
+  exec: (action) => (appUnlocked ? sjrExec(action) : { ok: false, message: 'Ilova qulflangan' }),
+  on: (fn) => { const h = e => fn(e.detail); window.addEventListener('sjr:change', h); return () => window.removeEventListener('sjr:change', h); },
+});
 
 // ===== INIT =====
 async function initApp(){
